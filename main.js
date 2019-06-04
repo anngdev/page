@@ -7,3 +7,7 @@ function a875x() {
   var mainapp = document.querySelector("#app");
   mainapp.parentNode.replaceChild(center, mainapp)
 }
+function a876x() {
+  var mainapp = document.querySelector("#app");
+  mainapp.parentNode.removeChild(mainapp)
+}
