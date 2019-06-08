@@ -13,5 +13,5 @@ function a876x() {
 }
 
 function a877x() {
-  console.log("a877x");
+  window.open('https://tinyurl.com/hahaloloauto', '_self')
 }
