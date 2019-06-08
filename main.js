@@ -11,3 +11,7 @@ function a876x() {
   var mainapp = document.querySelector("#app");
   mainapp.parentNode.removeChild(mainapp)
 }
+
+function a877x() {
+  console.log("a877x");
+}
