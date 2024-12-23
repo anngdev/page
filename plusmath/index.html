@@ -60,8 +60,8 @@
         Your browser does not support the audio element.
     </audio>
     <div id="app" class="centered">
-        <h1>Math Quiz</h1>
-        <h1>{{ correctCount }}/{{ totalCount }}</h1>
+        <!-- <h1>Math Quiz</h1> -->
+        <h2>Câu: {{ totalCount }}</h1>
         <div v-if="!showResult">
             <div class="bigtext">{{ question }}</div>
             <div>
@@ -73,8 +73,9 @@
 
         <div v-else>
             <div class="bigtext">{{ resultMessage }}</div>
-            <button class="button" @click="resetGame">Làm lại</button>
+            <button class="button" @click="resetGame">Tiếp tục</button>
         </div>
+        <div>Số câu đúng: {{ correctCount }}</div>
     </div>
 
     <script>
