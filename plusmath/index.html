@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Math Quiz</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 32px;
+            cursor: pointer;
+            border: none;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .bigtext {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 32px;
+            cursor: pointer;
+            border: none;
+            background-color: #dbffe1;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+
+        .centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
+}
+
+        .button:hover {
+            background-color: #d0d0d0;
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="correct">
+        <source src="news-ting-6832.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio id="incorrect">
+        <source src="error-10-206498.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <div id="app" class="centered">
+        <h1>Math Quiz</h1>
+        <div v-if="!showResult">
+            <div class="bigtext">{{ question }}</div>
+            <div>
+                <button v-for="(answer, index) in answers" :key="index" class="button" @click="checkAnswer(answer)">
+                    {{ answer }}
+                </button>
+            </div>
+        </div>
+
+        <div v-else>
+            <div class="bigtext">{{ resultMessage }}</div>
+            <button class="button" @click="resetGame">Làm lại</button>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    num1: 0,
+                    num2: 0,
+                    correctAnswer: 0,
+                    answers: [],
+                    question: '',
+                    showResult: false,
+                    resultMessage: '',
+                };
+            },
+            methods: {
+                generateQuestion() {
+                    // Generate random numbers and the correct answer
+                    this.num1 = Math.floor(Math.random() * 100) + 1;
+                    this.num2 = Math.floor(Math.random() * 100) + 1;
+                    this.correctAnswer = this.num1 + this.num2;
+
+                    // Generate question text
+                    this.question = `${this.num1} + ${this.num2} = ?`;
+
+                    // Generate answers
+                    const incorrectAnswers = new Set();
+                    while (incorrectAnswers.size < 3) {
+                        const offset = Math.floor(Math.random() * 20) - 10; // Range [-10, 10]
+                        const wrongAnswer = this.correctAnswer + offset;
+                        if (wrongAnswer !== this.correctAnswer && wrongAnswer > 0) {
+                            incorrectAnswers.add(wrongAnswer);
+                        }
+                    }
+
+                    this.answers = [...incorrectAnswers, this.correctAnswer]
+                        .sort(() => Math.random() - 0.5); // Shuffle answers
+                },
+                checkAnswer(selectedAnswer) {
+                    if (selectedAnswer === this.correctAnswer) {
+                        this.resultMessage = 'Chính xác!';
+                        var x = document.getElementById("correct");
+                        x.play();
+                        document.body.style.backgroundColor = '#ddfad4';
+                    } else {
+                        var x = document.getElementById("incorrect");
+                        x.play();
+                        this.resultMessage = `Sai! Đáp án đúng là ${this.correctAnswer}.`;
+                        document.body.style.backgroundColor = '#fcf0e1';
+                    }
+                    this.showResult = true;
+                },
+                resetGame() {
+                    this.showResult = false;
+                    this.resultMessage = '';
+                    document.body.style.backgroundColor = 'white';
+                    this.generateQuestion();
+                },
+            },
+            mounted() {
+                this.generateQuestion();
+            },
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
