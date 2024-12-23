@@ -25,25 +25,24 @@
         }
 
         .bigtext {
-            display: inline-block;
             margin: 10px;
             padding: 10px 20px;
             font-size: 32px;
             cursor: pointer;
             border: none;
-            background-color: #dbffe1;
+            background-color: #c6e5ff;
             border-radius: 5px;
             transition: background-color 0.2s;
             font-weight: bold;
         }
 
         .centered {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  /* bring your own prefixes */
-  transform: translate(-50%, -50%);
-}
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            /* bring your own prefixes */
+            transform: translate(-50%, -50%);
+        }
 
         .button:hover {
             background-color: #d0d0d0;
@@ -62,6 +61,7 @@
     </audio>
     <div id="app" class="centered">
         <h1>Math Quiz</h1>
+        <h1>{{ correctCount }}/{{ totalCount }}</h1>
         <div v-if="!showResult">
             <div class="bigtext">{{ question }}</div>
             <div>
@@ -83,6 +83,8 @@
         createApp({
             data() {
                 return {
+                    correctCount: 0,
+                    totalCount: 0,
                     num1: 0,
                     num2: 0,
                     correctAnswer: 0,
@@ -94,13 +96,22 @@
             },
             methods: {
                 generateQuestion() {
+                    this.totalCount += 1
                     // Generate random numbers and the correct answer
-                    this.num1 = Math.floor(Math.random() * 100) + 1;
-                    this.num2 = Math.floor(Math.random() * 100) + 1;
+                    const a = Math.floor(Math.random() * 100) + 1;
+                    const b = Math.floor(Math.random() * 100) + 1;
+                    this.num1 = a;
+                    this.num2 = b;
                     this.correctAnswer = this.num1 + this.num2;
+                    const sign = Math.floor(Math.random() * 2) == 1 ? "+" : "-"
+                    if (sign == "-"){
+                        this.num1 = Math.max(a,b)
+                        this.num2 = Math.min(a,b)
+                        this.correctAnswer = this.num1 - this.num2
+                    }
 
                     // Generate question text
-                    this.question = `${this.num1} + ${this.num2} = ?`;
+                    this.question = `${this.num1} ${sign} ${this.num2} = ?`;
 
                     // Generate answers
                     const incorrectAnswers = new Set();
@@ -121,10 +132,11 @@
                         var x = document.getElementById("correct");
                         x.play();
                         document.body.style.backgroundColor = '#ddfad4';
+                        this.correctCount += 1
                     } else {
                         var x = document.getElementById("incorrect");
                         x.play();
-                        this.resultMessage = `Sai! Đáp án đúng là ${this.correctAnswer}.`;
+                        this.resultMessage = `Sai! Đáp án ${this.correctAnswer}.`;
                         document.body.style.backgroundColor = '#fcf0e1';
                     }
                     this.showResult = true;
