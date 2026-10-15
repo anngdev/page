@@ -1,0 +1,1323 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>NEXUS</title>
+<style>
+/* Layout: lớp nội dung đặc (danh sách inset grouped, thẻ số liệu) nằm dưới; lớp điều hướng và điều khiển bằng "Liquid Glass"
+   nổi phía trên: sidebar dạng tấm kính nổi (màn hình rộng), tab bar dạng viên thuốc nổi (điện thoại), nút, segmented control, sheet, toast.
+   Màu theo Apple system colors; Investment = systemTeal, Loan = systemIndigo để hai hệ thống luôn phân biệt được. */
+:root{
+  --blue:#007AFF; --green:#34C759; --orange:#FF9500; --red:#FF3B30; --gray:#8E8E93;
+  --inv:#30B0C7; --loan:#5856D6;
+  --label:#000000; --label2:rgba(60,60,67,.6); --label3:rgba(60,60,67,.3);
+  --sep:rgba(60,60,67,.22); --bg:#F2F2F7; --cell:#FFFFFF;
+  --fill:rgba(120,120,128,.12); --fill2:rgba(120,120,128,.2);
+  /* Liquid Glass */
+  --glass:rgba(255,255,255,.34); --glass-strong:rgba(255,255,255,.62);
+  --rim-hi:rgba(255,255,255,.95); --rim-lo:rgba(255,255,255,.18);
+  --spec:rgba(255,255,255,.7); --glass-shadow:0 10px 30px rgba(0,0,0,.10),0 1px 3px rgba(0,0,0,.06);
+  --amb1:rgba(48,176,199,.20); --amb2:rgba(88,86,214,.18); --amb3:rgba(255,149,0,.10);
+  --shadow:0 20px 60px rgba(0,0,0,.18);
+  --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono:ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --spring:cubic-bezier(.3,1.45,.45,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --blue:#0A84FF; --green:#30D158; --orange:#FF9F0A; --red:#FF453A; --gray:#8E8E93;
+  --inv:#40C8E0; --loan:#5E5CE6;
+  --label:#FFFFFF; --label2:rgba(235,235,245,.6); --label3:rgba(235,235,245,.3);
+  --sep:rgba(84,84,88,.55); --bg:#000000; --cell:#1C1C1E;
+  --fill:rgba(118,118,128,.24); --fill2:rgba(118,118,128,.36);
+  --glass:rgba(40,40,44,.38); --glass-strong:rgba(36,36,40,.66);
+  --rim-hi:rgba(255,255,255,.42); --rim-lo:rgba(255,255,255,.06);
+  --spec:rgba(255,255,255,.22); --glass-shadow:0 10px 30px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.4);
+  --amb1:rgba(64,200,224,.22); --amb2:rgba(94,92,230,.26); --amb3:rgba(255,159,10,.08);
+  --shadow:0 20px 60px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --blue:#0A84FF; --green:#30D158; --orange:#FF9F0A; --red:#FF453A; --gray:#8E8E93;
+  --inv:#40C8E0; --loan:#5E5CE6;
+  --label:#FFFFFF; --label2:rgba(235,235,245,.6); --label3:rgba(235,235,245,.3);
+  --sep:rgba(84,84,88,.55); --bg:#000000; --cell:#1C1C1E;
+  --fill:rgba(118,118,128,.24); --fill2:rgba(118,118,128,.36);
+  --glass:rgba(40,40,44,.38); --glass-strong:rgba(36,36,40,.66);
+  --rim-hi:rgba(255,255,255,.42); --rim-lo:rgba(255,255,255,.06);
+  --spec:rgba(255,255,255,.22); --glass-shadow:0 10px 30px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.4);
+  --amb1:rgba(64,200,224,.22); --amb2:rgba(94,92,230,.26); --amb3:rgba(255,159,10,.08);
+  --shadow:0 20px 60px rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+/* Ẩn thanh cuộn ở mọi view (ứng dụng dùng chủ yếu trên điện thoại); vẫn cuộn được bằng chạm, chuột và bàn phím */
+html,body,*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{display:none;width:0;height:0}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--label);font-family:var(--font);font-size:17px;line-height:1.29;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+/* Nền môi trường: màu của hai hệ thống loang nhẹ, để lớp kính có thứ để khúc xạ */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(60vmax 50vmax at 8% -5%,var(--amb1),transparent 60%),
+             radial-gradient(55vmax 45vmax at 100% 20%,var(--amb2),transparent 60%),
+             radial-gradient(50vmax 40vmax at 40% 110%,var(--amb3),transparent 60%),var(--bg)}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--blue);text-decoration:none}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 55%,transparent);outline-offset:2px;border-radius:12px}
+.num{font-variant-numeric:tabular-nums}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Vật liệu Liquid Glass ---------- */
+.glass,.sidebar-panel,.tabbar,.lens,.back,.seg,.thumb,.btn,.chip,.sheet,.toast,.mock-badge,.side a.active{
+  position:relative;isolation:isolate;
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(var(--blur,14px)) saturate(190%) brightness(1.04);
+  backdrop-filter:blur(var(--blur,14px)) saturate(190%) brightness(1.04);
+  box-shadow:var(--glass-shadow);
+}
+/* điểm sáng phản chiếu, di chuyển theo con trỏ (--mx, --my do script đặt) */
+.glass::before,.sidebar-panel::before,.tabbar::before,.lens::before,.back::before,.seg::before,.thumb::before,.btn::before,.chip::before,.sheet::before,.toast::before,.mock-badge::before,.side a.active::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:radial-gradient(120% 100% at var(--mx,28%) var(--my,-20%),var(--spec),transparent 55%);
+  opacity:.9;transition:opacity .3s}
+/* viền kính: sáng ở cạnh trên–trái và dưới–phải */
+.glass::after,.sidebar-panel::after,.tabbar::after,.lens::after,.back::after,.seg::after,.thumb::after,.btn::after,.chip::after,.sheet::after,.toast::after,.mock-badge::after,.side a.active::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;
+  background:linear-gradient(155deg,var(--rim-hi),var(--rim-lo) 30%,transparent 50%,var(--rim-lo) 72%,var(--rim-hi));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+/* phản hồi khi chạm: kính "nảy" như chất lỏng */
+.btn,.chip,.back,.tabbar a,.seg button{transition:transform .35s var(--spring),filter .2s}
+.btn:active:not(:disabled),.chip:active,.back:active{transform:scale(1.04);filter:brightness(1.08)}
+.tabbar a:active,.seg button:active{transform:scale(.94)}
+/* khúc xạ nền (Chromium): script thêm class .refract cho <html> */
+html.refract .tabbar,html.refract .sidebar-panel,html.refract .lens,html.refract .sheet{
+  -webkit-backdrop-filter:url(#lg-refract) blur(var(--blur,14px)) saturate(190%) brightness(1.04);
+  backdrop-filter:url(#lg-refract) blur(var(--blur,14px)) saturate(190%) brightness(1.04)}
+
+/* ---------- Khung ---------- */
+.app{display:grid;grid-template-columns:1fr;min-height:100vh}
+.sidebar{display:none}
+.main{min-width:0;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.content{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:4px 32px}
+@media (min-width:900px){
+  .app{grid-template-columns:300px 1fr}
+  .sidebar{display:block;padding:10px 0 10px 10px}
+  .sidebar-panel{position:sticky;top:10px;height:calc(100vh - 20px);overflow:auto;border-radius:28px;padding:calc(14px + env(safe-area-inset-top,0px)) 10px 20px;--glass:var(--glass-strong);--blur:24px}
+  .main{padding-bottom:24px}
+  .tabbar{display:none!important}
+  .content{padding-inline:32px}
+}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 12px 14px;font-weight:700;font-size:20px;letter-spacing:-.02em}
+.brand-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--inv),var(--loan));display:grid;place-items:center;color:#fff;font-size:15px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.side-h{font-size:13px;font-weight:600;color:var(--label2);padding:16px 12px 6px;display:flex;align-items:center;gap:8px}
+.side-h .dot{width:8px;height:8px;border-radius:50%}
+.side a{display:flex;align-items:center;gap:12px;min-height:44px;padding:8px 12px;border-radius:14px;color:var(--label);font-size:15px;margin:1px 0}
+.side a svg{width:22px;height:22px;color:var(--blue);flex:none}
+.side a[data-domain="inv"] svg{color:var(--inv)} .side a[data-domain="loan"] svg{color:var(--loan)}
+.side a:hover:not(.active){background:var(--fill)}
+.side a.active{--glass:color-mix(in srgb,var(--blue) 16%,var(--glass-strong));color:var(--blue);font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+
+/* Thanh điều hướng: trong suốt, nội dung cuộn bên dưới mờ dần (scroll edge) */
+.navbar{position:sticky;top:0;z-index:5;padding-top:env(safe-area-inset-top,0px);isolation:isolate}
+.navbar::before{content:"";position:absolute;inset:0 0 -18px;z-index:-1;pointer-events:none;
+  background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 70%,transparent),transparent);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  -webkit-mask-image:linear-gradient(#000 45%,transparent);mask-image:linear-gradient(#000 45%,transparent)}
+.navbar .in{max-width:760px;margin:0 auto;min-height:56px;display:flex;align-items:center;gap:8px;padding-inline:12px}
+@media (min-width:900px){.navbar .in{padding-inline:28px}}
+.back{width:44px;height:44px;border-radius:50%;border:0;display:grid;place-items:center;color:var(--label);cursor:pointer;flex:none}
+.back svg{width:22px;height:22px}
+.navbar .ttl{font-weight:600;font-size:17px;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.navbar .sp{width:44px;flex:none}
+
+/* Tiêu đề lớn */
+.large{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:6px 4px 6px;flex-wrap:wrap}
+.large h1{margin:0;font-size:34px;line-height:41px;font-weight:700;letter-spacing:.01em}
+.domain{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:5px 11px;border-radius:999px;letter-spacing:0;text-transform:none}
+.d-inv{color:var(--inv);background:color-mix(in srgb,var(--inv) 15%,transparent)}
+.d-loan{color:var(--loan);background:color-mix(in srgb,var(--loan) 15%,transparent)}
+.d-both{color:var(--label2);background:var(--fill)}
+
+/* Lớp nội dung: danh sách inset grouped (đặc, góc bo lớn đồng tâm) */
+.sec-h{font-size:13px;line-height:18px;color:var(--label2);text-transform:uppercase;letter-spacing:.02em;padding:22px 18px 7px}
+.sec-f{font-size:13px;line-height:18px;color:var(--label2);padding:7px 18px 0}
+.group{background:var(--cell);border-radius:22px;overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;min-height:48px;padding:12px 18px;position:relative;width:100%;text-align:left;background:none;border:0;color:var(--label);cursor:default}
+.row+.row::before{content:"";position:absolute;top:0;left:18px;right:0;border-top:.5px solid var(--sep)}
+.row.ic+.row::before,.row+.row.ic::before{left:62px}
+a.row,button.row{cursor:pointer}
+a.row:active,button.row:active{background:var(--fill)}
+.row .grow{flex:1;min-width:0}
+.row .t{font-size:17px}
+.row .s{font-size:15px;color:var(--label2);margin-top:2px}
+.row .v{color:var(--label2);font-size:17px;text-align:right}
+.row .chev{width:14px;height:14px;color:var(--label3);flex:none}
+.icon-tile{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.icon-tile svg{width:19px;height:19px}
+
+/* Thẻ tổng quan */
+.hero{background:var(--cell);border-radius:28px;padding:20px 20px 18px;margin-top:8px}
+.hero .lbl{font-size:15px;color:var(--label2)}
+.hero .big{font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:4px 0 2px}
+.hero .unit{font-size:20px;font-weight:600;color:var(--label2);margin-left:4px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}
+.stat .k{font-size:13px;color:var(--label2)}
+.stat .n{font-size:20px;font-weight:600;margin-top:2px}
+
+/* Nút: kính trong (thứ cấp) và kính nhuộm màu (chính) */
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{min-height:52px;padding:0 22px;border-radius:999px;border:0;font-size:17px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:1 1 160px;color:var(--label)}
+.btn.fill{--glass:color-mix(in srgb,var(--blue) 86%,transparent);--spec:rgba(255,255,255,.55);color:#fff}
+.btn.green{--glass:color-mix(in srgb,var(--green) 86%,transparent);--spec:rgba(255,255,255,.55);color:#fff}
+.btn.tint{--glass:color-mix(in srgb,var(--blue) 14%,var(--glass));color:var(--blue)}
+.btn.red{--glass:color-mix(in srgb,var(--red) 14%,var(--glass));color:var(--red)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{min-height:36px;padding:0 15px;font-size:15px;flex:none}
+.btn svg{width:20px;height:20px}
+
+/* Segmented control kính, có "thấu kính" trượt */
+.seg{display:flex;border-radius:999px;padding:3px;margin-top:8px;--blur:12px}
+.seg button{flex:1;min-height:36px;border:0;background:none;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer;color:var(--label);position:relative;z-index:1}
+.seg button[aria-pressed="true"]{font-weight:600}
+.seg .thumb{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n,1));border-radius:999px;transform:translateX(calc(var(--i,0) * 100%));transition:transform .5s var(--spring);--glass:var(--glass-strong);z-index:0}
+
+/* Ô nhập */
+.field{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 18px}
+.field input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:28px;font-weight:600;padding:6px 0}
+.field .unit{color:var(--label2);font-size:17px}
+.field textarea{flex:1;min-width:0;border:0;background:none;outline:none;font-size:17px;line-height:22px;min-height:88px;padding:6px 0;resize:vertical}
+.chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 14px}
+.chip{min-height:34px;padding:0 14px;border-radius:999px;border:0;font-size:15px;cursor:pointer;--blur:10px}
+
+/* Công tắc */
+.switch{appearance:none;-webkit-appearance:none;width:51px;height:31px;border-radius:999px;background:var(--fill2);position:relative;cursor:pointer;flex:none;transition:background .25s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15);transition:transform .4s var(--spring)}
+.switch:checked{background:var(--green)} .switch:checked::after{transform:translateX(20px)}
+
+.check{width:22px;height:22px;color:var(--blue);flex:none;visibility:hidden}
+.row[aria-checked="true"] .check{visibility:visible}
+
+.bar{height:6px;border-radius:999px;background:var(--fill);overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;border-radius:999px;background:var(--blue)}
+.ring{width:96px;height:96px;flex:none}
+.pill{display:inline-flex;align-items:center;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.p-blue{color:var(--blue);background:color-mix(in srgb,var(--blue) 14%,transparent)}
+.p-green{color:var(--green);background:color-mix(in srgb,var(--green) 16%,transparent)}
+.p-orange{color:var(--orange);background:color-mix(in srgb,var(--orange) 16%,transparent)}
+.p-red{color:var(--red);background:color-mix(in srgb,var(--red) 14%,transparent)}
+.p-gray{color:var(--label2);background:var(--fill)}
+
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:10px 18px;text-align:left;border-top:.5px solid var(--sep);white-space:nowrap}
+th{font-size:13px;color:var(--label2);font-weight:500;border-top:0}
+td.r,th.r{text-align:right}
+
+.callout{display:flex;gap:12px;align-items:flex-start;background:var(--cell);border-radius:20px;padding:14px 18px;margin-top:12px;font-size:15px;line-height:20px}
+.callout svg{width:22px;height:22px;flex:none;margin-top:-1px}
+.callout.warn svg{color:var(--orange)} .callout.info svg{color:var(--blue)}
+
+.grid2{display:grid;grid-template-columns:1fr;gap:0 16px}
+@media (min-width:1100px){.grid2{grid-template-columns:1fr 1fr}}
+
+/* Tab bar: viên thuốc kính nổi, thấu kính trượt theo tab đang chọn */
+.tabbar{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:6;display:flex;width:min(440px,calc(100% - 24px));border-radius:999px;padding:5px;--blur:18px}
+.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:999px;font-size:10px;font-weight:600;color:var(--label);position:relative;z-index:1}
+.tabbar a svg{width:24px;height:24px}
+.tabbar a.active{color:var(--blue)}
+.tabbar .lens{position:absolute;top:5px;bottom:5px;left:5px;width:calc((100% - 10px)/var(--n,5));border-radius:999px;z-index:0;transform:translateX(calc(var(--i,0) * 100%));transition:transform .55s var(--spring);--glass:color-mix(in srgb,var(--blue) 10%,var(--glass-strong));box-shadow:0 2px 10px rgba(0,0,0,.08)}
+
+/* Sheet: tấm kính nổi, góc bo lớn đồng tâm với màn hình */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:20;opacity:0;transition:opacity .3s}
+.backdrop.on{opacity:1}
+.sheet{position:fixed;z-index:21;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:90vh;overflow:auto;border-radius:34px;--glass:var(--glass-strong);--blur:30px;box-shadow:var(--shadow);transform:translateY(110%);transition:transform .5s var(--spring);padding:8px 14px 18px}
+.sheet.on{transform:none}
+.sheet .group{background:color-mix(in srgb,var(--cell) 78%,transparent)}
+.grabber{width:36px;height:5px;border-radius:999px;background:var(--label3);margin:4px auto 10px}
+.sheet h2{font-size:20px;margin:6px 4px 4px;text-align:center}
+.sheet .sub{text-align:center;color:var(--label2);font-size:15px;margin:0 8px 10px}
+@media (min-width:700px){
+  .sheet{left:50%;right:auto;bottom:auto;top:50%;width:540px;transform:translate(-50%,-44%) scale(.96);opacity:0;transition:opacity .25s,transform .45s var(--spring)}
+  .sheet.on{transform:translate(-50%,-50%);opacity:1}
+  .grabber{display:none}
+}
+
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-160%);z-index:30;padding:12px 20px;border-radius:999px;font-size:15px;font-weight:600;display:flex;gap:8px;align-items:center;transition:transform .55s var(--spring);max-width:calc(100% - 32px);--glass:var(--glass-strong)}
+.toast.on{transform:translate(-50%,0)}
+.toast svg{width:20px;height:20px;color:var(--green)}
+
+.mock-badge{position:fixed;right:14px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:4;font-size:11px;font-weight:600;color:var(--label2);border-radius:999px;padding:5px 11px;--blur:10px}
+@media (min-width:900px){.mock-badge{bottom:14px}}
+
+/* Trợ năng: giảm độ trong suốt → kính thành mặt đặc; tăng tương phản → viền rõ hơn; giảm chuyển động → tắt hiệu ứng */
+@media (prefers-reduced-transparency: reduce){
+  .glass,.sidebar-panel,.tabbar,.lens,.back,.seg,.thumb,.btn,.chip,.sheet,.toast,.mock-badge,.side a.active{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .sidebar-panel,.tabbar,.sheet,.toast,.mock-badge,.back,.seg,.chip,.btn.tint,.btn.red{--glass:var(--cell)}
+  .lens,.thumb,.side a.active{--glass:var(--fill2)}
+  body::before{display:none}
+}
+@media (prefers-contrast: more){
+  .glass::after,.sidebar-panel::after,.tabbar::after,.lens::after,.back::after,.seg::after,.thumb::after,.btn::after,.chip::after,.sheet::after,.toast::after,.mock-badge::after,.side a.active::after{background:var(--label3)}
+}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+<div class="app">
+  <aside class="sidebar" aria-label="Điều hướng chính"><div class="sidebar-panel">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">N</div>NEXUS</div>
+    <nav class="side" id="side"></nav>
+  </div></aside>
+  <div class="main">
+    <header class="navbar"><div class="in" id="navbar"></div></header>
+    <main class="content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="Thanh tab"></nav>
+<div id="sheet-root"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="mock-badge">Dữ liệu mô phỏng</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="lg-refract" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="11" result="noise"/>
+    <feGaussianBlur in="noise" stdDeviation="2.5" result="soft"/>
+    <feDisplacementMap in="SourceGraphic" in2="soft" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<script>
+/* ============================================================
+   NEXUS – mockup frontend (tĩnh, chạy trên Cloudflare Pages free tier)
+   Mọi số liệu là dữ liệu giả, khớp bộ số ban đầu trong đặc tả v4 (mục 2.6.5, 3.3, 4.5, 13).
+   Bản thật đọc dữ liệu từ contract qua RPC/Blockscout (đặc tả mục 8).
+   ============================================================ */
+(function(){
+'use strict';
+
+/* ---------- Tiện ích ---------- */
+const DAY = 864e5;
+const D = s => new Date(s + 'T00:00:00Z');
+const TODAY = D('2026-10-14');
+const addDays = (d, n) => new Date(d.getTime() + n * DAY);
+const diff = (a, b) => Math.round((b - a) / DAY);
+const fdate = d => d.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit', year:'numeric', timeZone:'UTC'});
+const fmt = (n, dg = 0) => new Intl.NumberFormat('vi-VN', {minimumFractionDigits:dg, maximumFractionDigits:dg}).format(n);
+const money = n => fmt(n, Math.abs(n) < 1000 && n % 1 ? 2 : 0);
+const pct = bps => { const v = bps / 100; return fmt(v, Number.isInteger(v) ? 0 : (Number.isInteger(v * 10) ? 1 : 2)) + '%'; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* Biểu tượng đơn giản theo phong cách SF Symbols (nét 1.8) */
+const P = {
+  house:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/>',
+  savings:'<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.4"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  star:'<path d="m12 3.5 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>',
+  bank:'<path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/>',
+  doc:'<path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 6 20V4a.5.5 0 0 1 .5-.5z"/><path d="M14 3.5V8h4M9 12h6M9 15.5h6"/>',
+  network:'<circle cx="12" cy="5.5" r="2.2"/><circle cx="5.5" cy="18" r="2.2"/><circle cx="18.5" cy="18" r="2.2"/><path d="M12 7.7v4.3M12 12l-5.3 4.2M12 12l5.3 4.2"/>',
+  coins:'<ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7"/><path d="M9.5 16.4c.7.1 1.4.1 2 .1 3 0 5.5-1.1 5.5-2.5"/><path d="M14.5 11.6c3 .2 6 .9 6 2.4v4c0 1.4-2.5 2.5-5.5 2.5-2.4 0-4.4-.7-5.1-1.7"/>',
+  vote:'<rect x="4" y="10.5" width="16" height="9.5" rx="2"/><path d="m8.5 7 2.5 2.5L16 4.5"/>',
+  chart:'<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/>',
+  person:'<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.8 3.9-6 7.5-6s6.6 2.2 7.5 6"/>',
+  chevR:'<path d="m9 5 7 7-7 7"/>', chevL:'<path d="m15 5-7 7 7 7"/>',
+  check:'<path d="m4.5 12.5 4.5 4.5L19.5 6.5"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.1"/>',
+  warn:'<path d="M12 3.8 21.2 19.5H2.8z"/><path d="M12 10v4.5M12 17v.1"/>',
+  clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/>',
+  shield:'<path d="M12 3.5 19 6v5.5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>',
+  key:'<circle cx="8" cy="15.5" r="4"/><path d="m10.8 12.7 8-8M16 7.5l2.5 2.5M14 9.5l2 2"/>',
+  arrowUp:'<path d="M12 19V5M6 11l6-6 6 6"/>', arrowDown:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+  gift:'<rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5v7.5h14v-7.5M12 8.5V20"/><path d="M12 8.5C10 8.5 7.5 7.8 7.5 6a2 2 0 0 1 4-0.5L12 8.5l.5-3a2 2 0 0 1 4 .5c0 1.8-2.5 2.5-4.5 2.5z"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  building:'<rect x="5" y="3.5" width="14" height="17" rx="1"/><path d="M9 7.5h2M13 7.5h2M9 11h2M13 11h2M9 14.5h2M13 14.5h2M10.5 20.5v-3h3v3"/>'
+};
+const ic = (n, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+const tile = (n, color) => `<span class="icon-tile" style="background:${color}">${ic(n)}</span>`;
+
+/* ---------- Dữ liệu mô phỏng (theo đặc tả v4) ---------- */
+const RATES = { // mục 3.3 – bảng lãi ban đầu (bps)
+  30:{AT:500, PER:490, FLEX:480, UP:497},
+  90:{AT:600, PER:590, FLEX:570, UP:591},
+  180:{AT:700, PER:690, FLEX:670, UP:676},
+  365:{AT:800, PER:785, FLEX:760, UP:740}
+};
+const MODES = {
+  AT:{n:'Cuối kỳ', d:'Nhận toàn bộ lãi khi đáo hạn. Lãi cao nhất.'},
+  PER:{n:'Định kỳ', d:'Rút lãi sau mỗi 20 ngày.'},
+  FLEX:{n:'Linh hoạt', d:'Rút lãi bất cứ lúc nào, tối thiểu 10 USDT mỗi lần.'},
+  UP:{n:'Đầu kỳ', d:'Nhận toàn bộ lãi ngay khi gửi. Lãi thấp nhất.'}
+};
+const KYC = { // mục 13.8
+  0:{n:'Chưa xác minh', cap:1000}, 1:{n:'Cơ bản', cap:50000}, 2:{n:'Đầy đủ', cap:500000}, 3:{n:'Tổ chức', cap:Infinity}
+};
+const RANKS = ['Chưa có hạng','Đồng','Bạc','Vàng','Bạch kim','Kim cương','Vương miện'];
+const RANK_TERMS = [null,
+  {p:30000, t:0, req:150000, rw:5}, {p:90000, t:150000, req:600000, rw:20}, {p:180000, t:900000, req:1800000, rw:60},
+  {p:360000, t:3000000, req:4500000, rw:150}, {p:720000, t:12000000, req:15000000, rw:500}, {p:1440000, t:40000000, req:45000000, rw:1500}];
+
+const S = {
+  me:{accountId:10234, wallet:'0x7a3F…9c21', name:'Nguyễn An', kyc:2, memberOf:{}},
+  role:'affiliate',
+  positions:[
+    {id:'P-1042', term:180, mode:'AT', apr:700, P:10000, start:'2026-07-01', paid:0},
+    {id:'P-1107', term:90, mode:'FLEX', apr:570, P:5000, start:'2026-09-15', paid:20},
+    {id:'P-0988', term:30, mode:'AT', apr:500, P:10000, start:'2026-08-21', paid:0}
+  ],
+  rank:{r:2, personal:120000, team:520000, cyclePts:410000, cycleEnd:'2026-10-30', credit:10, debt:0},
+  team:[{l:'F1', n:4, v:12000},{l:'F2', n:9, v:31000},{l:'F3', n:15, v:48000},{l:'F4', n:6, v:9500},{l:'F5', n:2, v:3000}],
+  codes:['annguyen'],
+  dep:{term:180, mode:'AT', amount:10000, agree:false},
+  loan:{id:'L-2031', P:10000, apr:2000, grade:'B', start:'2026-07-14', months:6, paidK:2, feeBps:50, pkg:'Tiêu dùng 6 tháng', referrer:'Node #142 · Trần Minh'},
+  req:{pkg:0, amount:8000},
+  pkgs:[
+    {n:'Tiêu dùng 6 tháng', months:6, fee:150, max:10000, type:'Gốc đều'},
+    {n:'Tiêu dùng 12 tháng', months:12, fee:150, max:10000, type:'Gốc đều'},
+    {n:'Kinh doanh 12 tháng', months:12, fee:100, max:10000, type:'Giải ngân từng đợt', tranche:true}
+  ],
+  offer:{pkg:0, fee:50, until:'2026-11-30'},
+  grade:{g:'B', apr:2000},
+  node:{id:142, depth:2, limit:60000, used:35000, pts:18400, rank:2},
+  approvals:[
+    {id:'L-2077', who:'Lê Hoa', amount:8000, pkg:'Tiêu dùng 6 tháng', grade:'A', st:'REQUESTED'},
+    {id:'L-2079', who:'Phạm Nam', amount:9500, pkg:'Tiêu dùng 12 tháng', grade:'C', st:'REQUESTED'}
+  ],
+  fund:{quota:50000, pos:[{id:'I-12', amount:30000, start:'2026-06-01', req:null}]},
+  gov:{
+    inv:{name:'Council Investment', members:['A','B','C','D','E'], props:[
+      {id:13, title:'Góp thêm 100.000 vào gói nhà đầu tư của Loan', tier:'NORMAL', status:'PENDING', created:'2026-10-13',
+       desc:'Tỷ lệ tiền mặt đang 31%, cao hơn mục tiêu 25%. Góp thêm để đưa phân bổ về mục tiêu (đặc tả mục 13.2).',
+       actions:[{fn:'LoanInvestmentAdapter.invest(amount = 100.000)', human:'Đã góp vào Loan: 700.000 → 800.000', sim:true}],
+       votes:{A:['APPROVE','Đề xuất'], B:['APPROVE','Đồng ý, tiền mặt vẫn ≥ 20%']}},
+      {id:12, title:'Hạ lãi gói 180 ngày Cuối kỳ từ 7% xuống 6,5%', tier:'NORMAL', status:'QUEUED', created:'2026-10-12', eta:'2026-10-15',
+       desc:'Tỷ lệ góp vào Loan thực tế 72%, ngưỡng không lỗ còn 7,78%. Hạ lãi để giữ biên an toàn.',
+       actions:[{fn:'InvestmentVault.setPackageApr(term = 180, mode = AT_MATURITY, aprBps = 650)', human:'Lãi gói 180 ngày Cuối kỳ: 7% → 6,5%', sim:true}],
+       votes:{A:['APPROVE','Đề xuất'], B:['APPROVE','Đồng ý theo mục 2.6.5'], C:['DENY','Muốn giữ 7% thêm 1 tháng'], D:['APPROVE','']}},
+      {id:11, title:'Đăng ký strategy LoanInvestmentAdapter v1', tier:'CHARTER', status:'EXECUTED', created:'2026-09-01',
+       desc:'Kênh đầu tư đầu tiên: gói nhà đầu tư của Loan, hạn mức 80%.',
+       actions:[{fn:'InvestmentVault.registerStrategy(addr = 0x51c…e0a, capBps = 8000)', human:'Thêm kênh đầu tư: Loan, hạn mức 80% tiền gửi', sim:true}],
+       votes:{A:['APPROVE',''],B:['APPROVE',''],C:['APPROVE',''],D:['APPROVE',''],E:['APPROVE','']}}
+    ]},
+    loan:{name:'Council Loan', members:['F','G','H','D','M'], props:[
+      {id:8, title:'Rút 20.000 vốn điều lệ', tier:'CRITICAL', status:'REJECTED', created:'2026-10-05',
+       desc:'Nhà vận hành đề nghị rút một phần lợi nhuận.',
+       actions:[{fn:'LoanPool.withdrawOperatorCapital(amount = 20.000)', human:'Vốn điều lệ: 100.000 → 80.000; hệ số an toàn vốn 11,2% → 9,0%', sim:false}],
+       votes:{F:['APPROVE','Đề xuất'], G:['DENY','Hệ số an toàn vốn đang trong vùng đệm'], H:['DENY','Như G']}},
+      {id:9, title:'Tạo gói vay Kinh doanh 12 tháng (giải ngân từng đợt)', tier:'NORMAL', status:'PENDING', created:'2026-10-13',
+       desc:'Gói cho khoản vay lớn, tối đa 4 đợt, giai đoạn rút vốn ≤ 6 tháng (mục 5.1.3).',
+       actions:[{fn:'LoanManager.createPackage(name = "Kinh doanh 12 tháng", trancheEnabled = true, maxTranches = 4, …)', human:'Thêm gói vay mới: 12 tháng, phí 1%, tối đa 4 đợt', sim:true}],
+       votes:{F:['APPROVE','Đề xuất'], H:['APPROVE','']}}
+    ]},
+    ops:{name:'Ops', members:['X','Y','Z'], props:[
+      {id:42, title:'Cấp hạn mức ứng thưởng 10 USDT cho #10234', tier:'OPS', status:'PENDING', created:'2026-10-14',
+       desc:'Đã thẩm định thu nhập và lịch sử gửi (hash hồ sơ 0x4e1…).', actions:[{fn:'RewardDistributor.setAdvanceCredit(domain = INVEST, accountId = 10234, limit = 10, until = 14/04/2027)', human:'Hạn mức ứng thưởng #10234: 0 → 10 USDT', sim:true}],
+       votes:{X:['APPROVE','Đề xuất']}},
+      {id:41, title:'Duyệt KYC ngày 13/10 (35 hồ sơ)', tier:'OPS', status:'EXECUTED', created:'2026-10-13',
+       desc:'Hồ sơ đã đối chiếu off-chain.', actions:[{fn:'KYCRegistry.approveKyc(…) × 35', human:'35 tài khoản lên cấp KYC 1–2', sim:true}],
+       votes:{X:['APPROVE','Đề xuất'], Y:['APPROVE','Đã kiểm tra danh sách']}}
+    ]}
+  },
+  govTab:'inv'
+};
+const TIER = {
+  EMERGENCY:{n:'Khẩn cấp', need:2, delay:0}, NORMAL:{n:'Thường', need:3, delay:1},
+  CRITICAL:{n:'Nghiêm trọng', need:4, delay:2}, CHARTER:{n:'Điều lệ', need:4, delay:7}, OPS:{n:'Vận hành', need:2, delay:0}
+};
+
+/* ---------- Tính toán (theo công thức đặc tả) ---------- */
+function posInfo(p){
+  const start = D(p.start), mat = addDays(start, p.term);
+  const end = TODAY < mat ? TODAY : mat;
+  const earned = p.P * p.apr * Math.max(0, diff(start, end)) / (1e4 * 365);
+  const matured = TODAY >= mat;
+  const floating = matured ? p.P * 0.03 * diff(mat, TODAY) / 365 : 0; // lãi thả nổi 3%
+  let allowed = 0;
+  if (matured) allowed = p.P * p.apr * p.term / (1e4 * 365);
+  else if (p.mode === 'FLEX') allowed = earned;
+  else if (p.mode === 'PER') allowed = p.P * p.apr * (Math.floor(diff(start, TODAY) / 20) * 20) / (1e4 * 365);
+  const claimable = Math.max(0, allowed + floating - p.paid);
+  const progress = Math.min(1, diff(start, TODAY) / p.term);
+  return {start, mat, earned, floating, matured, claimable, progress, daysLeft:Math.max(0, diff(TODAY, mat)), age:diff(start, TODAY)};
+}
+function earlyQuote(p){ // mục 3.4, FORFEIT_AND_PENALTY, clawback bật
+  const penalty = p.P * 0.02, clawback = p.paid;
+  return {penalty, clawback, out:Math.max(0, p.P - penalty - clawback)};
+}
+function loanSchedule(P, apr, months){ // gốc đều, kỳ 30 ngày
+  const rows = []; const pr = P / months; let out = P;
+  for (let k = 1; k <= months; k++){ const it = out * apr / 1e4 * 30 / 365; rows.push({k, pr, it, out}); out -= pr; }
+  return rows;
+}
+const totalDeposits = () => S.positions.reduce((a, p) => a + p.P, 0);
+
+/* ---------- Điều hướng ---------- */
+const domColor = {inv:'var(--inv)', loan:'var(--loan)', both:'var(--label2)'};
+
+function renderChrome(path){
+  const R = ROLES[S.role], NAV = R.nav, TABS = NAV.flatMap(g => g.items).slice(0, 5);
+  document.getElementById('side').innerHTML = NAV.map(g =>
+    `<div class="side-h"><span class="dot" style="background:${domColor[g.dom]}"></span>${g.h}</div>` +
+    g.items.map(it => `<a href="#${it.to}" data-domain="${g.dom}" class="${path === it.to ? 'active' : ''}" ${path === it.to ? 'aria-current="page"' : ''}>${ic(it.i)}${it.n}</a>`).join('')
+  ).join('') + `<div class="side-h" style="margin-top:12px">Vai trò</div><a href="#" data-act="roleSheet" role="button">${ic(R.i)}${esc(R.n)}</a>`;
+  const top = TABS.reduce((best, t) => (path === t.to || path.startsWith(t.to + '/')) && t.to.length > best.length ? t.to : best, '');
+  const tb = document.getElementById('tabbar');
+  tb.style.setProperty('--n', TABS.length);
+  if (!tb.querySelector('.lens')) tb.innerHTML = '<span class="lens" aria-hidden="true"></span>' + TABS.map(t => `<a href="#${t.to}" data-tab="${t.to}">${ic(t.i)}<span>${t.n}</span></a>`).join('');
+  const idx = Math.max(0, TABS.findIndex(t => t.to === top));
+  tb.style.setProperty('--i', idx);
+  tb.querySelectorAll('a').forEach(a => { const on = a.dataset.tab === top; a.classList.toggle('active', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+}
+function navbar(title, back){
+  document.getElementById('navbar').innerHTML =
+    (back ? `<button class="back" data-act="back" data-to="${back}" aria-label="Quay lại">${ic('chevL')}</button>` : '<span class="sp"></span>') +
+    `<div class="ttl">${esc(title)}</div><button class="back" data-act="roleSheet" aria-label="Đổi vai trò: ${esc(ROLES[S.role].n)}">${ic(ROLES[S.role].i)}</button>`;
+}
+const large = (title, dom) => `<div class="large"><h1>${esc(title)}</h1>${dom ? `<span class="domain d-${dom}">${dom === 'inv' ? 'Investment' : dom === 'loan' ? 'Loan' : 'Hai hệ thống'}</span>` : ''}</div>`;
+const secH = t => `<div class="sec-h">${t}</div>`;
+const secF = t => `<div class="sec-f">${t}</div>`;
+const row = (o) => {
+  const tag = o.href ? 'a' : (o.act ? 'button' : 'div');
+  const attrs = o.href ? `href="#${o.href}"` : (o.act ? `type="button" data-act="${o.act}" ${o.data || ''}` : '');
+  return `<${tag} class="row${o.icon ? ' ic' : ''}" ${attrs} ${o.aria || ''}>${o.icon || ''}<div class="grow"><div class="t">${o.t}</div>${o.s ? `<div class="s">${o.s}</div>` : ''}</div>${o.v != null ? `<div class="v num">${o.v}</div>` : ''}${o.href || o.chev ? ic('chevR', 'chev') : ''}${o.check ? ic('check', 'check') : ''}</${tag}>`;
+};
+
+/* ---------- Màn hình: Investment ---------- */
+function viewInvest(){
+  navbar('Tiết kiệm');
+  const infos = S.positions.map(p => [p, posInfo(p)]);
+  const total = totalDeposits();
+  const interest = infos.reduce((a, [p, i]) => a + i.earned + i.floating, 0);
+  const claim = infos.reduce((a, [, i]) => a + i.claimable, 0);
+  const kyc0 = S.me.kyc === 0;
+  return large('Tiết kiệm', 'inv') +
+  (kyc0 ? `<div class="callout warn">${ic('shield')}<div><b>Bạn chưa xác minh danh tính.</b> Được gửi tối đa 1.000 USDT; chưa lên hạng, chưa nhận thưởng; điểm đội nhóm bạn tạo cho người giới thiệu chỉ tính 50%; mất ví thì không khôi phục được.<div class="btns" style="margin-top:10px"><button class="btn sm fill" data-act="kycStart">Xác minh ngay</button></div></div></div>` : '') +
+  `<section class="hero" aria-label="Tổng quan">
+    <div class="lbl">Tổng tiền gửi</div>
+    <div class="big num">${money(total)}<span class="unit">USDT</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Lãi đã phát sinh</div><div class="n num" style="color:var(--green)">+${fmt(interest, 2)}</div></div>
+      <div class="stat"><div class="k">Có thể nhận ngay</div><div class="n num">${fmt(claim, 2)}</div></div>
+      <div class="stat"><div class="k">Hạng</div><div class="n">${RANKS[S.rank.r]}</div></div>
+    </div>
+    <div class="btns">
+      <a class="btn fill" href="#/invest/deposit">${ic('plus')}Gửi tiết kiệm</a>
+      <button class="btn tint" data-act="claimAll" ${claim < 0.01 ? 'disabled' : ''}>${ic('arrowDown')}Nhận lãi</button>
+    </div>
+  </section>` +
+  secH('Khoản gửi') +
+  `<div class="group">${infos.map(([p, i]) => {
+    const st = i.matured ? '<span class="pill p-orange">Lãi thả nổi 3%</span>' : `<span class="pill p-blue">Còn ${i.daysLeft} ngày</span>`;
+    return `<a class="row" href="#/invest/p/${p.id}"><div class="grow">
+      <div class="t num">${money(p.P)} USDT</div>
+      <div class="s">${p.term} ngày · ${MODES[p.mode].n} ${pct(p.apr)} · đáo hạn ${fdate(i.mat)}</div>
+      <div class="bar" aria-hidden="true"><i style="width:${i.progress * 100}%;background:var(--inv)"></i></div>
+    </div>${st}${ic('chevR', 'chev')}</a>`; }).join('')}</div>` +
+  secF('Khoản đã đáo hạn tự chuyển sang lãi thả nổi cho tới khi bạn rút. Không tự tái tục.') +
+  secH('Giới thiệu & thưởng') +
+  `<div class="group">${S.rank.r ? row({icon:tile('star', 'var(--orange)'), t:'Hạng ' + RANKS[S.rank.r], s:`Chu kỳ này: ${fmt(S.rank.cyclePts)} / ${fmt(RANK_TERMS[S.rank.r].req)} điểm`, v:RANK_TERMS[S.rank.r].rw + ' USDT', href:'/invest/rewards'}) : row({icon:tile('star', 'var(--gray)'), t:'Chưa có hạng', s:`Điểm cá nhân trọn đời ${fmt(S.rank.personal)} / 30.000 cho hạng Đồng`, href:'/invest/rewards'})}
+  ${row({icon:tile('link', 'var(--blue)'), t:'Mã giới thiệu', s:'nexus.app/?ref=' + S.codes[0], href:'/invest/rewards'})}</div>` +
+  `<div class="callout info">${ic('info')}<div>Investment giữ tối thiểu 20% tiền gửi bằng tiền mặt và chỉ đầu tư phần còn lại qua các kênh đã được hội đồng Investment duyệt. Khi nhiều người rút cùng lúc, yêu cầu được xếp hàng và vẫn có lãi trong lúc chờ (tối đa khoảng 30 ngày).</div></div>`;
+}
+
+function viewDeposit(){
+  navbar('Gửi tiết kiệm', '/invest');
+  const d = S.dep, r = RATES[d.term][d.mode];
+  const interest = d.amount * r * d.term / (1e4 * 365);
+  const cap = KYC[S.me.kyc].cap, room = cap - totalDeposits();
+  const over = d.amount > room, under = d.amount < 100;
+  return large('Gửi tiết kiệm', 'inv') +
+  secH('Kỳ hạn') +
+  `<div class="seg" data-key="term" style="--n:4;--i:${[30, 90, 180, 365].indexOf(d.term)}" role="group" aria-label="Kỳ hạn"><span class="thumb" aria-hidden="true"></span>${[30, 90, 180, 365].map(t => `<button type="button" data-act="term" data-v="${t}" aria-pressed="${d.term === t}">${t} ngày</button>`).join('')}</div>` +
+  secH('Cách nhận lãi') +
+  `<div class="group" role="radiogroup" aria-label="Cách nhận lãi">${Object.keys(MODES).map(m =>
+    row({act:'mode', data:`data-v="${m}" role="radio" aria-checked="${d.mode === m}"`, t:MODES[m].n, s:MODES[m].d, v:pct(RATES[d.term][m]), check:true})).join('')}</div>` +
+  secH('Số tiền') +
+  `<div class="group"><label class="field"><input id="amt" inputmode="decimal" aria-label="Số tiền gửi" value="${fmt(d.amount)}" data-input="amount"><span class="unit">USDT</span></label>
+   <div class="chips">${[1000, 5000, 10000, 50000].map(v => `<button type="button" class="chip" data-act="amtChip" data-v="${v}">${fmt(v)}</button>`).join('')}</div></div>` +
+  secF(over ? `<span style="color:var(--red)">Vượt hạn mức cấp KYC ${KYC[S.me.kyc].n}: còn gửi được ${money(room)} USDT.</span>` : under ? `<span style="color:var(--red)">Tối thiểu 100 USDT.</span>` : `Cấp KYC ${KYC[S.me.kyc].n}: còn gửi được ${money(room)} USDT.`) +
+  secH('Dự kiến') +
+  `<div class="group">
+    ${row({t:'Lãi suất', v:pct(r) + '/năm'})}
+    ${row({t:d.mode === 'UP' ? 'Lãi nhận ngay khi gửi' : 'Lãi khi đáo hạn', v:fmt(interest, 2) + ' USDT'})}
+    ${row({t:'Ngày đáo hạn', v:fdate(addDays(TODAY, d.term))})}
+    ${row({t:'Điểm KPI cá nhân', s:'1 điểm = 1 USDT × 1 ngày', v:'+' + fmt(d.amount) + '/ngày'})}
+  </div>` +
+  secH('Điều lệ') +
+  `<div class="group"><label class="row" style="cursor:pointer"><div class="grow"><div class="t">Tôi đã đọc điều lệ Investment</div><div class="s">Gồm rủi ro khi Investment đầu tư vào Loan</div></div><input type="checkbox" class="switch" data-input="agree" ${d.agree ? 'checked' : ''} aria-label="Đồng ý điều lệ"></label></div>` +
+  `<div class="btns"><button class="btn fill" data-act="reviewDeposit" ${(!d.agree || over || under) ? 'disabled' : ''}>Xem lại</button></div>`;
+}
+
+function viewPosition(id){
+  const p = S.positions.find(x => x.id === id); if (!p) return viewNotFound();
+  navbar(p.id, '/invest');
+  const i = posInfo(p), q = earlyQuote(p);
+  const canEarly = !i.matured && i.age >= 7;
+  return large(money(p.P) + ' USDT', 'inv') +
+  `<div class="group">
+    ${row({t:'Kỳ hạn', v:p.term + ' ngày'})}
+    ${row({t:'Cách nhận lãi', v:MODES[p.mode].n + ' · ' + pct(p.apr)})}
+    ${row({t:'Ngày gửi', v:fdate(i.start)})}
+    ${row({t:'Ngày đáo hạn', v:fdate(i.mat)})}
+    ${row({t:'Lãi trong hạn đã phát sinh', v:fmt(i.earned, 2)})}
+    ${i.matured ? row({t:'Lãi thả nổi sau đáo hạn (3%)', v:fmt(i.floating, 2)}) : ''}
+    ${row({t:'Đã nhận', v:fmt(p.paid, 2)})}
+    ${row({t:'Có thể nhận ngay', v:`<b style="color:var(--label)">${fmt(i.claimable, 2)}</b>`})}
+  </div>` +
+  `<div class="btns">
+    <button class="btn tint" data-act="claim" data-id="${p.id}" ${i.claimable < (i.matured ? 0.01 : 10) ? 'disabled' : ''}>${ic('arrowDown')}Nhận lãi</button>
+    ${i.matured ? `<button class="btn fill" data-act="withdraw" data-id="${p.id}">Rút gốc và lãi</button>`
+      : `<button class="btn red" data-act="early" data-id="${p.id}" ${canEarly ? '' : 'disabled'}>Rút trước hạn</button>`}
+  </div>` +
+  secF(i.matured ? 'Đã đáo hạn: rút bất cứ lúc nào, không bị phạt.' :
+    canEarly ? `Rút trước hạn: phạt 2% gốc (${money(q.penalty)} USDT)${q.clawback ? ', trừ lại lãi đã nhận' : ''} và trừ lại toàn bộ điểm KPI của khoản này.` :
+    `Phải giữ tối thiểu 7 ngày trước khi được rút (còn ${7 - i.age} ngày).`);
+}
+
+function viewRewards(){
+  navbar('Giới thiệu & thưởng', '/invest');
+  const rk = S.rank;
+  if (!rk.r || S.me.kyc === 0) return large('Giới thiệu & thưởng', 'inv') +
+    `<section class="hero"><div class="lbl">Chưa có hạng</div><div class="big num" style="font-size:28px">${fmt(rk.personal)} <span class="unit">/ 30.000 điểm cá nhân</span></div>
+     <div class="bar"><i style="width:${Math.min(100, rk.personal / 300)}%;background:var(--orange)"></i></div>
+     <div class="s" style="color:var(--label2);font-size:15px;margin-top:8px">Đủ 30.000 điểm và đã xác minh danh tính thì lên được hạng Đồng.</div></section>` +
+    secH('Để lên hạng và nhận thưởng') +
+    `<div class="group">${row({icon:tile('shield', S.me.kyc ? 'var(--green)' : 'var(--orange)'), t:'Xác minh danh tính', s:S.me.kyc ? 'Đã xong' : 'Bắt buộc để lên hạng, nhận và ứng thưởng', act:S.me.kyc ? '' : 'kycStart', chev:!S.me.kyc})}
+      ${row({icon:tile('star', 'var(--gray)'), t:'Điểm cá nhân trọn đời ≥ 30.000', s:'Ví dụ gửi 1.000 USDT trong 30 ngày'})}
+      ${row({icon:tile('network', 'var(--gray)'), t:'Khi chưa có hạng', s:'Chỉ nhận điểm đội nhóm từ người bạn giới thiệu trực tiếp (F1)'})}</div>` +
+    secH('Mã giới thiệu') + `<div class="group">${row({icon:tile('link', 'var(--blue)'), t:'Địa chỉ ví của bạn', s:'Dùng làm mã giới thiệu; mã chữ dễ nhớ mua được sau', act:'copy'})}</div>`;
+  const cur = RANK_TERMS[rk.r], next = RANK_TERMS[rk.r + 1];
+  const prog = Math.min(1, rk.cyclePts / cur.req);
+  const adv = Math.max(0, Math.min(cur.rw * 0.5 * prog, rk.credit) - rk.debt);
+  const left = diff(TODAY, D(rk.cycleEnd));
+  const C = 2 * Math.PI * 40;
+  return large('Giới thiệu & thưởng', 'inv') +
+  `<section class="hero" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+    <svg class="ring" viewBox="0 0 96 96" role="img" aria-label="Tiến độ KPI chu kỳ ${Math.round(prog * 100)}%">
+      <circle cx="48" cy="48" r="40" fill="none" stroke="var(--fill)" stroke-width="10"/>
+      <circle cx="48" cy="48" r="40" fill="none" stroke="var(--orange)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C * prog} ${C}" transform="rotate(-90 48 48)"/>
+      <text x="48" y="54" text-anchor="middle" font-size="20" font-weight="700" fill="var(--label)">${Math.round(prog * 100)}%</text>
+    </svg>
+    <div style="flex:1;min-width:200px">
+      <div class="lbl">Hạng ${RANKS[rk.r]} · KPI duy trì chu kỳ này</div>
+      <div class="big num" style="font-size:28px">${fmt(rk.cyclePts)} <span class="unit">/ ${fmt(cur.req)} điểm</span></div>
+      <div class="s" style="color:var(--label2);font-size:15px">Còn ${left} ngày · đạt KPI nhận <b style="color:var(--label)">${cur.rw} USDT</b></div>
+    </div>
+  </section>
+  <div class="btns">
+    <button class="btn fill" disabled>${ic('gift')}Nhận thưởng (sau ${fdate(D(rk.cycleEnd))})</button>
+    <button class="btn tint" data-act="advance" ${adv < 0.01 ? 'disabled' : ''}>Ứng trước ${fmt(adv, 2)} USDT</button>
+  </div>` +
+  secF(`Hạn mức ứng = thưởng ${cur.rw} × 50% × tiến độ ${Math.round(prog * 100)}%, không vượt hạn mức thẩm định ${rk.credit} USDT. Nợ ứng tự trừ vào thưởng sau.`) +
+  secH('Lên hạng ' + RANKS[rk.r + 1]) +
+  `<div class="group">
+    <div class="row"><div class="grow"><div class="t">KPI cá nhân trọn đời</div><div class="s num">${fmt(rk.personal)} / ${fmt(next.p)}</div><div class="bar"><i style="width:${Math.min(100, rk.personal / next.p * 100)}%"></i></div></div></div>
+    <div class="row"><div class="grow"><div class="t">KPI đội nhóm trọn đời</div><div class="s num">${fmt(rk.team)} / ${fmt(next.t)}</div><div class="bar"><i style="width:${Math.min(100, rk.team / next.t * 100)}%"></i></div></div></div>
+  </div>` +
+  secF('Rút sớm làm trừ lại điểm của khoản đó; nếu điểm xuống dưới ngưỡng thì hạng tự hạ.') +
+  secH('Đội nhóm') +
+  `<div class="group tbl"><table><thead><tr><th>Tầng</th><th class="r">Thành viên</th><th class="r">Đang gửi (USDT)</th></tr></thead><tbody>
+    ${S.team.map(t => `<tr><td>${t.l}</td><td class="r num">${t.n}</td><td class="r num">${fmt(t.v)}</td></tr>`).join('')}
+  </tbody></table></div>` +
+  secF('Điểm đội nhóm giảm dần theo tầng: 100% / 50% / 20% / 10% / 5%. Khoản gửi từ người chưa KYC tính 50%.') +
+  secH('Mã giới thiệu') +
+  `<div class="group">
+    ${row({icon:tile('link', 'var(--blue)'), t:S.codes[0], s:'Mã chính · nexus.app/?ref=' + S.codes[0], act:'copy', chev:false})}
+    ${row({icon:tile('plus', 'var(--green)'), t:'Mua mã mới', s:'≥ 6 ký tự: 10 USDT · 5: 50 · 4: 200 · 3: 500', act:'buyCode', chev:true})}
+  </div>`;
+}
+
+/* ---------- Màn hình: Loan ---------- */
+function viewLoan(){
+  navbar('Khoản vay');
+  const L = S.loan, sch = loanSchedule(L.P, L.apr, L.months);
+  if (L.paidK >= L.months) return large('Khoản vay', 'loan') + `<section class="hero"><div class="lbl">${L.id} · ${L.pkg}</div><div class="big">Đã trả hết</div><div class="btns"><a class="btn fill" href="#/loan/request">Vay mới</a></div></section>`;
+  const next = sch[L.paidK], due = addDays(D(L.start), 30 * (L.paidK + 1));
+  const late = diff(due, TODAY), outstanding = L.P - L.P / L.months * L.paidK;
+  const pending = S.approvals.filter(a => a.st === 'REQUESTED').length;
+  return large('Khoản vay', 'loan') +
+  `<section class="hero">
+    <div class="lbl">Dư nợ ${L.id} · ${L.pkg}</div>
+    <div class="big num">${money(outstanding)}<span class="unit">USDT</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Kỳ tới (${L.paidK + 1}/${L.months})</div><div class="n num">${fmt(next.pr + next.it, 2)}</div></div>
+      <div class="stat"><div class="k">Hạn trả</div><div class="n">${fdate(due)}</div></div>
+      <div class="stat"><div class="k">Lãi suất · hạng</div><div class="n">${pct(L.apr)} · ${L.grade}</div></div>
+    </div>
+    ${late > 0 ? `<div class="callout warn" style="background:color-mix(in srgb,var(--orange) 12%,transparent)">${ic('warn')}<div>Đã quá hạn ${late} ngày. Còn ${Math.max(0, 3 - late)} ngày ân hạn trước khi tính lãi phạt.</div></div>` : ''}
+    <div class="btns"><button class="btn fill" data-act="repay">Trả kỳ ${L.paidK + 1}</button><a class="btn tint" href="#/loan/l/${L.id}">Lịch trả nợ</a></div>
+  </section>` +
+  secH('Việc của bạn') +
+  `<div class="group">
+    ${row({icon:tile('doc', 'var(--loan)'), t:'Vay mới', s:'Mỗi người 1 khoản đang chạy (nâng theo thẩm định)', href:'/loan/request'})}
+    ${row({icon:tile('network', 'var(--orange)'), t:'Hồ sơ chờ bạn xác nhận', s:'Bạn là người giới thiệu', v:pending ? `<span class="pill p-orange">${pending}</span>` : '', href:'/loan/network'})}
+    ${row({icon:tile('coins', 'var(--green)'), t:'Góp vốn vào Loan', s:'Gói nhà đầu tư 12%/năm', href:'/loan/fund'})}
+  </div>`;
+}
+
+function viewLoanDetail(id){
+  const L = S.loan; if (id !== L.id) return viewNotFound();
+  navbar(L.id, '/loan');
+  const sch = loanSchedule(L.P, L.apr, L.months);
+  const steps = [['Bạn gửi yêu cầu', '14/07/2026'], ['Người giới thiệu xác nhận', '14/07/2026'], ['Quản lý duyệt và giải ngân', '14/07/2026']];
+  return large('Lịch trả nợ', 'loan') +
+  secH('Tiến trình duyệt') +
+  `<div class="group">${steps.map(s => row({icon:tile('check', 'var(--green)'), t:s[0], v:s[1]})).join('')}</div>` +
+  secH('Các kỳ trả (gốc đều, lãi ' + pct(L.apr) + ')') +
+  `<div class="group tbl"><table><thead><tr><th>Kỳ</th><th>Hạn</th><th class="r">Gốc</th><th class="r">Lãi</th><th class="r">Trạng thái</th></tr></thead><tbody>
+  ${sch.map(r => { const due = addDays(D(L.start), 30 * r.k); const st = r.k <= L.paidK ? '<span class="pill p-green">Đã trả</span>' : (due < TODAY ? '<span class="pill p-orange">Quá hạn</span>' : '<span class="pill p-gray">Chưa tới</span>');
+    return `<tr><td>${r.k}</td><td>${fdate(due)}</td><td class="r num">${fmt(r.pr, 2)}</td><td class="r num">${fmt(r.it, 2)}</td><td class="r">${st}</td></tr>`; }).join('')}
+  </tbody></table></div>` +
+  secF(`Nhận về lúc giải ngân: ${fmt(L.P * (1 - L.feeBps / 1e4), 2)} USDT (phí giải ngân ưu đãi ${pct(L.feeBps)}). Tiền trả được phân bổ: phí phạt → lãi quá hạn → lãi trong hạn → gốc.`);
+}
+
+function viewLoanRequest(){
+  navbar('Vay mới', '/loan');
+  const r = S.req, pk = S.pkgs[r.pkg];
+  const offer = S.offer.pkg === r.pkg ? S.offer : null;
+  const fee = offer ? offer.fee : pk.fee;
+  const sch = loanSchedule(r.amount, S.grade.apr, pk.months);
+  const totalInt = sch.reduce((a, x) => a + x.it, 0);
+  const over = r.amount > pk.max, hasActive = true;
+  return large('Vay mới', 'loan') +
+  `<div class="callout warn">${ic('warn')}<div>Bạn đang có 1 khoản vay chạy (${S.loan.id}). Mặc định mỗi người 1 khoản; vay thêm cần nhóm vận hành Loan nâng hạn mức sau thẩm định. Màn hình dưới để minh họa.</div></div>` +
+  secH('Gói vay') +
+  `<div class="group" role="radiogroup" aria-label="Gói vay">${S.pkgs.map((p, idx) =>
+    row({act:'pkg', data:`data-v="${idx}" role="radio" aria-checked="${r.pkg === idx}"`, t:p.n, s:`${p.type} · phí giải ngân ${pct(p.fee)}${S.offer.pkg === idx ? ' · <span style="color:var(--green)">có ưu đãi</span>' : ''}`, check:true})).join('')}</div>` +
+  secH('Số tiền') +
+  `<div class="group"><label class="field"><input inputmode="decimal" aria-label="Số tiền vay" value="${fmt(r.amount)}" data-input="loanAmount"><span class="unit">USDT</span></label></div>` +
+  secF(over ? `<span style="color:var(--red)">Tối đa ${fmt(pk.max)} USDT: không quá 10% vốn điều lệ của Loan (đặc tả C24).</span>` : `Tối đa ${fmt(pk.max)} USDT (10% vốn điều lệ).`) +
+  secH('Điều kiện của bạn') +
+  `<div class="group">
+    ${row({t:'Hạng tín dụng', s:'Do thẩm định off-chain cấp', v:`<span class="pill p-blue">${S.grade.g}</span> ${pct(S.grade.apr)}/năm`})}
+    ${row({t:'Phí giải ngân', s:offer ? `Ưu đãi riêng đến ${fdate(D(offer.until))} (gói ${pct(pk.fee)})` : 'Theo gói', v:pct(fee)})}
+    ${row({t:'Người giới thiệu', v:S.loan.referrer})}
+  </div>` +
+  secH('Dự kiến') +
+  `<div class="group">
+    ${row({t:'Nhận về ví', v:fmt(r.amount * (1 - fee / 1e4), 2) + ' USDT'})}
+    ${row({t:'Nợ gốc', v:fmt(r.amount) + ' USDT'})}
+    ${row({t:'Tổng lãi (' + pk.months + ' kỳ, gốc đều)', v:fmt(totalInt, 2) + ' USDT'})}
+    ${row({t:'Kỳ đầu', v:fmt(sch[0].pr + sch[0].it, 2) + ' USDT'})}
+  </div>` +
+  (pk.tranche ? secF('Gói này giải ngân từng đợt: tối đa 4 đợt, đợt sau cần xác nhận tiến độ; trong giai đoạn rút vốn chỉ trả lãi trên số đã nhận.') : '') +
+  `<div class="btns"><button class="btn fill" data-act="reviewLoan" ${over || r.amount < 500 ? 'disabled' : ''}>Gửi yêu cầu vay</button></div>`;
+}
+
+function viewNetwork(){
+  navbar('Mạng lưới', '/loan');
+  const n = S.node;
+  return large('Mạng lưới giới thiệu', 'loan') +
+  `<section class="hero">
+    <div class="lbl">Node #${n.id} · tầng ${n.depth} · hạng LOAN ${RANKS[n.rank]}</div>
+    <div class="big num" style="font-size:28px">${fmt(n.used)} <span class="unit">/ ${fmt(n.limit)} USDT</span></div>
+    <div class="s" style="color:var(--label2);font-size:15px">Hạn mức giải ngân tháng 10/2026 (UTC) của nhánh bạn</div>
+    <div class="bar"><i style="width:${n.used / n.limit * 100}%;background:var(--loan)"></i></div>
+    <div class="stats"><div class="stat"><div class="k">Điểm LOAN (lãi thực thu)</div><div class="n num">${fmt(n.pts)}</div></div><div class="stat"><div class="k">Tuyến dưới tối đa</div><div class="n">5 tầng</div></div></div>
+  </section>` +
+  secH('Hồ sơ chờ bạn xác nhận') +
+  `<div class="group">${S.approvals.map(a => `<div class="row"><div class="grow"><div class="t">${esc(a.who)} · <span class="num">${fmt(a.amount)}</span> USDT</div><div class="s">${a.id} · ${a.pkg} · hạng ${a.grade}</div></div>
+    ${a.st === 'REQUESTED' ? `<button class="btn sm red" data-act="refDeny" data-id="${a.id}">Từ chối</button><button class="btn sm fill" data-act="refApprove" data-id="${a.id}">Xác nhận</button>`
+      : a.st === 'REFERRER_APPROVED' ? '<span class="pill p-blue">Chờ quản lý</span>' : '<span class="pill p-gray">Đã từ chối</span>'}</div>`).join('')}</div>` +
+  secF('Xác nhận chưa trừ hạn mức; hạn mức chỉ bị trừ khi quản lý duyệt và giải ngân. Bạn chỉ có điểm khi người vay thực sự trả lãi; người vay bỏ nợ thì điểm bị thu hồi.');
+}
+
+function viewFund(){
+  navbar('Góp vốn', '/loan');
+  const f = S.fund;
+  return large('Góp vốn vào Loan', 'loan') +
+  secH('Gói đang mở') +
+  `<div class="group">
+    ${row({icon:tile('coins', 'var(--green)'), t:'Gói nhà đầu tư', s:'Whitelist · lãi 12%/năm · khóa 90 ngày · báo trước 30 ngày', v:`<span class="pill p-green">Quota ${fmt(f.quota)}</span>`})}
+    ${row({icon:tile('building', 'var(--gray)'), t:'Gói vận hành (vốn điều lệ)', s:'Chỉ dành cho nhà vận hành · hưởng phần lời còn lại · chịu lỗ trước', v:'<span class="pill p-gray">Không áp dụng</span>'})}
+  </div>` +
+  secF('Khi Loan lỗ, vốn điều lệ chịu trước; phần vượt chia đều theo tỷ lệ cho mọi nhà đầu tư, không phân biệt gói.') +
+  secH('Vị thế của bạn') +
+  `<div class="group">${f.pos.map(p => {
+    const lockUntil = addDays(D(p.start), 90);
+    const payAt = p.req ? addDays(D(p.req), 30) : null;
+    const canReq = !p.req && TODAY >= lockUntil;
+    return `<div class="row"><div class="grow"><div class="t num">${fmt(p.amount)} USDT</div>
+      <div class="s">${p.id} · góp ${fdate(D(p.start))} · hết khóa ${fdate(lockUntil)}</div>
+      ${payAt ? `<div class="s" style="color:var(--blue)">Đã yêu cầu rút ${fdate(D(p.req))} → nhận từ ${fdate(payAt)} (nếu LoanPool đủ tiền mặt)</div>` : ''}</div>
+      ${canReq ? `<button class="btn sm tint" data-act="fundReq" data-id="${p.id}">Yêu cầu rút</button>` : p.req ? '<span class="pill p-blue">Đang báo trước</span>' : '<span class="pill p-gray">Đang khóa</span>'}</div>`; }).join('')}</div>` +
+  `<div class="btns"><button class="btn fill" data-act="fundAdd">${ic('plus')}Góp thêm</button><button class="btn tint" data-act="fundClaim">Nhận lãi tháng</button></div>`;
+}
+
+/* ---------- Màn hình: Biểu quyết ---------- */
+function tally(p, members){
+  let a = 0, d = 0; members.forEach(m => { const v = p.votes[m]; if (v && v[0] === 'APPROVE') a++; else if (v && v[0] === 'DENY') d++; });
+  return {a, d, n:members.length - a - d};
+}
+const statusPill = s => ({PENDING:'<span class="pill p-blue">Đang biểu quyết</span>', QUEUED:'<span class="pill p-orange">Chờ hiệu lực</span>', EXECUTED:'<span class="pill p-green">Đã thực thi</span>', REJECTED:'<span class="pill p-red">Bị bác</span>', CANCELLED:'<span class="pill p-gray">Đã hủy</span>'}[s]);
+
+function viewGov(){
+  navbar('Biểu quyết');
+  const g = S.gov[S.govTab];
+  return large('Biểu quyết', 'both') +
+  `<div class="seg" data-key="gov" style="--n:3;--i:${['inv', 'loan', 'ops'].indexOf(S.govTab)}" role="group" aria-label="Hội đồng"><span class="thumb" aria-hidden="true"></span>${[['inv', 'Council Investment'], ['loan', 'Council Loan'], ['ops', 'Ops']].map(([k, n]) => `<button type="button" data-act="govTab" data-v="${k}" aria-pressed="${S.govTab === k}">${n}</button>`).join('')}</div>` +
+  secH(g.name + ' · ' + g.members.length + ' thành viên') +
+  `<div class="group">${g.props.map(p => { const t = tally(p, g.members), tr = TIER[p.tier];
+    return `<a class="row" href="#/gov/${S.govTab}/${p.id}"><div class="grow"><div class="t">#${p.id} ${esc(p.title)}</div>
+      <div class="s">${tr.n} · cần ${tr.need}/${g.members.length} · ${t.a} đồng ý · ${t.d} từ chối</div></div>${statusPill(p.status)}${ic('chevR', 'chev')}</a>`; }).join('')}</div>` +
+  secF('Mỗi hệ thống có hội đồng và nhóm vận hành riêng. Mọi đề xuất và phiếu bầu nằm trên blockchain; độ trễ cho người dùng thấy trước thay đổi.');
+}
+
+function viewProposal(k, id){
+  const g = S.gov[k], p = g && g.props.find(x => x.id === +id); if (!p) return viewNotFound();
+  navbar('Đề xuất #' + p.id, '/gov');
+  const t = tally(p, g.members), tr = TIER[p.tier];
+  const myName = S.me.memberOf[k], amMember = !!myName && g.members.includes(myName);
+  const myVote = amMember ? p.votes[myName] : null;
+  const canVote = amMember && (p.status === 'PENDING' || p.status === 'QUEUED');
+  const execOk = p.status === 'QUEUED' && p.eta && TODAY >= D(p.eta);
+  return large('#' + p.id + ' ' + p.title, k === 'loan' ? 'loan' : 'inv') +
+  `<div class="group">
+    ${row({t:'Trạng thái', v:statusPill(p.status)})}
+    ${row({t:'Mức', s:'Contract tự xác định theo hàm được gọi', v:`${tr.n} · cần ${tr.need}/${g.members.length} · chờ ${tr.delay ? tr.delay + ' ngày' : 'không'}`})}
+    ${row({t:'Ngày tạo', v:fdate(D(p.created))})}
+    ${p.eta ? row({t:'Thực thi được từ', v:fdate(D(p.eta))}) : ''}
+  </div>` +
+  secH('Mô tả của người đề xuất') +
+  `<div class="group"><div class="row"><div class="grow" style="font-size:15px;line-height:20px">${esc(p.desc)}</div></div></div>` +
+  secH('Hành động sẽ thực thi (đã giải mã)') +
+  `<div class="group">${p.actions.map((a, i) => `<div class="row"><div class="grow"><div class="t" style="font-family:var(--mono);font-size:13px;word-break:break-all">${i + 1}. ${esc(a.fn)}</div><div class="s" style="color:var(--label)">${esc(a.human)}</div></div>${a.sim ? '<span class="pill p-green">Mô phỏng ✓</span>' : '<span class="pill p-red">Mô phỏng ✗</span>'}</div>`).join('')}</div>` +
+  secF('Tiêu đề và mô tả do người đề xuất viết; hãy bỏ phiếu dựa trên phần hành động đã giải mã.') +
+  secH(`Biểu quyết · ${t.a} đồng ý · ${t.d} từ chối · ${t.n} chưa bỏ phiếu`) +
+  `<div class="group">${g.members.map(m => { const v = p.votes[m];
+    const icn = !v ? tile('clock', 'var(--gray)') : v[0] === 'APPROVE' ? tile('check', 'var(--green)') : tile('x', 'var(--red)');
+    return row({icon:icn, t:'Thành viên ' + m + (m === myName && amMember ? ' (bạn)' : ''), s:v ? (v[1] ? '“' + esc(v[1]) + '”' : (v[0] === 'APPROVE' ? 'Đồng ý' : 'Từ chối')) : 'Chưa bỏ phiếu'}); }).join('')}</div>` +
+  (canVote ? `<div class="btns"><button class="btn red" data-act="vote" data-k="${k}" data-id="${p.id}" data-v="DENY">${ic('x')}${myVote && myVote[0] === 'DENY' ? 'Đã từ chối' : 'Từ chối'}</button><button class="btn green" data-act="vote" data-k="${k}" data-id="${p.id}" data-v="APPROVE">${ic('check')}${myVote && myVote[0] === 'APPROVE' ? 'Đã đồng ý' : 'Đồng ý'}</button></div>` + secF('Bạn được đổi phiếu khi đề xuất còn đang biểu quyết hoặc đang chờ hiệu lực.') : '') +
+  (p.status === 'QUEUED' ? `<div class="btns"><button class="btn fill" data-act="exec" data-k="${k}" data-id="${p.id}" ${execOk ? '' : 'disabled'}>Thực thi${execOk ? '' : ' (từ ' + fdate(D(p.eta)) + ')'}</button></div>` + secF('Hết thời gian chờ thì bất kỳ ai cũng gọi thực thi được.') : '');
+}
+
+/* ---------- Màn hình: Minh bạch ---------- */
+function meter(label, val, max, color, txt){
+  return `<div class="row"><div class="grow"><div class="t">${label}</div><div class="bar"><i style="width:${Math.min(100, val / max * 100)}%;background:${color}"></i></div></div><div class="v num">${txt}</div></div>`;
+}
+function viewTransparency(){
+  navbar('Minh bạch');
+  const ladder = [['0–30 ngày', 160000, 300000], ['31–90 ngày', 210000, 150000], ['91–180 ngày', 380000, 250000], ['181–365 ngày', 250000, 100000]];
+  const mx = 400000;
+  return large('Minh bạch', 'both') +
+  `<p style="color:var(--label2);font-size:15px;margin:4px 4px 0">Đọc trực tiếp từ contract, chốt sổ gần nhất 01/10/2026 (UTC). Hai hệ thống có sổ sách riêng.</p>` +
+  `<div class="grid2"><div>` +
+  secH('<span class="domain d-inv">Investment</span>') +
+  `<div class="group">
+    ${row({t:'Tổng tiền gửi', v:'1.000.000'})}
+    ${meter('Tiền mặt (mục tiêu 25%, tối thiểu 20%)', 31, 100, 'var(--inv)', '31%')}
+    ${meter('Đã góp vào Loan (tối đa 80%)', 69, 100, 'var(--loan)', '69%')}
+    ${row({t:'Vốn chủ Investment', s:'Tối thiểu 5% tiền gửi (đề xuất)', v:'50.000'})}
+    ${meter('Quỹ bảo hiểm (mục tiêu 2%)', 1.4, 2, 'var(--green)', '14.000')}
+    ${row({t:'Thanh khoản 30 ngày (LCR)', v:'<span class="pill p-green">135%</span>'})}
+    ${row({t:'Tỷ lệ tự chủ lãi', s:'Lãi nhận từ kênh đầu tư / lãi phải trả', v:'118%'})}
+    ${row({t:'Hàng chờ rút', v:'0'})}
+  </div></div><div>` +
+  secH('<span class="domain d-loan">Loan</span>') +
+  `<div class="group">
+    ${row({t:'Dư nợ cho vay', v:'810.000'})}
+    ${row({t:'Vốn điều lệ', v:'100.000'})}
+    ${row({t:'Vốn nhà đầu tư', s:'Chỉ số vốn 1,0000', v:'800.000'})}
+    ${meter('Hệ số an toàn vốn (tối thiểu 10%, đệm 12,5%)', 11.2, 20, 'var(--orange)', '11,2%')}
+    ${row({t:'Tỷ lệ nợ xấu (≥ 90 ngày)', v:'1,5%'})}
+    ${row({t:'Dự phòng (cụ thể + chung 0,75%)', v:'25.885'})}
+    ${row({t:'Thanh khoản 30 ngày (LCR)', v:'<span class="pill p-green">128%</span>'})}
+    ${row({t:'Khoản đã cơ cấu lại', v:'3 · 14.500'})}
+  </div></div></div>` +
+  secH('Bảng kỳ hạn Investment (tài sản / nghĩa vụ)') +
+  `<div class="group">${ladder.map(([k, a, l]) => `<div class="row"><div class="grow"><div class="t">${k}</div>
+    <div class="bar" title="Tài sản"><i style="width:${a / mx * 100}%;background:var(--inv)"></i></div>
+    <div class="bar" title="Nghĩa vụ"><i style="width:${l / mx * 100}%;background:var(--orange)"></i></div></div>
+    <div class="v num" style="font-size:15px">${fmt(a)}<br><span style="color:var(--orange)">${fmt(l)}</span></div></div>`).join('')}</div>` +
+  secF('<span style="color:var(--inv)">■</span> Tài sản đến hạn (tiền mặt, vốn Loan hết khóa) &nbsp; <span style="color:var(--orange)">■</span> Tiền gửi đáo hạn') +
+  secH('Đề xuất đang chờ hiệu lực') +
+  `<div class="group">${row({t:'#12 Hạ lãi gói 180 ngày Cuối kỳ từ 7% xuống 6,5%', s:'Council Investment · hiệu lực từ 15/10/2026', href:'/gov/inv/12'})}</div>`;
+}
+
+/* ---------- Màn hình: Tài khoản ---------- */
+function viewAccount(){
+  navbar('Tài khoản');
+  const k = KYC[S.me.kyc];
+  return large('Tài khoản', 'both') +
+  `<div class="group">
+    ${row({icon:tile('person', 'var(--blue)'), t:S.me.name, s:'Mã tài khoản #' + S.me.accountId + ' · dùng chung cho Investment và Loan'})}
+    ${row({icon:tile('key', 'var(--gray)'), t:'Ví đang dùng', v:`<span style="font-family:var(--mono);font-size:15px">${S.me.wallet}</span>`})}
+  </div>` +
+  secH('Xác minh danh tính') +
+  `<div class="group">
+    ${row({icon:tile('shield', 'var(--green)'), t:'Cấp ' + S.me.kyc + ' · ' + k.n, s:'Hết hạn 30/06/2027'})}
+    ${[0, 1, 2, 3].map(l => row({t:'Cấp ' + l + ' · ' + KYC[l].n, s:l === 3 ? 'Hạn mức riêng' : 'Gửi tối đa ' + fmt(KYC[l].cap) + ' USDT' + (l >= 2 ? ' · được vay' : ''), v:l === S.me.kyc ? '<span class="pill p-green">Hiện tại</span>' : ''})).join('')}
+  </div>` +
+  secF('Mất ví chỉ khôi phục được khi đã xác minh danh tính.') +
+  secH('Ví') +
+  `<div class="group">
+    ${row({icon:tile('arrowUp', 'var(--blue)'), t:'Chuyển sang ví mới', s:'Cần cả ví cũ và ví mới ký; có hiệu lực sau 48 giờ', act:'migrate', chev:true})}
+    ${row({icon:tile('warn', 'var(--red)'), t:'Báo mất ví', s:'Xác minh danh tính với nhóm vận hành; hội đồng thực thi sau 48 giờ', act:'lost', chev:true})}
+  </div>` +
+  secH('Điều lệ đã ký') +
+  `<div class="group">
+    ${row({t:'Điều lệ Investment', v:'v3 · 01/07/2026'})}
+    ${row({t:'Điều lệ hạng Bạc', v:'v1 · 12/08/2026'})}
+    ${row({t:'Điều lệ vay', v:'v2 · 14/07/2026'})}
+  </div>` +
+  `<div class="callout info">${ic('info')}<div>Mỗi giao dịch cần coin trả phí (gas) của chain. Bạn tự chuẩn bị coin này; hệ thống không cấp. Sau khi đổi ví, cần cấp quyền USDT lại cho các contract.</div></div>`;
+}
+
+function viewNotFound(){ navbar('Không tìm thấy', '/invest'); return large('Không tìm thấy') + '<p>Trang không tồn tại.</p>'; }
+
+/* ---------- Vai trò ----------
+   Ứng dụng thật nhận diện vai trò tự động từ dữ liệu on-chain của ví đã kết nối (đặc tả mục 8.5):
+   có position → người gửi; có hạng → thành viên hoa hồng; có khoản vay → người vay; sở hữu node → người giới thiệu;
+   node có cờ isManager → quản lý; có vị thế trong gói nhà đầu tư → nhà đầu tư; nắm share gói vận hành → nhà vận hành;
+   là thành viên NexusMultisig → Council hoặc Ops. Một người có thể có nhiều vai trò.
+   Mockup cho phép chọn từng vai trò để xem giao diện riêng. */
+const N = (to, n, i) => ({to, n, i});
+const COMMON = {h:'Chung', dom:'both', items:[N('/transparency', 'Minh bạch', 'chart'), N('/account', 'Tài khoản', 'person')]};
+const INV_NAV = {h:'Investment', dom:'inv', items:[N('/invest', 'Tiết kiệm', 'savings'), N('/invest/deposit', 'Gửi tiết kiệm', 'plus'), N('/invest/rewards', 'Giới thiệu & thưởng', 'star')]};
+const ROLES = {
+  guest:{g:'Người dùng', n:'Khách', d:'Chưa kết nối ví: xem giới thiệu và số liệu minh bạch', i:'house', c:'var(--gray)', home:'/welcome',
+    nav:[{h:'NEXUS', dom:'both', items:[N('/welcome', 'Giới thiệu', 'house'), N('/transparency', 'Minh bạch', 'chart')]}]},
+  dep0:{g:'Người dùng', n:'Người gửi chưa KYC', d:'Gửi tối đa 1.000 USDT; chưa có hạng, chưa nhận thưởng', i:'savings', c:'var(--inv)', home:'/invest',
+    nav:[INV_NAV, COMMON], extra:[/^\/invest\/p\//]},
+  affiliate:{g:'Người dùng', n:'Người gửi · thành viên hoa hồng', d:'Đã KYC, hạng Bạc: gửi tiết kiệm, đội nhóm, thưởng, ứng trước', i:'star', c:'var(--inv)', home:'/invest',
+    nav:[INV_NAV, COMMON], extra:[/^\/invest\/p\//]},
+  borrower:{g:'Người dùng', n:'Người vay', d:'Khoản vay đang chạy, lịch trả nợ, yêu cầu vay mới', i:'bank', c:'var(--loan)', home:'/loan',
+    nav:[{h:'Loan', dom:'loan', items:[N('/loan', 'Khoản vay', 'bank'), N('/loan/request', 'Vay mới', 'doc')]}, COMMON], extra:[/^\/loan\/l\//]},
+  investor:{g:'Người dùng', n:'Nhà đầu tư Loan', d:'Góp vốn vào gói nhà đầu tư, nhận lãi, yêu cầu rút', i:'coins', c:'var(--loan)', home:'/loan/fund',
+    nav:[{h:'Loan', dom:'loan', items:[N('/loan/fund', 'Góp vốn', 'coins')]}, COMMON]},
+  referrer:{g:'Mạng lưới Loan', n:'Người giới thiệu khoản vay', d:'Chủ node: hạn mức nhánh, xác nhận hồ sơ, điểm theo lãi thực thu', i:'network', c:'var(--loan)', home:'/loan/network',
+    nav:[{h:'Loan', dom:'loan', items:[N('/loan/network', 'Mạng lưới', 'network')]}, COMMON]},
+  manager:{g:'Mạng lưới Loan', n:'Quản lý khoản vay', d:'Duyệt và giải ngân trong cây con, xác nhận giải ngân từng đợt', i:'shield', c:'var(--loan)', home:'/loan/manage',
+    nav:[{h:'Loan', dom:'loan', items:[N('/loan/manage', 'Duyệt & giải ngân', 'shield'), N('/loan/network', 'Mạng lưới', 'network')]}, COMMON]},
+  operator:{g:'Quản trị & vận hành', n:'Nhà vận hành Loan', d:'Vốn điều lệ, an toàn vốn, dự phòng, giới hạn tập trung', i:'building', c:'var(--loan)', home:'/operator',
+    nav:[{h:'Loan', dom:'loan', items:[N('/operator', 'Vốn & rủi ro', 'building')]}, {h:'Quản trị', dom:'both', items:[N('/gov', 'Biểu quyết', 'vote')]}, COMMON], extra:[/^\/gov\/(inv|loan|ops)\/\d+$/]},
+  ops:{g:'Quản trị & vận hành', n:'Nhóm vận hành (Ops)', d:'Duyệt KYC, cấp hạn mức, ưu đãi phí, cơ cấu nợ, whitelist (2 phiếu)', i:'key', c:'var(--orange)', home:'/ops',
+    nav:[{h:'Vận hành', dom:'both', items:[N('/ops', 'Bàn vận hành', 'key'), N('/gov', 'Đề xuất', 'vote')]}, COMMON], extra:[/^\/gov\/(inv|loan|ops)\/\d+$/]},
+  council:{g:'Quản trị & vận hành', n:'Thành viên hội đồng', d:'Biểu quyết, tạo đề xuất, quỹ Investment, vốn Loan, khẩn cấp', i:'vote', c:'var(--blue)', home:'/gov',
+    nav:[{h:'Quản trị', dom:'both', items:[N('/gov', 'Biểu quyết', 'vote'), N('/gov/new', 'Tạo đề xuất', 'plus'), N('/emergency', 'Khẩn cấp', 'warn')]},
+         {h:'Investment', dom:'inv', items:[N('/treasury', 'Quỹ & phân bổ', 'savings')]}, {h:'Loan', dom:'loan', items:[N('/operator', 'Vốn & rủi ro', 'building')]}, COMMON],
+    extra:[/^\/gov\/(inv|loan|ops)\/\d+$/]}
+};
+const PERSONA = {
+  guest:{name:'', kyc:null}, dep0:{name:'Trần Bình', kyc:0, acc:10588}, affiliate:{name:'Nguyễn An', kyc:2, acc:10234},
+  borrower:{name:'Lê Minh', kyc:2, acc:10377}, investor:{name:'Hoàng Lan', kyc:2, acc:10412}, referrer:{name:'Trần Minh', kyc:2, acc:10142},
+  manager:{name:'Phạm Quang', kyc:2, acc:10012}, operator:{name:'NEXUS Lending (pháp nhân Loan)', kyc:3, acc:10001},
+  ops:{name:'Vận hành viên Z', kyc:2, acc:10003, memberOf:{ops:'Z'}}, council:{name:'Thành viên D', kyc:2, acc:10004, memberOf:{inv:'D', loan:'D'}}
+};
+const MAIN_POS = S.positions, MAIN_RANK = S.rank;
+const DEP0_POS = [{id:'P-2001', term:30, mode:'FLEX', apr:480, P:800, start:'2026-10-01', paid:0}];
+const DEP0_RANK = {r:0, personal:10400, team:0, cyclePts:0, cycleEnd:'2026-10-30', credit:0, debt:0};
+function setRole(r){
+  S.role = r; const p = PERSONA[r];
+  S.me.name = p.name; S.me.kyc = p.kyc; S.me.accountId = p.acc; S.me.memberOf = p.memberOf || {};
+  S.positions = r === 'dep0' ? DEP0_POS : MAIN_POS; S.rank = r === 'dep0' ? DEP0_RANK : MAIN_RANK;
+  if (r === 'dep0') S.dep.amount = 100;
+  document.getElementById('tabbar').innerHTML = '';
+  const home = '#' + ROLES[r].home;
+  if (location.hash === home) rerender(false); else location.hash = home;
+}
+function allowed(path){
+  const R = ROLES[S.role];
+  if (R.nav.some(g => g.items.some(it => it.to === path))) return true;
+  return (R.extra || []).some(rx => rx.test(path));
+}
+
+/* Dữ liệu cho các màn hình theo vai trò */
+const MGR = {node:12, limit:200000, used:95000,
+  queue:[
+    {id:'L-2066', who:'Bùi Tâm', amount:6000, grade:'B', ref:'Node #142', pkg:'Tiêu dùng 6 tháng', ok:true, st:'REFERRER_APPROVED'},
+    {id:'L-2070', who:'Ngô Linh', amount:9000, grade:'C', ref:'Node #157', pkg:'Tiêu dùng 12 tháng', ok:false, why:'Nhánh Node #157 đã dùng 58.000 / 60.000 tháng này', st:'REFERRER_APPROVED'}],
+  tranches:[{loan:'L-1990', who:'Đặng Khoa', k:2, of:3, amount:10000, notBefore:'2026-10-10', done:false}]};
+const OPS = {
+  kyc:[{acc:10601, name:'Đỗ Hà', lv:1, docs:'CCCD', sel:true}, {acc:10602, name:'Lý Phong', lv:2, docs:'CCCD + sao kê', sel:true}, {acc:10603, name:'Mai Chi', lv:1, docs:'Hộ chiếu', sel:true}, {acc:10604, name:'Tô Vũ', lv:2, docs:'CCCD + hợp đồng lao động', sel:false}],
+  credit:[{acc:10234, name:'Nguyễn An', what:'Hạn mức ứng thưởng', ask:'10 USDT, 6 tháng'}, {acc:10377, name:'Lê Minh', what:'Nâng giới hạn vay', ask:'2 khoản, tổng dư nợ ≤ 15.000'}],
+  restruct:[{loan:'L-1984', who:'Vũ Thảo', late:22, ask:'Giãn từ 6 lên 9 kỳ (tăng 50%)'}],
+  wl:[{name:'Hoàng Lan', acc:10412, quota:50000, used:30000}, {name:'InvestmentVault (adapter)', acc:10002, quota:1000000, used:690000}]
+};
+S.opsTab = 'kyc';
+const PAUSE = [['DEPOSIT', 'Gửi tiết kiệm', false], ['WITHDRAW_PRINCIPAL', 'Rút gốc', false], ['CLAIM_INTEREST', 'Nhận lãi', false], ['CLAIM_REWARD', 'Nhận thưởng', false], ['REQUEST_ADVANCE', 'Ứng thưởng', true], ['BORROW', 'Vay mới', false], ['REFER', 'Giới thiệu người mới', false]];
+const TEMPLATES = [
+  {k:'inv', n:'Đổi lãi gói tiết kiệm', tier:'NORMAL', f:'Lãi mới (bps)', def:650, fn:v => `InvestmentVault.setPackageApr(term = 180, mode = AT_MATURITY, aprBps = ${v})`, h:v => 'Lãi gói 180 ngày Cuối kỳ: 7% → ' + pct(v), t:v => 'Đổi lãi gói 180 ngày Cuối kỳ thành ' + pct(v)},
+  {k:'inv', n:'Góp vốn vào Loan', tier:'NORMAL', f:'Số tiền (USDT)', def:50000, fn:v => `LoanInvestmentAdapter.invest(amount = ${fmt(v)})`, h:v => 'Đã góp vào Loan: 690.000 → ' + fmt(690000 + v), t:v => 'Góp thêm ' + fmt(v) + ' vào gói nhà đầu tư của Loan'},
+  {k:'inv', n:'Rút vốn từ Loan', tier:'NORMAL', f:'Số tiền (USDT)', def:100000, fn:v => `LoanInvestmentAdapter.requestRedeem(amount = ${fmt(v)})`, h:v => 'Yêu cầu Loan trả lại ' + fmt(v) + ' sau 30 ngày báo trước', t:v => 'Rút ' + fmt(v) + ' từ Loan về quỹ'},
+  {k:'inv', n:'Đăng ký kênh đầu tư mới', tier:'CHARTER', f:'Hạn mức (bps)', def:1000, fn:v => `InvestmentVault.registerStrategy(addr = 0x…, capBps = ${v})`, h:v => 'Thêm kênh đầu tư, hạn mức ' + pct(v) + ' tiền gửi', t:v => 'Đăng ký kênh đầu tư mới, hạn mức ' + pct(v)},
+  {k:'loan', n:'Đổi lãi gói vay hạng B', tier:'NORMAL', f:'Lãi mới (bps)', def:2100, fn:v => `LoanManager.setGradeApr(grade = B, aprBps = ${v})`, h:v => 'Lãi hạng B: 20% → ' + pct(v), t:v => 'Đổi lãi vay hạng B thành ' + pct(v)},
+  {k:'loan', n:'Đổi lãi gói nhà đầu tư', tier:'CRITICAL', f:'Lãi mới (bps)', def:1150, fn:v => `LoanPool.setInvestorPackageApr(packageId = 1, aprBps = ${v})`, h:v => 'Gói nhà đầu tư (vị thế mới): 12% → ' + pct(v), t:v => 'Đổi lãi gói nhà đầu tư thành ' + pct(v)},
+  {k:'loan', n:'Rút vốn điều lệ', tier:'CRITICAL', f:'Số tiền (USDT)', def:10000, fn:v => `LoanPool.withdrawOperatorCapital(amount = ${fmt(v)})`, h:v => 'Vốn điều lệ: 100.000 → ' + fmt(100000 - v), t:v => 'Rút ' + fmt(v) + ' vốn điều lệ'}
+];
+S.newp = {k:'inv', t:0, v:TEMPLATES[0].def, desc:''};
+
+/* ---------- Màn hình: Khách ---------- */
+function viewWelcome(){
+  navbar('NEXUS');
+  return large('NEXUS') +
+  `<p style="color:var(--label2);font-size:17px;margin:0 4px">Hai hệ thống độc lập trên cùng một blockchain. Bạn không cần tài khoản để xem số liệu minh bạch.</p>
+  <div class="grid2" style="margin-top:12px">
+    <section class="hero"><span class="domain d-inv">Investment</span><h2 style="margin:12px 0 6px;font-size:22px">Gửi tiết kiệm</h2>
+      <div class="s" style="color:var(--label2);font-size:15px">Kỳ hạn 30–365 ngày, lãi 5–8%/năm. Giới thiệu bạn bè để lên hạng và nhận thưởng tháng.</div></section>
+    <section class="hero"><span class="domain d-loan">Loan</span><h2 style="margin:12px 0 6px;font-size:22px">Vay tín chấp</h2>
+      <div class="s" style="color:var(--label2);font-size:15px">Vay 3–12 tháng qua người giới thiệu trong mạng lưới, lãi theo hạng tín dụng.</div></section>
+  </div>
+  <div class="btns"><button class="btn fill" data-act="connect">${ic('key')}Kết nối ví</button><a class="btn tint" href="#/transparency">${ic('chart')}Xem minh bạch</a></div>
+  <div class="callout info">${ic('info')}<div>Mỗi giao dịch cần coin trả phí (gas) của chain; bạn tự chuẩn bị coin này. Chưa xác minh danh tính vẫn gửi được tối đa 1.000 USDT.</div></div>`;
+}
+
+/* ---------- Màn hình: Quản lý khoản vay ---------- */
+function viewManage(){
+  navbar('Duyệt & giải ngân');
+  return large('Duyệt & giải ngân', 'loan') +
+  `<section class="hero"><div class="lbl">Node #${MGR.node} · quản lý · hạn mức cây con tháng 10/2026 (UTC)</div>
+    <div class="big num" style="font-size:28px">${fmt(MGR.used)} <span class="unit">/ ${fmt(MGR.limit)} USDT</span></div>
+    <div class="bar"><i style="width:${MGR.used / MGR.limit * 100}%;background:var(--loan)"></i></div></section>` +
+  secH('Chờ quản lý duyệt') +
+  `<div class="group">${MGR.queue.map(q => `<div class="row"><div class="grow"><div class="t">${esc(q.who)} · <span class="num">${fmt(q.amount)}</span> USDT · hạng ${q.grade}</div>
+    <div class="s">${q.id} · ${q.pkg} · giới thiệu bởi ${q.ref}</div>
+    ${q.st === 'REFERRER_APPROVED' ? (q.ok ? '<div class="s" style="color:var(--green)">✓ Hạn mức nhánh · ✓ Tiền mặt LoanPool · ✓ Giới hạn một khách</div>' : `<div class="s" style="color:var(--red)">✗ ${esc(q.why)}</div>`) : ''}</div>
+    ${q.st === 'REFERRER_APPROVED' ? `<button class="btn sm red" data-act="mgrDeny" data-id="${q.id}">Từ chối</button><button class="btn sm fill" data-act="mgrApprove" data-id="${q.id}" ${q.ok ? '' : 'disabled'}>Duyệt & giải ngân</button>`
+      : q.st === 'ACTIVE' ? '<span class="pill p-green">Đã giải ngân</span>' : '<span class="pill p-gray">Đã từ chối</span>'}</div>`).join('')}</div>` +
+  secF('Duyệt là giải ngân ngay và trừ hạn mức của mọi node từ người giới thiệu lên gốc. Bạn không duyệt được khoản mà mình là bên vay hoặc người giới thiệu.') +
+  secH('Giải ngân từng đợt chờ xác nhận tiến độ') +
+  `<div class="group">${MGR.tranches.map(t => `<div class="row"><div class="grow"><div class="t">${t.loan} · ${esc(t.who)} · đợt ${t.k}/${t.of}</div><div class="s num">${fmt(t.amount)} USDT · từ ${fdate(D(t.notBefore))} · khoản vay không quá hạn</div></div>
+    ${t.done ? '<span class="pill p-green">Đã giải ngân</span>' : `<button class="btn sm fill" data-act="tranche" data-id="${t.loan}">Xác nhận & giải ngân</button>`}</div>`).join('')}</div>` +
+  secF('Xác nhận kèm hash biên bản hoặc chứng từ tiến độ (đặc tả mục 5.1.3).');
+}
+
+/* ---------- Màn hình: Nhà vận hành ---------- */
+function viewOperator(){
+  navbar('Vốn & rủi ro');
+  const buckets = [['0–9 ngày', 742000, 0], ['10–29 ngày', 38000, 5], ['30–59 ngày', 12000, 25], ['60–89 ngày', 6000, 50], ['≥ 90 ngày (nợ xấu)', 12000, 100]];
+  const spec = buckets.reduce((a, b) => a + b[1] * b[2] / 100, 0), gen = (810000 - 12000) * 0.0075;
+  const lim = [['Một khách lớn nhất', '9,5% vốn điều lệ', '≤ 10%', true], ['Nhánh lớn nhất', '18% dư nợ', '≤ 20%', true], ['Kỳ hạn trên 6 tháng', '41% dư nợ', '≤ 50%', true], ['Gói lớn nhất', '52% dư nợ', '≤ 40%', false], ['Tiền mặt LoanPool', '11% tổng vốn', '≥ 10%', true]];
+  const isOp = S.role === 'operator';
+  return large('Vốn & rủi ro', 'loan') +
+  `<section class="hero"><div class="lbl">Hệ số an toàn vốn (CAR)</div>
+    <div class="big num">11,2%<span class="unit">tối thiểu 10% · đệm 12,5%</span></div>
+    <div class="bar" style="height:10px"><i style="width:${11.2 / 20 * 100}%;background:var(--orange)"></i></div>
+    <div class="stats"><div class="stat"><div class="k">Vốn điều lệ</div><div class="n num">100.000</div></div><div class="stat"><div class="k">Lời từ đầu năm</div><div class="n num" style="color:var(--green)">+48.300</div></div><div class="stat"><div class="k">Vốn nhà đầu tư</div><div class="n num">800.000</div></div></div>
+    <div class="callout warn" style="background:color-mix(in srgb,var(--orange) 12%,transparent)">${ic('warn')}<div>CAR đang trong vùng đệm (10%–12,5%): vẫn cho vay được, nhưng chưa được rút vốn điều lệ hay lợi nhuận.</div></div>
+    <div class="btns">${isOp ? `<button class="btn fill" data-act="opAdd">${ic('plus')}Góp thêm vốn điều lệ</button><button class="btn tint" disabled>Đề xuất rút lợi nhuận</button>` : `<a class="btn tint" href="#/gov/new">Tạo đề xuất cho Council Loan</a>`}</div></section>` +
+  secH('Phân loại nợ và dự phòng') +
+  `<div class="group tbl"><table><thead><tr><th>Quá hạn</th><th class="r">Dư nợ</th><th class="r">Tỷ lệ</th><th class="r">Dự phòng</th></tr></thead><tbody>
+    ${buckets.map(b => `<tr><td>${b[0]}</td><td class="r num">${fmt(b[1])}</td><td class="r">${b[2]}%</td><td class="r num">${fmt(b[1] * b[2] / 100)}</td></tr>`).join('')}
+    <tr><td>Dự phòng chung 0,75%</td><td class="r num">${fmt(810000 - 12000)}</td><td class="r">0,75%</td><td class="r num">${fmt(gen)}</td></tr>
+    <tr><td><b>Tổng</b></td><td class="r num"><b>810.000</b></td><td></td><td class="r num"><b>${fmt(spec + gen)}</b></td></tr></tbody></table></div>` +
+  secF('Tỷ lệ nợ xấu 1,5%. Dự phòng cập nhật tự động theo số ngày quá hạn, không chờ biểu quyết.') +
+  secH('Giới hạn danh mục') +
+  `<div class="group">${lim.map(l => row({t:l[0], s:'Giới hạn ' + l[2], v:`${l[1]} ${l[3] ? '<span class="pill p-green">Đạt</span>' : '<span class="pill p-red">Vượt</span>'}`})).join('')}</div>` +
+  secF('Gói vượt giới hạn thì không giải ngân thêm khoản mới của gói đó cho tới khi tỷ trọng giảm.') +
+  secH('Nhà đầu tư') +
+  `<div class="group">${row({t:'Hàng chờ rút', v:'0'})}${row({t:'Chỉ số vốn nhà đầu tư', v:'1,0000'})}${row({t:'Lãi phải trả tháng này', v:fmt(800000 * 0.12 * 30 / 365, 2)})}</div>`;
+}
+
+/* ---------- Màn hình: Quỹ Investment (Council Investment) ---------- */
+function viewTreasury(){
+  navbar('Quỹ & phân bổ');
+  const alloc = [['Tiền mặt', 31, '20%', '25%', '–', 'var(--inv)'], ['Kênh Loan', 69, '0%', '70%', '80%', 'var(--loan)'], ['Kênh khác', 0, '0%', '0%', '10%', 'var(--gray)']];
+  const inc = 690000 * 0.12 * 30 / 365, ins = inc * 0.1, owe = 1000000 * 0.07 * 30 / 365, rest = inc - ins - owe;
+  return large('Quỹ & phân bổ', 'inv') +
+  secH('Phân bổ tài sản (tổng tiền gửi 1.000.000)') +
+  `<div class="group">${alloc.map(a => `<div class="row"><div class="grow"><div class="t">${a[0]}</div><div class="s">Tối thiểu ${a[2]} · mục tiêu ${a[3]} · tối đa ${a[4]}</div><div class="bar"><i style="width:${a[1]}%;background:${a[5]}"></i></div></div><div class="v num">${a[1]}%</div></div>`).join('')}</div>` +
+  secF('Tiền mặt cao hơn mục tiêu 6 điểm: có thể đề xuất góp thêm khoảng 60.000 vào Loan.') +
+  secH('Kênh đầu tư') +
+  `<div class="group">${row({icon:tile('coins', 'var(--loan)'), t:'LoanInvestmentAdapter v1', s:'Gói nhà đầu tư 12% · hạn mức 80% · ACTIVE', v:'690.000'})}
+    <div class="tbl"><table><thead><tr><th>Vị thế</th><th class="r">Số tiền</th><th class="r">Hết khóa</th></tr></thead><tbody>
+    <tr><td>#1</td><td class="r num">200.000</td><td class="r">01/11/2026</td></tr><tr><td>#2</td><td class="r num">200.000</td><td class="r">01/12/2026</td></tr><tr><td>#3</td><td class="r num">290.000</td><td class="r">01/01/2027</td></tr></tbody></table></div></div>` +
+  secF('Góp rải theo tháng để luôn có vị thế sắp hết khóa (đặc tả C21).') +
+  secH('Thu nhập tháng và thứ tự phân phối') +
+  `<div class="group">${row({t:'Lãi nhận từ Loan', v:fmt(inc, 2)})}${row({t:'1. Quỹ bảo hiểm 10%', s:'Đang 1,4% / mục tiêu 2% tiền gửi', v:'−' + fmt(ins, 2)})}${row({t:'2. Quỹ lãi trả người gửi', s:'Lãi bình quân 7%', v:'−' + fmt(owe, 2)})}${row({t:'3–4. Quỹ thưởng và lợi nhuận', v:fmt(rest, 2)})}</div>` +
+  `<div class="callout warn">${ic('warn')}<div>Biên còn mỏng vì mới góp 69% vào Loan. Ngưỡng không lỗ ở mức góp này là 12% × 69% × 90% = 7,45%, sát lãi tiền gửi bình quân 7%.</div></div>` +
+  `<div class="btns"><a class="btn fill" href="#/gov/new" data-act="tpl" data-t="1">Đề xuất góp thêm</a><a class="btn tint" href="#/gov/new" data-act="tpl" data-t="2">Đề xuất rút về</a></div>` +
+  secH('Chỉ số') + `<div class="group">${row({t:'Thanh khoản 30 ngày (LCR)', v:'<span class="pill p-green">135%</span>'})}${row({t:'Vốn chủ Investment', s:'Tối thiểu 5% tiền gửi', v:'50.000'})}</div>`;
+}
+
+/* ---------- Màn hình: Khẩn cấp (Council) ---------- */
+function viewEmergency(){
+  navbar('Khẩn cấp');
+  return large('Khẩn cấp', 'both') +
+  `<div class="callout warn">${ic('warn')}<div>Mức khẩn cấp: cần 2/5 phiếu, có hiệu lực ngay, <b>tự hết hạn sau tối đa 7 ngày</b>. Mở lại (unpause) hoặc gia hạn cần 3/5 phiếu và chờ 24 giờ. Các thao tác trả nợ không bao giờ bị tạm dừng.</div></div>` +
+  secH('Tạm dừng theo chức năng') +
+  `<div class="group">${PAUSE.map((p, i) => `<label class="row" style="cursor:pointer"><div class="grow"><div class="t">${p[1]}</div><div class="s" style="font-family:var(--mono);font-size:12px">${p[0]}${p[2] ? ' · đang dừng tới 18/10/2026' : ''}</div></div><input type="checkbox" class="switch" data-input="pause" data-i="${i}" ${p[2] ? 'checked' : ''} aria-label="Tạm dừng ${p[1]}"></label>`).join('')}</div>` +
+  secF('Bật công tắc sẽ tạo đề xuất mức khẩn cấp; chức năng chỉ dừng khi đủ 2 phiếu.') +
+  secH('Chặn tạm thời một tài khoản') +
+  `<div class="group"><label class="field"><input aria-label="Mã tài khoản hoặc địa chỉ ví" placeholder="#10234 hoặc 0x…" style="font-size:20px"></label></div>
+  <div class="btns"><button class="btn red" data-act="freeze">Đề xuất chặn tạm thời (≤ 7 ngày)</button></div>`;
+}
+
+/* ---------- Màn hình: Tạo đề xuất ---------- */
+function viewGovNew(){
+  navbar('Tạo đề xuất', '/gov');
+  const np = S.newp, list = TEMPLATES.map((t, i) => [t, i]).filter(([t]) => t.k === np.k);
+  if (!list.some(([, i]) => i === np.t)){ np.t = list[0][1]; np.v = TEMPLATES[np.t].def; }
+  const t = TEMPLATES[np.t], tr = TIER[t.tier];
+  return large('Tạo đề xuất', 'both') +
+  `<div class="seg" data-key="newk" style="--n:2;--i:${np.k === 'inv' ? 0 : 1}" role="group" aria-label="Hội đồng"><span class="thumb" aria-hidden="true"></span><button type="button" data-act="newk" data-v="inv" aria-pressed="${np.k === 'inv'}">Council Investment</button><button type="button" data-act="newk" data-v="loan" aria-pressed="${np.k === 'loan'}">Council Loan</button></div>` +
+  secH('Loại thao tác') +
+  `<div class="group" role="radiogroup">${list.map(([x, i]) => row({act:'newt', data:`data-v="${i}" role="radio" aria-checked="${np.t === i}"`, t:x.n, s:TIER[x.tier].n + ' · cần ' + TIER[x.tier].need + '/5 · chờ ' + (TIER[x.tier].delay ? TIER[x.tier].delay + ' ngày' : 'không'), check:true})).join('')}</div>` +
+  secH(t.f) +
+  `<div class="group"><label class="field"><input inputmode="decimal" aria-label="${t.f}" value="${fmt(np.v)}" data-input="newv"></label></div>` +
+  secH('Mô tả') +
+  `<div class="group"><label class="field"><textarea aria-label="Mô tả đề xuất" data-input="newdesc" placeholder="Lý do, bối cảnh, ảnh hưởng">${esc(np.desc)}</textarea></label></div>` +
+  secH('Xem trước') +
+  `<div class="group">${row({t:'Tiêu đề', v:esc(t.t(np.v))})}
+    <div class="row"><div class="grow"><div class="t" style="font-family:var(--mono);font-size:13px;word-break:break-all">${esc(t.fn(np.v))}</div><div class="s" style="color:var(--label)">${esc(t.h(np.v))}</div></div><span class="pill p-green">Mô phỏng ✓</span></div>
+    ${row({t:'Mức (contract tự xác định)', v:`${tr.n} · cần ${tr.need}/5 · chờ ${tr.delay ? tr.delay + ' ngày' : 'không'}`})}</div>` +
+  `<div class="btns"><button class="btn fill" data-act="submitProp">Ký và gửi đề xuất</button></div>` +
+  secF('Bạn tự động được tính là một phiếu đồng ý.');
+}
+
+/* ---------- Màn hình: Bàn vận hành (Ops) ---------- */
+function viewOps(){
+  navbar('Bàn vận hành');
+  const tabs = [['kyc', 'KYC'], ['credit', 'Hạn mức'], ['offer', 'Ưu đãi'], ['restruct', 'Cơ cấu nợ'], ['wl', 'Nhà đầu tư']];
+  const ti = tabs.findIndex(t => t[0] === S.opsTab);
+  const pend = S.gov.ops.props.filter(p => p.status === 'PENDING');
+  let body = '';
+  if (S.opsTab === 'kyc'){
+    const n = OPS.kyc.filter(k => k.sel).length;
+    body = secH('Hồ sơ chờ duyệt') + `<div class="group">${OPS.kyc.map((k, i) => `<label class="row" style="cursor:pointer"><div class="grow"><div class="t">#${k.acc} · ${esc(k.name)}</div><div class="s">Đề nghị cấp ${k.lv} · ${esc(k.docs)}</div></div><input type="checkbox" class="switch" data-input="kycSel" data-i="${i}" ${k.sel ? 'checked' : ''} aria-label="Chọn hồ sơ ${esc(k.name)}"></label>`).join('')}</div>` +
+      secF('Đối chiếu giấy tờ off-chain; on-chain chỉ ghi identityHash, không lưu thông tin cá nhân.') +
+      `<div class="btns"><button class="btn fill" data-act="opsPropose" data-what="Duyệt KYC ${n} hồ sơ" ${n ? '' : 'disabled'}>Tạo đề xuất duyệt ${n} hồ sơ</button></div>`;
+  } else if (S.opsTab === 'credit'){
+    body = secH('Yêu cầu hạn mức') + `<div class="group">${OPS.credit.map(c => `<div class="row"><div class="grow"><div class="t">#${c.acc} · ${esc(c.name)}</div><div class="s">${c.what}: ${esc(c.ask)}</div></div><button class="btn sm fill" data-act="opsPropose" data-what="${c.what} cho #${c.acc}">Đề xuất</button></div>`).join('')}</div>` +
+      secF('Hạn mức ứng thưởng không vượt trần do Council Investment đặt (1.000 USDT mỗi người). Kèm hash hồ sơ thẩm định.');
+  } else if (S.opsTab === 'offer'){
+    body = secH('Tạo ưu đãi phí giải ngân') + `<div class="group">${row({t:'Khách hàng', v:'#10377 · Lê Minh'})}${row({t:'Gói', v:'Tiêu dùng 6 tháng (phí 1,5%)'})}${row({t:'Phí ưu đãi', s:'Không thấp hơn sàn 0,3%', v:'0,5%'})}${row({t:'Hiệu lực đến', v:'30/11/2026 · dùng 1 lần'})}</div>` +
+      `<div class="btns"><button class="btn fill" data-act="opsPropose" data-what="Ưu đãi phí 0,5% cho #10377">Tạo đề xuất ưu đãi</button></div>`;
+  } else if (S.opsTab === 'restruct'){
+    body = secH('Yêu cầu cơ cấu lại nợ') + `<div class="group">${OPS.restruct.map(r => `<div class="row"><div class="grow"><div class="t">${r.loan} · ${esc(r.who)}</div><div class="s">Quá hạn ${r.late} ngày · ${esc(r.ask)}</div></div><button class="btn sm fill" data-act="opsPropose" data-what="Cơ cấu lại ${r.loan}">Đề xuất</button></div>`).join('')}</div>` +
+      secF('Tối đa 1 lần mỗi khoản, kéo dài ≤ 50%; giữ nguyên mức dự phòng tới khi trả đúng hạn 3 kỳ liên tiếp. Khoản > 10.000 cần thêm Council Loan.');
+  } else {
+    body = secH('Whitelist gói nhà đầu tư') + `<div class="group">${OPS.wl.map(w => `<div class="row"><div class="grow"><div class="t">${esc(w.name)}</div><div class="s num">#${w.acc} · đã góp ${fmt(w.used)} / quota ${fmt(w.quota)}</div><div class="bar"><i style="width:${w.used / w.quota * 100}%;background:var(--loan)"></i></div></div></div>`).join('')}</div>` +
+      `<div class="btns"><button class="btn fill" data-act="opsPropose" data-what="Thêm nhà đầu tư vào whitelist">${ic('plus')}Thêm nhà đầu tư</button></div>` + secF('Tổng quota không vượt hạn mức của gói do Council Loan đặt.');
+  }
+  return large('Bàn vận hành', 'both') +
+  `<div class="seg" data-key="ops" style="--n:5;--i:${ti}" role="group" aria-label="Loại việc"><span class="thumb" aria-hidden="true"></span>${tabs.map(t => `<button type="button" data-act="opsTab" data-v="${t[0]}" aria-pressed="${S.opsTab === t[0]}">${t[1]}</button>`).join('')}</div>` +
+  body +
+  secH('Đề xuất chờ người thứ hai duyệt') +
+  `<div class="group">${pend.length ? pend.map(p => row({t:'#' + p.id + ' ' + esc(p.title), s:'Đề xuất bởi ' + Object.keys(p.votes)[0] + ' · cần 2 phiếu', href:'/gov/ops/' + p.id})).join('') : row({t:'Không có đề xuất nào đang chờ'})}</div>` +
+  secF('Mọi việc của nhóm vận hành cần 2 người: một người đề xuất, một người khác duyệt. Có hiệu lực ngay khi đủ phiếu.');
+}
+
+function viewNoAccess(){ navbar('Không có quyền'); const R = ROLES[S.role];
+  return large('Không có quyền truy cập') + `<div class="callout warn">${ic('warn')}<div>Vai trò “${R.n}” không dùng màn hình này. Trong ứng dụng thật, quyền được kiểm tra bằng contract; giao diện chỉ ẩn những gì bạn không dùng được.</div></div><div class="btns"><a class="btn fill" href="#${R.home}">Về trang chính của bạn</a><button class="btn tint" data-act="roleSheet">Đổi vai trò</button></div>`; }
+
+function roleSheet(){
+  const groups = [...new Set(Object.values(ROLES).map(r => r.g))];
+  openSheet(`<h2>Xem với vai trò</h2><p class="sub">Ứng dụng thật tự nhận diện vai trò từ dữ liệu on-chain của ví; một người có thể có nhiều vai trò.</p>` +
+    groups.map(g => secH(g) + `<div class="group">${Object.entries(ROLES).filter(([, r]) => r.g === g).map(([k, r]) =>
+      row({icon:tile(r.i, r.c), act:'setRole', data:`data-v="${k}" role="radio" aria-checked="${S.role === k}"`, t:r.n, s:r.d, check:true})).join('')}</div>`).join('') +
+    `<div class="btns"><button class="btn tint" data-act="closeSheet">Đóng</button></div>`);
+}
+
+/* ---------- Sheet & toast ---------- */
+let lastFocus = null;
+function openSheet(html){
+  lastFocus = document.activeElement;
+  const root = document.getElementById('sheet-root');
+  root.innerHTML = `<div class="backdrop" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grabber"></div>${html}</div>`;
+  requestAnimationFrame(() => { root.querySelector('.backdrop').classList.add('on'); const s = root.querySelector('.sheet'); s.classList.add('on'); const f = s.querySelector('button,input'); if (f) f.focus(); });
+}
+function closeSheet(){
+  const root = document.getElementById('sheet-root'); const s = root.querySelector('.sheet'); if (!s) return;
+  s.classList.remove('on'); root.querySelector('.backdrop').classList.remove('on');
+  setTimeout(() => { root.innerHTML = ''; if (lastFocus) lastFocus.focus(); }, 260);
+}
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast'); t.innerHTML = ic('check') + esc(msg); t.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600);
+}
+const signSheet = (title, sub, rowsHtml, act, label, extra = '') => openSheet(
+  `<h2>${title}</h2><p class="sub">${sub}</p><div class="group">${rowsHtml}</div>${extra}
+   <div class="btns"><button class="btn tint" data-act="closeSheet">Hủy</button><button class="btn fill" data-act="${act}">${label}</button></div>
+   <p class="sub" style="margin-top:12px;font-size:13px">Ví của bạn sẽ hiện yêu cầu ký giao dịch. Phí gas trả bằng coin của chain.</p>`);
+
+/* ---------- Liquid Glass: điểm sáng theo con trỏ, khúc xạ ---------- */
+const segPrev = {};
+const GLASS = '.glass,.sidebar-panel,.tabbar,.back,.seg,.btn,.chip,.sheet,.toast,.side a.active';
+const mqMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : {matches:false};
+const mqTransp = window.matchMedia ? window.matchMedia('(prefers-reduced-transparency: reduce)') : {matches:false};
+if (navigator.userAgentData && !mqTransp.matches) document.documentElement.classList.add('refract'); // backdrop-filter: url() hiện chỉ ổn định trên Chromium
+let glassRaf = 0;
+document.addEventListener('pointermove', e => {
+  if (mqMotion.matches || glassRaf) return;
+  const g = e.target.closest && e.target.closest(GLASS); if (!g) return;
+  glassRaf = requestAnimationFrame(() => {
+    glassRaf = 0; const r = g.getBoundingClientRect();
+    g.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+    g.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100 - 40).toFixed(1) + '%');
+  });
+}, {passive:true});
+
+/* ---------- Router ---------- */
+function route(){
+  const path = location.hash.replace(/^#/, '') || ROLES[S.role].home;
+  const parts = path.split('/').filter(Boolean);
+  let html;
+  if (!allowed(path)) html = viewNoAccess();
+  else if (path === '/welcome') html = viewWelcome();
+  else if (path === '/loan/manage') html = viewManage();
+  else if (path === '/operator') html = viewOperator();
+  else if (path === '/treasury') html = viewTreasury();
+  else if (path === '/emergency') html = viewEmergency();
+  else if (path === '/gov/new') html = viewGovNew();
+  else if (path === '/ops') html = viewOps();
+  else if (path === '/invest') html = viewInvest();
+  else if (path === '/invest/deposit') html = viewDeposit();
+  else if (path === '/invest/rewards') html = viewRewards();
+  else if (parts[0] === 'invest' && parts[1] === 'p') html = viewPosition(parts[2]);
+  else if (path === '/loan') html = viewLoan();
+  else if (path === '/loan/request') html = viewLoanRequest();
+  else if (path === '/loan/network') html = viewNetwork();
+  else if (path === '/loan/fund') html = viewFund();
+  else if (parts[0] === 'loan' && parts[1] === 'l') html = viewLoanDetail(parts[2]);
+  else if (path === '/gov') html = viewGov();
+  else if (parts[0] === 'gov' && parts.length === 3) html = viewProposal(parts[1], parts[2]);
+  else if (path === '/transparency') html = viewTransparency();
+  else if (path === '/account') html = viewAccount();
+  else html = viewNotFound();
+  renderChrome(path);
+  document.getElementById('view').innerHTML = html;
+  document.querySelectorAll('.seg[data-key]').forEach(el => { // trượt thấu kính từ vị trí cũ sang vị trí mới
+    const k = el.dataset.key, to = el.style.getPropertyValue('--i'), from = segPrev[k];
+    if (from != null && from !== to){ el.style.setProperty('--i', from); requestAnimationFrame(() => requestAnimationFrame(() => el.style.setProperty('--i', to))); }
+    segPrev[k] = to;
+  });
+  const navPath = '/' + parts.slice(0, 2).join('/');
+  document.title = 'NEXUS · ' + (document.querySelector('.large h1') || {}).textContent;
+  return navPath;
+}
+function rerender(keepScroll = true){ const y = window.scrollY; route(); if (keepScroll) window.scrollTo(0, y); }
+window.addEventListener('hashchange', () => { route(); window.scrollTo(0, 0); document.getElementById('view').focus({preventScroll:true}); });
+
+/* ---------- Sự kiện ---------- */
+const parseNum = s => Number(String(s).replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+
+document.addEventListener('input', e => {
+  const k = e.target.dataset.input; if (!k) return;
+  if (k === 'amount'){ S.dep.amount = parseNum(e.target.value); refreshKeep(e.target); }
+  if (k === 'loanAmount'){ S.req.amount = parseNum(e.target.value); refreshKeep(e.target); }
+  if (k === 'newv'){ S.newp.v = parseNum(e.target.value); const y = window.scrollY; rerender(); window.scrollTo(0, y); const ni = document.querySelector('[data-input="newv"]'); if (ni){ ni.focus(); ni.setSelectionRange(ni.value.length, ni.value.length); } }
+  if (k === 'newdesc'){ S.newp.desc = e.target.value; }
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset.input;
+  if (k === 'agree'){ S.dep.agree = e.target.checked; rerender(); }
+  if (k === 'kycSel'){ OPS.kyc[+e.target.dataset.i].sel = e.target.checked; rerender(); }
+  if (k === 'pause'){
+    const pz = PAUSE[+e.target.dataset.i];
+    e.target.checked = pz[2]; // chỉ đổi khi đề xuất đủ phiếu
+    signSheet((pz[2] ? 'Mở lại: ' : 'Tạm dừng: ') + pz[1], 'Council Investment · ' + (pz[2] ? 'mức Thường (3/5, chờ 24 giờ)' : 'mức Khẩn cấp (2/5, hiệu lực ngay, tối đa 7 ngày)'),
+      row({t:'Hàm', v:`<span style="font-family:var(--mono);font-size:13px">ComplianceGuard.${pz[2] ? 'unpause' : 'pause'}(${pz[0]})</span>`}) + (pz[0] === 'WITHDRAW_PRINCIPAL' && !pz[2] ? row({t:'Lưu ý', s:'Dừng rút gốc ảnh hưởng mọi người gửi; chỉ dùng khi có sự cố nghiêm trọng'}) : ''),
+      'propDone', 'Ký và gửi đề xuất');
+  }
+});
+function refreshKeep(input){ // giữ con trỏ khi gõ số tiền
+  const sel = input.dataset.input, pos = input.value.length;
+  rerender();
+  const ni = document.querySelector(`[data-input="${sel}"]`);
+  if (ni){ ni.focus(); const raw = sel === 'amount' ? S.dep.amount : S.req.amount; ni.value = raw ? fmt(raw) : ''; ni.setSelectionRange(ni.value.length, ni.value.length); }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, id = el.dataset.id;
+  switch (a){
+    case 'back': location.hash = '#' + el.dataset.to; break;
+    case 'closeSheet': closeSheet(); break;
+    case 'roleSheet': e.preventDefault(); roleSheet(); break;
+    case 'setRole': closeSheet(); setTimeout(() => { setRole(el.dataset.v); toast('Đang xem: ' + ROLES[el.dataset.v].n); }, 200); break;
+    case 'connect': openSheet(`<h2>Kết nối ví</h2><p class="sub">Dùng ví trình duyệt hỗ trợ chuẩn EIP-1193. Sau khi kết nối, giao diện hiện theo vai trò của ví.</p><div class="group">${['dep0', 'affiliate', 'borrower', 'investor'].map(k => row({icon:tile(ROLES[k].i, ROLES[k].c), act:'setRole', data:`data-v="${k}"`, t:'Thử với ví: ' + ROLES[k].n, s:ROLES[k].d, chev:true})).join('')}</div><div class="btns"><button class="btn tint" data-act="closeSheet">Đóng</button></div>`); break;
+    case 'kycStart': openSheet(`<h2>Xác minh danh tính</h2><p class="sub">Nộp giấy tờ cho nhóm vận hành. Hệ thống chỉ ghi mã băm danh tính lên blockchain, không lưu thông tin cá nhân.</p><div class="group">${row({t:'Cấp 1 · Cơ bản', s:'Giấy tờ tùy thân · gửi tối đa 50.000'})}${row({t:'Cấp 2 · Đầy đủ', s:'Thêm xác minh địa chỉ, nguồn tiền · gửi tối đa 500.000, được vay'})}</div><div class="btns"><button class="btn tint" data-act="closeSheet">Để sau</button><button class="btn fill" data-act="kycSent">Gửi yêu cầu</button></div>`); break;
+    case 'kycSent': closeSheet(); toast('Đã gửi yêu cầu xác minh'); break;
+    case 'mgrApprove': case 'mgrDeny': { const q = MGR.queue.find(x => x.id === id); q.st = a === 'mgrApprove' ? 'ACTIVE' : 'REJECTED'; if (a === 'mgrApprove') MGR.used += q.amount; toast(a === 'mgrApprove' ? 'Đã giải ngân ' + fmt(q.amount) + ' cho ' + q.who : 'Đã từ chối ' + id); rerender(); break; }
+    case 'tranche': { MGR.tranches.find(x => x.loan === id).done = true; toast('Đã giải ngân đợt 2 của ' + id); rerender(); break; }
+    case 'opAdd': signSheet('Góp thêm vốn điều lệ', 'Gói vận hành · Loan', row({t:'Sau khi góp 50.000', s:'Vốn điều lệ 150.000 · CAR ≈ 16,8% · ra khỏi vùng đệm'}) + row({t:'Chịu lỗ', s:'Vốn điều lệ chịu lỗ trước nhà đầu tư'}), 'closeSheet', 'Ký và góp'); break;
+    case 'tpl': S.newp.k = 'inv'; S.newp.t = +el.dataset.t; S.newp.v = TEMPLATES[S.newp.t].def; break;
+    case 'newk': S.newp.k = el.dataset.v; rerender(); break;
+    case 'newt': S.newp.t = +el.dataset.v; S.newp.v = TEMPLATES[S.newp.t].def; rerender(); break;
+    case 'submitProp': {
+      const np = S.newp, t = TEMPLATES[np.t], g = S.gov[np.k], me = S.me.memberOf[np.k];
+      const nid = Math.max(...Object.values(S.gov).flatMap(x => x.props.map(y => y.id))) + 1;
+      g.props.unshift({id:nid, title:t.t(np.v), tier:t.tier, status:'PENDING', created:'2026-10-14', desc:np.desc || '(không có mô tả)', actions:[{fn:t.fn(np.v), human:t.h(np.v), sim:true}], votes:{[me]:['APPROVE', 'Đề xuất']}});
+      S.govTab = np.k; np.desc = ''; toast('Đã gửi đề xuất #' + nid); location.hash = '#/gov/' + np.k + '/' + nid; break; }
+    case 'propDone': closeSheet(); toast('Đã gửi đề xuất, chờ đủ phiếu'); break;
+    case 'freeze': toast('Đã gửi đề xuất chặn tạm thời'); break;
+    case 'opsTab': S.opsTab = el.dataset.v; rerender(); break;
+    case 'opsPropose': {
+      const g = S.gov.ops, nid = Math.max(...Object.values(S.gov).flatMap(x => x.props.map(y => y.id))) + 1;
+      g.props.unshift({id:nid, title:el.dataset.what, tier:'OPS', status:'PENDING', created:'2026-10-14', desc:'Tạo từ bàn vận hành.', actions:[{fn:'(lời gọi tương ứng)', human:el.dataset.what, sim:true}], votes:{[S.me.memberOf.ops]:['APPROVE', 'Đề xuất']}});
+      toast('Đã tạo đề xuất #' + nid + ', chờ người thứ hai duyệt'); rerender(); break; }
+    case 'term': S.dep.term = +el.dataset.v; rerender(); break;
+    case 'mode': S.dep.mode = el.dataset.v; rerender(); break;
+    case 'amtChip': S.dep.amount = +el.dataset.v; rerender(); break;
+    case 'reviewDeposit': {
+      const d = S.dep, r = RATES[d.term][d.mode];
+      signSheet('Xác nhận gửi tiết kiệm', 'Investment', [
+        row({t:'Số tiền', v:fmt(d.amount) + ' USDT'}), row({t:'Kỳ hạn', v:d.term + ' ngày · ' + MODES[d.mode].n}),
+        row({t:'Lãi suất', v:pct(r)}), row({t:'Lãi dự kiến', v:fmt(d.amount * r * d.term / (1e4 * 365), 2) + ' USDT'}),
+        row({t:'Rút trước hạn', s:'Sau tối thiểu 7 ngày; phạt 2% gốc, mất lãi và trừ lại điểm KPI'})].join(''),
+        'confirmDeposit', 'Ký và gửi',
+        `<div class="callout warn">${ic('warn')}<div>Tiền gửi được Investment đầu tư một phần vào Loan. Nếu Loan lỗ vượt các lớp bảo vệ (vốn điều lệ của Loan, quỹ bảo hiểm Investment), tiền gửi có thể bị ảnh hưởng.</div></div>`);
+      break; }
+    case 'confirmDeposit': {
+      const d = S.dep, nid = 'P-' + (1200 + S.positions.length);
+      S.positions.unshift({id:nid, term:d.term, mode:d.mode, apr:RATES[d.term][d.mode], P:d.amount, start:'2026-10-14', paid:d.mode === 'UP' ? d.amount * RATES[d.term].UP * d.term / (1e4 * 365) : 0});
+      S.dep.agree = false; closeSheet(); toast('Đã gửi ' + fmt(d.amount) + ' USDT'); location.hash = '#/invest'; break; }
+    case 'claim': case 'claimAll': {
+      let sum = 0; S.positions.forEach(p => { if (a === 'claim' && p.id !== id) return; const i = posInfo(p); if (i.claimable >= (i.matured ? 0.01 : (p.mode === 'FLEX' ? 10 : 0.01))){ sum += i.claimable; p.paid += i.claimable; } });
+      toast(sum ? 'Đã nhận ' + fmt(sum, 2) + ' USDT lãi' : 'Chưa có lãi để nhận'); rerender(); break; }
+    case 'early': {
+      const p = S.positions.find(x => x.id === id), q = earlyQuote(p);
+      signSheet('Rút trước hạn', p.id + ' · Investment', [
+        row({t:'Gốc', v:fmt(p.P)}), row({t:'Phạt 2%', v:'−' + fmt(q.penalty, 2)}),
+        q.clawback ? row({t:'Trừ lại lãi đã nhận', v:'−' + fmt(q.clawback, 2)}) : '',
+        row({t:'Nhận về', v:`<b style="color:var(--label)">${fmt(q.out, 2)} USDT</b>`})].join(''),
+        'confirmEarly', 'Rút trước hạn',
+        `<div class="callout warn">${ic('warn')}<div>Toàn bộ điểm KPI của khoản này bị trừ lại, ở cả bạn và tuyến trên. Nếu điểm xuống dưới ngưỡng, hạng sẽ tự hạ.</div></div><input type="hidden" id="earlyId" value="${p.id}">`);
+      break; }
+    case 'confirmEarly': case 'withdraw': {
+      const pid = a === 'withdraw' ? id : document.getElementById('earlyId').value;
+      S.positions = S.positions.filter(x => x.id !== pid); closeSheet(); toast('Đã rút ' + pid); location.hash = '#/invest'; break; }
+    case 'advance': {
+      const cur = RANK_TERMS[S.rank.r], prog = Math.min(1, S.rank.cyclePts / cur.req), adv = Math.max(0, Math.min(cur.rw * 0.5 * prog, S.rank.credit) - S.rank.debt);
+      signSheet('Ứng trước thưởng', 'Investment', [row({t:'Số tiền ứng', v:fmt(adv, 2) + ' USDT'}), row({t:'Trả nợ', s:'Tự trừ vào thưởng chu kỳ sau; nếu rút gốc, nợ được trừ vào tiền rút'}), row({t:'Quá hạn', s:'Khoảng ngày 90 chưa trả: khóa ứng thêm và lên hạng. Ngày 210: nợ xấu'})].join(''), 'confirmAdvance', 'Ký và nhận');
+      break; }
+    case 'confirmAdvance': { const cur = RANK_TERMS[S.rank.r], prog = Math.min(1, S.rank.cyclePts / cur.req); const adv = Math.max(0, Math.min(cur.rw * 0.5 * prog, S.rank.credit) - S.rank.debt); S.rank.debt += adv; closeSheet(); toast('Đã ứng ' + fmt(adv, 2) + ' USDT'); rerender(); break; }
+    case 'copy': {
+      const link = 'https://nexus.app/?ref=' + S.codes[0];
+      if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => toast('Đã sao chép liên kết'), () => toast(link)); else toast(link); break; }
+    case 'buyCode':
+      openSheet(`<h2>Mua mã giới thiệu</h2><p class="sub">Mua qua 2 bước để không bị người khác giành trước: gửi mã đã mã hóa, rồi xác nhận sau ít nhất 1 block.</p>
+        <div class="group"><label class="field"><input aria-label="Mã muốn mua" placeholder="vd: an_nguyen" style="font-size:20px"></label></div>
+        <div class="sec-f">Chữ thường, số và dấu gạch dưới, 3–20 ký tự. Mã thuộc về tài khoản, tự đi theo khi đổi ví.</div>
+        <div class="btns"><button class="btn tint" data-act="closeSheet">Hủy</button><button class="btn fill" data-act="buyDone">Gửi bước 1</button></div>`); break;
+    case 'buyDone': closeSheet(); toast('Đã gửi bước 1, xác nhận sau 1 block'); break;
+    case 'repay': {
+      const L = S.loan, r = loanSchedule(L.P, L.apr, L.months)[L.paidK];
+      signSheet('Trả kỳ ' + (L.paidK + 1), L.id + ' · Loan', [row({t:'Gốc', v:fmt(r.pr, 2)}), row({t:'Lãi', v:fmt(r.it, 2)}), row({t:'Tổng', v:`<b style="color:var(--label)">${fmt(r.pr + r.it, 2)} USDT</b>`})].join(''), 'confirmRepay', 'Ký và trả'); break; }
+    case 'confirmRepay': S.loan.paidK = Math.min(S.loan.months, S.loan.paidK + 1); closeSheet(); toast('Đã trả kỳ ' + S.loan.paidK); rerender(); break;
+    case 'pkg': S.req.pkg = +el.dataset.v; rerender(); break;
+    case 'reviewLoan': {
+      const pk = S.pkgs[S.req.pkg], fee = S.offer.pkg === S.req.pkg ? S.offer.fee : pk.fee;
+      signSheet('Gửi yêu cầu vay', 'Loan', [row({t:'Gói', v:pk.n}), row({t:'Số tiền', v:fmt(S.req.amount) + ' USDT'}), row({t:'Nhận về', v:fmt(S.req.amount * (1 - fee / 1e4), 2) + ' USDT'}),
+        row({icon:tile('person', 'var(--loan)'), t:'1. Bạn gửi yêu cầu', s:'Ngay bây giờ'}), row({icon:tile('network', 'var(--orange)'), t:'2. Người giới thiệu xác nhận', s:'Trong 7 ngày'}), row({icon:tile('bank', 'var(--green)'), t:'3. Quản lý duyệt và giải ngân', s:'Hạn mức nhánh được trừ lúc này'})].join(''), 'confirmLoan', 'Ký và gửi'); break; }
+    case 'confirmLoan': closeSheet(); toast('Đã gửi yêu cầu vay'); location.hash = '#/loan'; break;
+    case 'refApprove': case 'refDeny': { const x = S.approvals.find(v => v.id === id); x.st = a === 'refApprove' ? 'REFERRER_APPROVED' : 'REJECTED'; toast(a === 'refApprove' ? 'Đã xác nhận ' + id : 'Đã từ chối ' + id); rerender(); break; }
+    case 'fundReq': { const x = S.fund.pos.find(v => v.id === id); x.req = '2026-10-14'; toast('Đã yêu cầu rút, nhận từ ' + fdate(addDays(TODAY, 30))); rerender(); break; }
+    case 'fundAdd': signSheet('Góp thêm vốn', 'Gói nhà đầu tư · Loan', [row({t:'Quota còn lại', v:fmt(S.fund.quota - S.fund.pos.reduce((s, p) => s + p.amount, 0)) + ' USDT'}), row({t:'Lãi', v:'12%/năm, trả hằng tháng'}), row({t:'Khóa', s:'90 ngày từ lúc góp; rút cần báo trước 30 ngày'})].join(''), 'closeSheet', 'Ký và góp'); break;
+    case 'fundClaim': toast('Đã nhận ' + fmt(30000 * 0.12 * 30 / 365, 2) + ' USDT lãi tháng'); break;
+    case 'govTab': S.govTab = el.dataset.v; rerender(); break;
+    case 'vote': {
+      const g = S.gov[el.dataset.k], p = g.props.find(x => x.id === +el.dataset.id), v = el.dataset.v;
+      p.votes[S.me.memberOf[el.dataset.k]] = [v, ''];
+      const t = tally(p, g.members), need = TIER[p.tier].need;
+      if (p.status === 'PENDING' && t.a >= need){ p.status = 'QUEUED'; p.eta = addDays(TODAY, TIER[p.tier].delay).toISOString().slice(0, 10); }
+      else if (p.status === 'QUEUED' && t.a < need) p.status = 'CANCELLED';
+      else if (p.status === 'PENDING' && t.d > g.members.length - need) p.status = 'REJECTED';
+      toast(v === 'APPROVE' ? 'Đã đồng ý' : 'Đã từ chối'); rerender(); break; }
+    case 'exec': { const g = S.gov[el.dataset.k], p = g.props.find(x => x.id === +el.dataset.id); p.status = 'EXECUTED'; toast('Đã thực thi #' + p.id); rerender(); break; }
+    case 'migrate': openSheet(`<h2>Chuyển sang ví mới</h2><p class="sub">Ví mới phải chưa từng dùng trong NEXUS.</p><div class="group">${row({t:'1. Ví cũ đề xuất ví mới'})}${row({t:'2. Ví mới xác nhận'})}${row({t:'3. Sau 48 giờ, ai cũng thực thi được', s:'Trong 48 giờ, ví cũ hoặc hội đồng có thể hủy'})}</div><div class="btns"><button class="btn tint" data-act="closeSheet">Đóng</button></div>`); break;
+    case 'lost': openSheet(`<h2>Báo mất ví</h2><p class="sub">Chỉ áp dụng cho tài khoản đã xác minh danh tính.</p><div class="group">${row({t:'1. Ví mới gửi yêu cầu khôi phục'})}${row({t:'2. Xác minh danh tính với nhóm vận hành', s:'Ví cũ bị khóa tạm thời ngay'})}${row({t:'3. Hội đồng thực thi sau 48 giờ', s:'Ví cũ phản đối thì chuyển sang xem xét lại'})}</div><div class="btns"><button class="btn tint" data-act="closeSheet">Đóng</button></div>`); break;
+  }
+});
+
+route();
+})();
+</script>
+
+</body></html>
