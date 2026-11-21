@@ -1,0 +1,2939 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathKid 4 - Học Toán Tiếng Anh Lớp 4 Thông Minh</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Nunito', 'ui-rounded', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+      background: linear-gradient(135deg, #EEF2FF 0%, #F0F9FF 45%, #FEFCE8 100%);
+      min-height: 100vh;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.38s ease-in-out;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.94); opacity: 0.6; }
+      60% { transform: scale(1.03); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: pop 0.28s ease-out;
+    }
+
+    @keyframes flipReveal {
+      0% { transform: rotateX(60deg); opacity: 0.2; }
+      100% { transform: rotateX(0deg); opacity: 1; }
+    }
+    .animate-flip {
+      animation: flipReveal 0.32s ease-out;
+    }
+
+    /* Keyword highlight class (activated only when toggle is ON or Hint is clicked) */
+    .kw-tag {
+      transition: all 0.25s ease;
+    }
+    .kw-active {
+      background-color: #FEF08A;
+      color: #312E81;
+      padding: 0.1rem 0.45rem;
+      border-radius: 0.5rem;
+      box-shadow: inset 0 -3px 0 #F59E0B;
+      font-weight: 900;
+    }
+
+    @keyframes pulseUrgent {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+      50% { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+    }
+    .animate-urgent {
+      animation: pulseUrgent 0.85s ease-in-out infinite;
+    }
+
+    @keyframes speakWave {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.18); }
+    }
+    .animate-speak {
+      animation: speakWave 0.6s ease-in-out infinite;
+      display: inline-block;
+    }
+
+    /* Confetti canvas overlay */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    /* Custom clean scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-amber-200 overflow-x-hidden">
+
+  <!-- Canvas pháo giấy khi hoàn thành bài luyện tập -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Toast Notification -->
+  <div id="toast-box" class="fixed bottom-5 right-5 z-50 hidden bg-slate-800/95 text-white px-4 py-3 rounded-2xl shadow-xl font-bold text-sm flex items-center gap-2 transition-all max-w-xs sm:max-w-sm">
+    <span id="toast-icon" class="text-lg">🔊</span>
+    <span id="toast-msg">Thông báo</span>
+  </div>
+
+  <!-- Audio & Speech Settings Modal (Hỗ trợ Xiaomi / Chrome Android) -->
+  <div id="audio-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeAudioModal()">
+    <div class="bg-white rounded-3xl p-5 sm:p-6 max-w-md w-full border-2 border-indigo-100 shadow-2xl space-y-4 animate-pop">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+          <span>🎙️</span> Cài đặt Giọng đọc Tiếng Anh
+        </h3>
+        <button onclick="closeAudioModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-black">✕</button>
+      </div>
+
+      <p class="text-xs sm:text-sm text-slate-500 font-semibold leading-relaxed">
+        Nếu dùng máy tính bảng <b>Xiaomi (MIUI / HyperOS)</b> hoặc Chrome Android bị mất tiếng, hãy chọn <b>Tự động</b> hoặc <b>Giọng Online</b>.
+      </p>
+
+      <div id="speech-mode-options" class="space-y-2"></div>
+
+      <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-extrabold text-sky-800">Kiểm tra loa phát âm:</span>
+          <button onclick="testSpeaker()"
+            class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs sm:text-sm shadow-sm transition active:scale-95 flex items-center gap-1.5">
+            <span>🔊</span> Thử loa ("Greater than!")
+          </button>
+        </div>
+        <div id="audio-test-status" class="text-xs font-bold text-slate-600 bg-white/80 rounded-xl px-3 py-2 border border-sky-100">
+          Trạng thái: Sẵn sàng. Bấm "Thử loa" để nghe kiểm tra.
+        </div>
+        <p class="text-[11px] font-semibold text-slate-500">
+          💡 Mẹo: Hãy đảm bảo âm lượng <b>Phương tiện (Media)</b> trên máy đang bật và không ở chế độ im lặng.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b-2 border-indigo-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 py-2.5 space-y-2.5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <!-- Logo -->
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-sky-500 text-white flex items-center justify-center text-2xl shadow-md">
+            🦉
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-2xl font-black text-indigo-700 leading-tight tracking-tight">
+              MathKid <span class="text-amber-500">4</span>
+            </h1>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-500">Hiểu Đề Toán Tiếng Anh Lớp 4</p>
+          </div>
+        </div>
+
+        <!-- Counters & Controls -->
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          <div class="flex items-center gap-1 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 px-2.5 py-1.5 rounded-2xl font-extrabold text-xs sm:text-sm" title="Số từ khóa bé đã thuộc">
+            <span>✅</span>
+            <span id="header-mastered">0/80</span>
+          </div>
+
+          <div class="flex items-center gap-1 bg-amber-50 border-2 border-amber-300 text-amber-800 px-2.5 py-1.5 rounded-2xl font-extrabold text-xs sm:text-sm" title="Tổng số sao">
+            <span>⭐</span>
+            <span id="header-stars">0</span>
+          </div>
+
+          <div class="flex items-center gap-1 bg-orange-50 border-2 border-orange-300 text-orange-700 px-2.5 py-1.5 rounded-2xl font-extrabold text-xs sm:text-sm" title="Chuỗi trả lời đúng hiện tại">
+            <span>🔥</span>
+            <span id="header-streak">0</span>
+          </div>
+
+          <button id="btn-sfx-toggle" onclick="toggleSFX()"
+            class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-2xl border-2 font-extrabold text-xs sm:text-sm transition active:scale-95 bg-sky-50 border-sky-200 text-sky-700"
+            title="Bật/Tắt hiệu ứng âm thanh">
+            <span id="sfx-icon" class="text-base">🔊</span>
+            <span id="sfx-label" class="hidden sm:inline">SFX</span>
+          </button>
+
+          <button id="btn-audio-settings" onclick="openAudioModal()"
+            class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-2xl border-2 font-extrabold text-xs sm:text-sm transition active:scale-95 bg-indigo-50 border-indigo-200 text-indigo-700"
+            title="Cài đặt giọng đọc (Xiaomi / Android)">
+            <span id="voice-status-icon" class="text-base">🎙️</span>
+            <span id="voice-mode-short" class="hidden md:inline">Giọng: Tự động</span>
+          </button>
+
+          <button onclick="testSpeaker()"
+            class="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 font-extrabold text-xs sm:text-sm transition active:scale-95"
+            title="Bấm nghe thử phát âm tiếng Anh">
+            <span>🔊</span>
+            <span class="hidden sm:inline">Thử loa</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Navigation Tabs -->
+      <nav class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+        <button id="tab-vocab" onclick="switchTab('vocab')"
+          class="py-2 sm:py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-base transition-all flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow-md">
+          <span>📚</span>
+          <span id="tab-vocab-label">Từ vựng (80 từ)</span>
+        </button>
+        <button id="tab-quiz" onclick="switchTab('quiz')"
+          class="py-2 sm:py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-base transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white/70">
+          <span>🎯</span>
+          <span>Luyện tập (Tự sinh đề)</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="max-w-6xl mx-auto px-3 sm:px-5 py-5 pb-20">
+
+    <!-- ======================================================= -->
+    <!-- TAB 1: VOCABULARY BUILDER (80 KEYWORDS)                 -->
+    <!-- ======================================================= -->
+    <section id="view-vocab" class="space-y-5">
+
+      <!-- Control Panel -->
+      <div class="bg-white rounded-3xl p-4 sm:p-5 border-2 border-indigo-100 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-slate-800 flex items-center gap-2">
+              <span>🔑</span> Kho Từ Khóa Toán Tiếng Anh Lớp 4
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">
+              Bấm <span class="font-extrabold text-sky-600">🔊 Nghe</span> hoặc <span class="font-extrabold text-teal-600">🐢 Chậm</span> để luyện phát âm, rồi đánh dấu <span class="font-extrabold text-emerald-600">✅ Đã thuộc</span>!
+            </p>
+          </div>
+
+          <!-- Mastery Progress Bar -->
+          <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl px-4 py-2.5 min-w-[230px]">
+            <div class="flex items-center justify-between text-xs sm:text-sm font-extrabold text-emerald-800 mb-1">
+              <span id="mastery-scope-label">🌟 Tiến độ toàn bộ</span>
+              <span id="mastery-text">0 / 80 (0%)</span>
+            </div>
+            <div class="w-full h-3 bg-emerald-200/70 rounded-full overflow-hidden">
+              <div id="mastery-bar" class="h-full bg-gradient-to-r from-emerald-400 to-green-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search + Self-test toggle + Quick Practice -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+          <div class="md:col-span-5 relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">🔍</span>
+            <input id="vocab-search" type="text" oninput="handleSearch(this.value)"
+              placeholder="Tìm tiếng Anh hoặc tiếng Việt (vd: làm tròn, angle)..."
+              class="w-full pl-10 pr-9 py-2.5 rounded-2xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-sm font-bold bg-slate-50 focus:bg-white transition" />
+            <button id="btn-clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black">✕</button>
+          </div>
+
+          <div class="md:col-span-4">
+            <button id="btn-hide-vi" onclick="toggleHideVietnamese()"
+              class="w-full py-2.5 px-3 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2 active:scale-95">
+              <span id="hide-vi-icon">🙈</span>
+              <span id="hide-vi-text">Ẩn nghĩa tiếng Việt (Tự kiểm tra)</span>
+            </button>
+          </div>
+
+          <div class="md:col-span-3">
+            <button onclick="quickPracticeTopic()"
+              class="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1.5">
+              <span>🚀</span> <span>Luyện tập chủ đề này</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topic Filter Pills -->
+      <div id="vocab-topic-pills" class="flex flex-wrap gap-2"></div>
+
+      <!-- Results Count & Flip Hint -->
+      <div class="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-bold text-slate-500 px-1">
+        <span id="vocab-count-label">Đang hiển thị 80 từ khóa</span>
+        <span id="flip-hint-label" class="hidden text-indigo-600 font-extrabold">💡 Bấm vào từng thẻ để lật xem nghĩa tiếng Việt!</span>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="vocab-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- TAB 2: PROCEDURAL ANTI-GUESSING QUIZ GENERATOR          -->
+    <!-- ======================================================= -->
+    <section id="view-quiz" class="hidden space-y-5">
+
+      <!-- 2A: SETUP SCREEN -->
+      <div id="quiz-setup" class="space-y-5">
+        <div class="bg-white rounded-3xl p-5 sm:p-7 border-2 border-indigo-100 shadow-sm space-y-6">
+          <div class="text-center space-y-1.5">
+            <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3.5 py-1 rounded-full text-xs font-black">
+              <span>✨</span> TỰ ĐỘNG SINH ĐỀ MỚI 100% — CHỐNG ĐOÁN MÒ
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-800">Thiết lập bài luyện tập thông minh</h2>
+            <p class="text-xs sm:text-sm text-slate-500 font-semibold max-w-xl mx-auto">
+              Các đáp án được tạo liên kết chặt chẽ (Làm tròn hàng chục/trăm/nghìn, Tổng/Hiệu/Tích/Thương của cùng 2 số, Sắp xếp tăng/giảm) để bé thật sự hiểu đề tiếng Anh!
+            </p>
+          </div>
+
+          <!-- 1. Choose Topic -->
+          <div class="space-y-2.5">
+            <label class="text-xs sm:text-sm font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+              <span>1️⃣</span> Chọn chủ đề:
+            </label>
+            <div id="setup-topic-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
+          </div>
+
+          <!-- 2. Choose Mode -->
+          <div class="space-y-2.5">
+            <label class="text-xs sm:text-sm font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+              <span>2️⃣</span> Chọn dạng bài:
+            </label>
+            <div id="setup-mode-list" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5"></div>
+          </div>
+
+          <!-- 3. Length & Keyword Highlight Toggle -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            <div class="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-2.5">
+              <label class="text-xs sm:text-sm font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                <span>3️⃣</span> Số lượng câu hỏi:
+              </label>
+              <div id="setup-length-list" class="grid grid-cols-4 gap-2"></div>
+            </div>
+
+            <div class="bg-amber-50/70 rounded-2xl p-4 border-2 border-amber-200/80 flex items-center justify-between gap-3">
+              <div>
+                <div class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                  <span>🔍</span> Đánh dấu từ khóa
+                </div>
+                <p class="text-xs font-semibold text-slate-600 mt-0.5">
+                  Mặc định <b>Tắt</b> để bé tự đọc hiểu đề. Khi làm bài vẫn có nút <b>💡 Gợi ý</b> bất cứ lúc nào!
+                </p>
+              </div>
+              <button id="btn-kw-toggle" onclick="toggleHighlightSetting()" role="switch" aria-checked="false"
+                class="relative shrink-0 w-14 h-8 rounded-full bg-slate-300 transition-colors duration-200 focus:outline-none">
+                <span id="kw-toggle-knob" class="absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Countdown Timer Setup -->
+          <div class="bg-sky-50/70 rounded-2xl p-4 sm:p-5 border-2 border-sky-200/80 space-y-3.5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="text-sm sm:text-base font-black text-slate-800 flex items-center gap-1.5">
+                  <span>⏱️</span> 4️⃣ Thời gian làm bài (Đếm ngược tổng)
+                </div>
+                <p class="text-xs font-semibold text-slate-600 mt-0.5">
+                  Nhập số giây cho mỗi câu, hệ thống sẽ tự nhân với tổng số câu hỏi.
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="timer-toggle-label" class="text-xs font-black text-emerald-700">Đang Bật</span>
+                <button id="btn-timer-toggle" onclick="toggleTimerSetting()" role="switch" aria-checked="true"
+                  class="relative shrink-0 w-14 h-8 rounded-full bg-emerald-500 transition-colors duration-200 focus:outline-none">
+                  <span id="timer-toggle-knob" class="absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200" style="transform: translateX(24px);"></span>
+                </button>
+              </div>
+            </div>
+
+            <div id="timer-config-body" class="space-y-3 pt-1">
+              <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div class="flex items-center gap-2 bg-white border-2 border-sky-200 rounded-2xl px-3.5 py-2 shrink-0">
+                  <label for="input-sec-per-q" class="text-xs sm:text-sm font-extrabold text-slate-600">Giây / mỗi câu:</label>
+                  <input id="input-sec-per-q" type="number" min="5" max="300" value="30"
+                    oninput="handleSecondsInput(this.value)"
+                    onchange="normalizeSecondsInput(this.value)"
+                    class="w-20 px-2.5 py-1 rounded-xl border-2 border-sky-200 focus:border-indigo-500 focus:outline-none text-center font-black text-base text-indigo-700 bg-sky-50/50" />
+                  <span class="text-xs font-extrabold text-slate-500">giây</span>
+                </div>
+
+                <!-- Quick Presets -->
+                <div id="timer-presets" class="flex flex-wrap gap-1.5"></div>
+              </div>
+
+              <!-- Formula Display -->
+              <div class="bg-white rounded-2xl px-4 py-2.5 border-2 border-indigo-100 flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs sm:text-sm font-extrabold text-slate-600">🧮 Tổng thời gian:</span>
+                <span id="timer-formula-text" class="text-sm sm:text-base font-black text-indigo-700">
+                  30 giây × 10 câu = 05:00
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Start Button -->
+          <div class="pt-2 text-center">
+            <button onclick="startNewQuiz()"
+              class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-700 hover:to-sky-600 text-white font-black text-lg shadow-lg hover:shadow-xl transition active:scale-95 flex items-center justify-center gap-2 mx-auto">
+              <span>🚀</span> <span>Bắt đầu làm bài ngay!</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2B: ACTIVE QUIZ SCREEN -->
+      <div id="quiz-active" class="hidden space-y-4">
+        <!-- Top Progress & Timer Bar -->
+        <div class="bg-white rounded-3xl p-3.5 sm:p-4 border-2 border-indigo-100 shadow-sm space-y-3">
+          <div class="flex flex-wrap items-center gap-2.5 sm:gap-4">
+            <button onclick="returnToSetup()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs sm:text-sm transition active:scale-95 shrink-0">
+              ⬅️ Cài đặt
+            </button>
+            <div class="flex-1 min-w-[140px]">
+              <div class="flex justify-between items-center text-xs font-extrabold text-slate-500 mb-1.5 gap-2">
+                <span id="quiz-progress-text">Câu 1 / 10</span>
+                <span id="quiz-type-badge" class="text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full truncate">Trắc nghiệm</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Live Countdown Clock & Pause Button -->
+            <div id="quiz-timer-box" class="hidden flex items-center gap-2 shrink-0">
+              <div id="timer-badge" class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-black text-base sm:text-lg tabular-nums transition-colors">
+                <span>⏱️</span>
+                <span id="timer-clock">05:00</span>
+              </div>
+              <button id="btn-pause-quiz" onclick="togglePauseQuiz()"
+                class="px-3 py-2 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-extrabold text-xs sm:text-sm transition active:scale-95 flex items-center gap-1">
+                <span id="pause-icon">⏸️</span>
+                <span id="pause-label" class="hidden sm:inline">Tạm dừng</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Smooth Shrinking Time Progress Bar -->
+          <div id="timer-bar-wrapper" class="hidden w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div id="timer-progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-linear" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <!-- Question Card Wrapper (with Pause Overlay) -->
+        <div class="relative">
+          <div id="quiz-card" class="bg-white rounded-3xl p-5 sm:p-8 border-2 border-indigo-100 shadow-md space-y-5">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Pause Overlay -->
+          <div id="quiz-pause-overlay" class="hidden absolute inset-0 z-20 bg-white/95 backdrop-blur-md rounded-3xl border-2 border-indigo-200 flex flex-col items-center justify-center p-6 text-center space-y-4 animate-pop">
+            <div class="text-5xl">⏸️</div>
+            <div>
+              <h3 class="text-xl sm:text-2xl font-black text-indigo-800">Đang tạm dừng làm bài</h3>
+              <p class="text-sm font-semibold text-slate-500 mt-1">Đồng hồ đã tạm dừng và đề bài được che lại để đảm bảo công bằng nhé!</p>
+            </div>
+            <button onclick="togglePauseQuiz()"
+              class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-base shadow-lg transition active:scale-95 flex items-center gap-2">
+              <span>▶️</span> <span>Tiếp tục làm bài</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Hint Box -->
+        <div id="quiz-hint-box" class="hidden bg-amber-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 text-amber-900 space-y-1 animate-pop">
+          <div class="font-black text-sm flex items-center gap-1.5">
+            <span>💡</span> Gợi ý hiểu đề:
+          </div>
+          <div id="quiz-hint-content" class="text-xs sm:text-sm font-bold leading-relaxed"></div>
+        </div>
+
+        <!-- Feedback Box -->
+        <div id="quiz-feedback" class="hidden rounded-3xl p-5 border-2 shadow-sm space-y-4 animate-pop">
+          <div class="flex items-start gap-3">
+            <div id="feedback-icon" class="text-3xl shrink-0">🎉</div>
+            <div class="space-y-1 flex-1">
+              <h4 id="feedback-title" class="text-lg font-black">Chính xác!</h4>
+              <div id="feedback-explain" class="text-xs sm:text-sm font-bold leading-relaxed"></div>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button id="btn-next-q" onclick="nextQuestion()"
+              class="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm sm:text-base shadow-md transition active:scale-95">
+              Câu tiếp theo ➡️
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2C: SUMMARY SCREEN -->
+      <div id="quiz-summary" class="hidden space-y-5 animate-pop">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-lg text-center space-y-6">
+          <div id="summary-trophy" class="text-6xl">🏆</div>
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-800">Hoàn thành bài luyện tập!</h2>
+            <p id="summary-subtitle" class="text-slate-500 font-bold mt-1 text-sm sm:text-base"></p>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-3xl mx-auto">
+            <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3.5">
+              <div class="text-2xl mb-1">📝</div>
+              <div id="summary-score" class="text-xl sm:text-2xl font-black text-indigo-700">8/10</div>
+              <div class="text-xs font-bold text-slate-500">Số câu đúng</div>
+            </div>
+            <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3.5">
+              <div class="text-2xl mb-1">🎯</div>
+              <div id="summary-accuracy" class="text-xl sm:text-2xl font-black text-emerald-700">80%</div>
+              <div class="text-xs font-bold text-slate-500">Độ chính xác</div>
+            </div>
+            <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3.5">
+              <div class="text-2xl mb-1">⭐</div>
+              <div id="summary-stars" class="text-xl sm:text-2xl font-black text-amber-700">+80</div>
+              <div class="text-xs font-bold text-slate-500">Sao kiếm được</div>
+            </div>
+            <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-3.5">
+              <div class="text-2xl mb-1">⏱️</div>
+              <div id="summary-time" class="text-xl sm:text-2xl font-black text-sky-700">02:15</div>
+              <div class="text-xs font-bold text-slate-500">Thời gian làm</div>
+            </div>
+            <div class="col-span-2 sm:col-span-1 bg-purple-50 border-2 border-purple-200 rounded-2xl p-3.5">
+              <div class="text-2xl mb-1">⚡</div>
+              <div id="summary-speed" class="text-xl sm:text-2xl font-black text-purple-700">14s/câu</div>
+              <div class="text-xs font-bold text-slate-500">Tốc độ TB</div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap justify-center gap-3 pt-2">
+            <button onclick="startNewQuiz()"
+              class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-sm sm:text-base shadow-md transition active:scale-95">
+              🔄 Làm bộ đề mới (Số mới 100%)
+            </button>
+            <button onclick="returnToSetup()"
+              class="px-6 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-sm sm:text-base transition active:scale-95">
+              ⚙️ Đổi chủ đề / Dạng bài
+            </button>
+          </div>
+        </div>
+
+        <!-- Review Missed Questions -->
+        <div id="summary-missed-section" class="hidden bg-white rounded-3xl p-5 sm:p-6 border-2 border-rose-100 shadow-sm space-y-4">
+          <h3 class="text-lg font-black text-rose-700 flex items-center gap-2">
+            <span>📌</span> Ôn lại các câu làm nhầm / hết giờ để nhớ sâu hơn
+          </h3>
+          <div id="summary-missed-list" class="space-y-3"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    // =========================================================================
+    // 1. WEB AUDIO API SOUND EFFECTS (OFFLINE, ZERO EXTERNAL FILES)
+    // =========================================================================
+    const SFX = (() => {
+      let ctx = null;
+      let enabled = true;
+
+      function getCtx() {
+        try {
+          if (!ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) ctx = new AudioCtx();
+          }
+          if (ctx && ctx.state === 'suspended') {
+            ctx.resume().catch(() => {});
+          }
+        } catch (e) {}
+        return ctx;
+      }
+
+      function tone(freq, dur, type = 'sine', offset = 0, vol = 0.14, endFreq = null) {
+        if (!enabled) return;
+        const a = getCtx();
+        if (!a) return;
+        try {
+          const now = a.currentTime + offset;
+          const osc = a.createOscillator();
+          const gain = a.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, now + dur);
+
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.exponentialRampToValueAtTime(vol, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+          osc.connect(gain);
+          gain.connect(a.destination);
+          osc.start(now);
+          osc.stop(now + dur + 0.02);
+        } catch (e) {}
+      }
+
+      return {
+        setEnabled(v) { enabled = !!v; },
+        isEnabled() { return enabled; },
+        unlock() { getCtx(); },
+        pop() { tone(520, 0.07, 'sine', 0, 0.11, 740); },
+        flip() { tone(300, 0.11, 'triangle', 0, 0.11, 560); },
+        tick() { tone(920, 0.055, 'sine', 0, 0.085, 760); },
+        timeout() {
+          tone(440, 0.18, 'sawtooth', 0.00, 0.11, 330);
+          tone(330, 0.18, 'sawtooth', 0.19, 0.11, 240);
+          tone(220, 0.35, 'sawtooth', 0.38, 0.12, 160);
+        },
+        correct() {
+          tone(523.25, 0.12, 'triangle', 0.00, 0.16);
+          tone(659.25, 0.12, 'triangle', 0.10, 0.16);
+          tone(783.99, 0.22, 'triangle', 0.20, 0.18);
+        },
+        wrong() {
+          tone(260, 0.14, 'sawtooth', 0.00, 0.10, 210);
+          tone(200, 0.22, 'sawtooth', 0.13, 0.10, 150);
+        },
+        match() {
+          tone(600, 0.09, 'sine', 0.00, 0.14);
+          tone(880, 0.15, 'sine', 0.08, 0.14);
+        },
+        fanfare() {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((n, i) => tone(n, 0.22, 'triangle', i * 0.11, 0.18));
+        }
+      };
+    })();
+
+    // =========================================================================
+    // 2. CONFETTI CELEBRATION ANIMATION
+    // =========================================================================
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#0EA5E9', '#EC4899'];
+      const particles = Array.from({ length: 95 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * 140,
+        w: 7 + Math.random() * 6,
+        h: 5 + Math.random() * 5,
+        vx: (Math.random() - 0.5) * 4,
+        vy: 2.5 + Math.random() * 4.5,
+        rot: Math.random() * 360,
+        vrot: (Math.random() - 0.5) * 10,
+        color: colors[Math.floor(Math.random() * colors.length)]
+      }));
+
+      let frames = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vrot;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 150) requestAnimationFrame(draw);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      draw();
+    }
+
+    // =========================================================================
+    // 3. TOPICS & 80 GRADE 4 MATH VOCABULARY KEYWORDS
+    // =========================================================================
+    const TOPICS = [
+      { id: 'all', icon: '🌟', name: 'Tất cả chủ đề', short: 'Tất cả' },
+      { id: 'comparison', icon: '⚖️', name: 'So sánh & Thứ tự', short: 'So sánh' },
+      { id: 'rounding', icon: '🎯', name: 'Số & Làm tròn', short: 'Làm tròn' },
+      { id: 'operations', icon: '🧮', name: 'Phép tính & Đề toán', short: 'Phép tính' },
+      { id: 'fractions', icon: '🍕', name: 'Phân số', short: 'Phân số' },
+      { id: 'geometry', icon: '📐', name: 'Hình học & Đo lường', short: 'Hình học' }
+    ];
+
+    const VOCABULARY = [
+      // --- COMPARISON & ORDERING (1-16 + 68, 69) ---
+      { id: 1, topic: 'comparison', badge: '>', en: 'Greater than', vi: 'Lớn hơn', exEn: '450 is greater than 405.', exVi: '450 lớn hơn 405.', color: 'rose' },
+      { id: 2, topic: 'comparison', badge: '<', en: 'Less than', vi: 'Bé hơn / Nhỏ hơn', exEn: '128 is less than 182.', exVi: '128 bé hơn 182.', color: 'rose' },
+      { id: 3, topic: 'comparison', badge: '=', en: 'Equal to', vi: 'Bằng nhau', exEn: '6 × 4 is equal to 24.', exVi: '6 × 4 bằng 24.', color: 'rose' },
+      { id: 4, topic: 'comparison', badge: '≠', en: 'Not equal to', vi: 'Không bằng / Khác', exEn: '15 is not equal to 51.', exVi: '15 không bằng 51.', color: 'rose' },
+      { id: 5, topic: 'comparison', badge: '👑', en: 'Greatest / Largest', vi: 'Lớn nhất', exEn: 'Find the greatest number.', exVi: 'Tìm số lớn nhất.', color: 'rose' },
+      { id: 6, topic: 'comparison', badge: '🐜', en: 'Smallest / Least', vi: 'Bé nhất / Nhỏ nhất', exEn: 'Which fraction is the smallest?', exVi: 'Phân số nào là bé nhất?', color: 'rose' },
+      { id: 7, topic: 'comparison', badge: '📈', en: 'Ascending order', vi: 'Thứ tự tăng dần (bé → lớn)', exEn: 'Arrange the numbers in ascending order.', exVi: 'Sắp xếp các số theo thứ tự tăng dần.', color: 'rose' },
+      { id: 8, topic: 'comparison', badge: '📉', en: 'Descending order', vi: 'Thứ tự giảm dần (lớn → bé)', exEn: 'Write the numbers in descending order.', exVi: 'Viết các số theo thứ tự giảm dần.', color: 'rose' },
+      { id: 9, topic: 'comparison', badge: '↗️', en: 'Least to greatest', vi: 'Từ bé nhất đến lớn nhất', exEn: 'Order from least to greatest.', exVi: 'Xếp từ bé nhất đến lớn nhất.', color: 'rose' },
+      { id: 10, topic: 'comparison', badge: '↘️', en: 'Greatest to least', vi: 'Từ lớn nhất đến bé nhất', exEn: 'Order from greatest to least.', exVi: 'Xếp từ lớn nhất đến bé nhất.', color: 'rose' },
+      { id: 11, topic: 'comparison', badge: '⚖️', en: 'Compare', vi: 'So sánh', exEn: 'Compare 3,490 and 3,940.', exVi: 'So sánh 3.490 và 3.940.', color: 'rose' },
+      { id: 12, topic: 'comparison', badge: '↔️', en: 'Between', vi: 'Ở giữa (hai số)', exEn: 'Which number is between 500 and 600?', exVi: 'Số nào nằm giữa 500 và 600?', color: 'rose' },
+      { id: 13, topic: 'comparison', badge: '➕', en: 'More than', vi: 'Nhiều hơn (cộng thêm)', exEn: 'What number is 100 more than 2,450?', exVi: 'Số nào nhiều hơn 2.450 là 100?', color: 'rose' },
+      { id: 14, topic: 'comparison', badge: '➖', en: 'Fewer than', vi: 'Ít hơn (trừ đi)', exEn: 'Lan has 5 fewer apples than Minh.', exVi: 'Lan có ít hơn Minh 5 quả táo.', color: 'rose' },
+      { id: 15, topic: 'comparison', badge: '🔢', en: 'Order / Arrange', vi: 'Sắp xếp theo thứ tự', exEn: 'Arrange these four numbers.', exVi: 'Sắp xếp bốn số này.', color: 'rose' },
+      { id: 16, topic: 'comparison', badge: '≈', en: 'Approximately / About', vi: 'Xấp xỉ / Khoảng chừng', exEn: '498 + 203 is about 700.', exVi: '498 + 203 xấp xỉ 700.', color: 'rose' },
+
+      // --- NUMBERS & ROUNDING (17-30 + 70) ---
+      { id: 17, topic: 'rounding', badge: '🎯', en: 'Round to the nearest', vi: 'Làm tròn đến hàng gần nhất', exEn: 'Round 4,682 to the nearest hundred.', exVi: 'Làm tròn 4.682 đến hàng trăm gần nhất.', color: 'sky' },
+      { id: 18, topic: 'rounding', badge: '10', en: 'Nearest ten', vi: 'Hàng chục gần nhất', exEn: 'Round 347 to the nearest ten → 350.', exVi: 'Làm tròn 347 đến hàng chục → 350.', color: 'sky' },
+      { id: 19, topic: 'rounding', badge: '100', en: 'Nearest hundred', vi: 'Hàng trăm gần nhất', exEn: 'Round 2,630 to the nearest hundred → 2,600.', exVi: 'Làm tròn 2.630 đến hàng trăm → 2.600.', color: 'sky' },
+      { id: 20, topic: 'rounding', badge: '1K', en: 'Nearest thousand', vi: 'Hàng nghìn gần nhất', exEn: 'Round 7,820 to the nearest thousand → 8,000.', exVi: 'Làm tròn 7.820 đến hàng nghìn → 8.000.', color: 'sky' },
+      { id: 21, topic: 'rounding', badge: '🏛️', en: 'Place value', vi: 'Giá trị theo hàng (chục, trăm...)', exEn: 'What is the place value of 5 in 5,230?', exVi: 'Giá trị theo hàng của chữ số 5 trong 5.230 là gì?', color: 'sky' },
+      { id: 22, topic: 'rounding', badge: '0-9', en: 'Digit', vi: 'Chữ số (từ 0 đến 9)', exEn: 'How many digits does 45,600 have?', exVi: 'Số 45.600 có bao nhiêu chữ số?', color: 'sky' },
+      { id: 23, topic: 'rounding', badge: '1s', en: 'Ones place / Units', vi: 'Hàng đơn vị', exEn: 'The digit in the ones place of 429 is 9.', exVi: 'Chữ số hàng đơn vị của 429 là 9.', color: 'sky' },
+      { id: 24, topic: 'rounding', badge: '10s', en: 'Tens place', vi: 'Hàng chục', exEn: 'The digit in the tens place of 429 is 2.', exVi: 'Chữ số hàng chục của 429 là 2.', color: 'sky' },
+      { id: 25, topic: 'rounding', badge: '100s', en: 'Hundreds place', vi: 'Hàng trăm', exEn: 'The digit in the hundreds place of 429 is 4.', exVi: 'Chữ số hàng trăm của 429 là 4.', color: 'sky' },
+      { id: 26, topic: 'rounding', badge: '1Ks', en: 'Thousands place', vi: 'Hàng nghìn', exEn: 'In 6,420, 6 is in the thousands place.', exVi: 'Trong 6.420, chữ số 6 ở hàng nghìn.', color: 'sky' },
+      { id: 27, topic: 'rounding', badge: '10K', en: 'Ten-thousands', vi: 'Hàng chục nghìn', exEn: '30,000 has 3 in the ten-thousands place.', exVi: '30.000 có chữ số 3 ở hàng chục nghìn.', color: 'sky' },
+      { id: 28, topic: 'rounding', badge: '2,4', en: 'Even number', vi: 'Số chẵn (chia hết cho 2)', exEn: '24, 68, and 100 are even numbers.', exVi: '24, 68 và 100 là các số chẵn.', color: 'sky' },
+      { id: 29, topic: 'rounding', badge: '1,3', en: 'Odd number', vi: 'Số lẻ (không chia hết cho 2)', exEn: '15, 37, and 99 are odd numbers.', exVi: '15, 37 và 99 là các số lẻ.', color: 'sky' },
+      { id: 30, topic: 'rounding', badge: '🔍', en: 'Estimate', vi: 'Ước lượng (tính nhẩm gần đúng)', exEn: 'Estimate the sum of 298 and 405.', exVi: 'Ước lượng tổng của 298 và 405.', color: 'sky' },
+
+      // --- OPERATIONS & WORD PROBLEMS (31-45 + 71, 72) ---
+      { id: 31, topic: 'operations', badge: '➕', en: 'Sum', vi: 'Tổng (kết quả phép cộng)', exEn: 'Find the sum of 24 and 6.', exVi: 'Tìm tổng của 24 và 6.', color: 'emerald' },
+      { id: 32, topic: 'operations', badge: '➖', en: 'Difference', vi: 'Hiệu (kết quả phép trừ)', exEn: 'What is the difference between 24 and 6?', exVi: 'Hiệu của 24 và 6 là bao nhiêu?', color: 'emerald' },
+      { id: 33, topic: 'operations', badge: '✖️', en: 'Product', vi: 'Tích (kết quả phép nhân)', exEn: 'Calculate the product of 12 and 4.', exVi: 'Tính tích của 12 và 4.', color: 'emerald' },
+      { id: 34, topic: 'operations', badge: '➗', en: 'Quotient', vi: 'Thương (kết quả phép chia)', exEn: 'The quotient of 36 divided by 9 is 4.', exVi: 'Thương của 36 chia cho 9 là 4.', color: 'emerald' },
+      { id: 35, topic: 'operations', badge: '🧩', en: 'Remainder', vi: 'Số dư (trong phép chia có dư)', exEn: '17 ÷ 5 = 3 with a remainder of 2.', exVi: '17 ÷ 5 = 3 và số dư là 2.', color: 'emerald' },
+      { id: 36, topic: 'operations', badge: '🤝', en: 'Altogether', vi: 'Tất cả / Cộng lại hết', exEn: 'How many books do they have altogether?', exVi: 'Họ có tất cả bao nhiêu quyển sách?', color: 'emerald' },
+      { id: 37, topic: 'operations', badge: '📦', en: 'Left / Remaining', vi: 'Còn lại (sau khi bớt đi)', exEn: 'How many candies are left?', exVi: 'Còn lại bao nhiêu viên kẹo?', color: 'emerald' },
+      { id: 38, topic: 'operations', badge: '×2', en: 'Twice as many', vi: 'Gấp đôi (nhân 2)', exEn: 'Tom has twice as many stickers as Ben.', exVi: 'Tom có số hình dán gấp đôi Ben.', color: 'emerald' },
+      { id: 39, topic: 'operations', badge: '×N', en: 'Times as many', vi: 'Gấp ... lần (phép nhân)', exEn: '3 times as many as 8 is 24.', exVi: 'Gấp 3 lần của 8 là 24.', color: 'emerald' },
+      { id: 40, topic: 'operations', badge: '🍰', en: 'Share equally', vi: 'Chia đều (phép chia)', exEn: 'Share 24 cookies equally among 6 kids.', exVi: 'Chia đều 24 cái bánh cho 6 bạn.', color: 'emerald' },
+      { id: 41, topic: 'operations', badge: '1️⃣', en: 'Each / Per', vi: 'Mỗi (một cái / một người)', exEn: 'Each box has 12 pencils.', exVi: 'Mỗi hộp có 12 cây bút chì.', color: 'emerald' },
+      { id: 42, topic: 'operations', badge: '🌱', en: 'Factor', vi: 'Thừa số / Ước số', exEn: '3 and 4 are factors of 12.', exVi: '3 và 4 là các thừa số (ước) của 12.', color: 'emerald' },
+      { id: 43, topic: 'operations', badge: '🚀', en: 'Multiple', vi: 'Bội số (số chia hết cho)', exEn: '15 and 20 are multiples of 5.', exVi: '15 và 20 là các bội số của 5.', color: 'emerald' },
+      { id: 44, topic: 'operations', badge: '⭐', en: 'Average / Mean', vi: 'Trung bình cộng', exEn: 'Find the average of 10, 20, and 30.', exVi: 'Tìm trung bình cộng của 10, 20 và 30.', color: 'emerald' },
+      { id: 45, topic: 'operations', badge: '➕', en: 'Add / Subtract / Multiply / Divide', vi: 'Cộng / Trừ / Nhân / Chia', exEn: 'Multiply 15 by 4 to get 60.', exVi: 'Nhân 15 với 4 để được 60.', color: 'emerald' },
+
+      // --- FRACTIONS (46-55 + 73, 74, 75) ---
+      { id: 46, topic: 'fractions', badge: 'a/b', en: 'Fraction', vi: 'Phân số', exEn: '3/4 is a fraction.', exVi: '3/4 là một phân số.', color: 'amber' },
+      { id: 47, topic: 'fractions', badge: '⬆️', en: 'Numerator', vi: 'Tử số (số nằm ở trên)', exEn: 'In 5/8, the numerator is 5.', exVi: 'Trong 5/8, tử số là 5.', color: 'amber' },
+      { id: 48, topic: 'fractions', badge: '⬇️', en: 'Denominator', vi: 'Mẫu số (số nằm ở dưới)', exEn: 'In 5/8, the denominator is 8.', exVi: 'Trong 5/8, mẫu số là 8.', color: 'amber' },
+      { id: 49, topic: 'fractions', badge: '=', en: 'Equivalent fractions', vi: 'Các phân số bằng nhau', exEn: '1/2 and 2/4 are equivalent fractions.', exVi: '1/2 và 2/4 là hai phân số bằng nhau.', color: 'amber' },
+      { id: 50, topic: 'fractions', badge: '✂️', en: 'Simplify / Lowest terms', vi: 'Rút gọn phân số (tối giản)', exEn: 'Simplify 4/8 to get 1/2.', exVi: 'Rút gọn 4/8 để được 1/2.', color: 'amber' },
+      { id: 51, topic: 'fractions', badge: '½', en: 'Half', vi: 'Một nửa (1/2)', exEn: 'Half of 20 is 10.', exVi: 'Một nửa của 20 là 10.', color: 'amber' },
+      { id: 52, topic: 'fractions', badge: '¼', en: 'Quarter / Fourth', vi: 'Một phần tư (1/4)', exEn: 'A quarter of 16 is 4.', exVi: 'Một phần tư của 16 là 4.', color: 'amber' },
+      { id: 53, topic: 'fractions', badge: '1/n', en: 'Unit fraction', vi: 'Phân số đơn vị (tử số bằng 1)', exEn: '1/5 is a unit fraction.', exVi: '1/5 là một phân số đơn vị.', color: 'amber' },
+      { id: 54, topic: 'fractions', badge: '1½', en: 'Mixed number', vi: 'Hỗn số (số nguyên + phân số)', exEn: '2 1/3 is a mixed number.', exVi: '2 1/3 là một hỗn số.', color: 'amber' },
+      { id: 55, topic: 'fractions', badge: '7/4', en: 'Improper fraction', vi: 'Phân số lớn hơn hoặc bằng 1 (tử ≥ mẫu)', exEn: '7/4 is an improper fraction.', exVi: '7/4 là phân số có tử số lớn hơn mẫu số.', color: 'amber' },
+
+      // --- GEOMETRY & MEASUREMENT (56-67 + 76-80) ---
+      { id: 56, topic: 'geometry', badge: '🔲', en: 'Perimeter', vi: 'Chu vi (tổng độ dài các cạnh)', exEn: 'Find the perimeter of the rectangle.', exVi: 'Tìm chu vi của hình chữ nhật.', color: 'purple' },
+      { id: 57, topic: 'geometry', badge: '🟩', en: 'Area', vi: 'Diện tích (phần bề mặt bên trong)', exEn: 'Area of a rectangle = length × width.', exVi: 'Diện tích hình chữ nhật = dài × rộng.', color: 'purple' },
+      { id: 58, topic: 'geometry', badge: '📏', en: 'Length / Width', vi: 'Chiều dài / Chiều rộng', exEn: 'The length is 8 cm and the width is 5 cm.', exVi: 'Chiều dài là 8 cm và chiều rộng là 5 cm.', color: 'purple' },
+      { id: 59, topic: 'geometry', badge: '📐', en: 'Angle', vi: 'Góc', exEn: 'A square has four right angles.', exVi: 'Hình vuông có bốn góc vuông.', color: 'purple' },
+      { id: 60, topic: 'geometry', badge: '∟', en: 'Right angle', vi: 'Góc vuông (bằng 90°)', exEn: 'A right angle measures 90 degrees.', exVi: 'Góc vuông có số đo 90 độ.', color: 'purple' },
+      { id: 61, topic: 'geometry', badge: '∠', en: 'Acute angle', vi: 'Góc nhọn (bé hơn 90°)', exEn: 'A 45° angle is an acute angle.', exVi: 'Góc 45° là góc nhọn.', color: 'purple' },
+      { id: 62, topic: 'geometry', badge: '⦦', en: 'Obtuse angle', vi: 'Góc tù (lớn hơn 90° và bé hơn 180°)', exEn: 'A 120° angle is an obtuse angle.', exVi: 'Góc 120° là góc tù.', color: 'purple' },
+      { id: 63, topic: 'geometry', badge: '—', en: 'Straight angle', vi: 'Góc bẹt (bằng 180°)', exEn: 'A straight angle equals 180 degrees.', exVi: 'Góc bẹt bằng 180 độ.', color: 'purple' },
+      { id: 64, topic: 'geometry', badge: '∥', en: 'Parallel lines', vi: 'Hai đường thẳng song song', exEn: 'Opposite sides of a rectangle are parallel.', exVi: 'Hai cạnh đối diện hình chữ nhật song song.', color: 'purple' },
+      { id: 65, topic: 'geometry', badge: '⊥', en: 'Perpendicular lines', vi: 'Hai đường thẳng vuông góc', exEn: 'Perpendicular lines form a 90° angle.', exVi: 'Hai đường vuông góc tạo thành góc 90°.', color: 'purple' },
+      { id: 66, topic: 'geometry', badge: '🦋', en: 'Symmetry', vi: 'Tính đối xứng', exEn: 'A butterfly has a line of symmetry.', exVi: 'Con bướm có một trục đối xứng.', color: 'purple' },
+      { id: 67, topic: 'geometry', badge: '⬡', en: 'Polygon', vi: 'Hình đa giác (hình khép kín nhiều cạnh)', exEn: 'Triangles and rectangles are polygons.', exVi: 'Hình tam giác và hình chữ nhật là các đa giác.', color: 'purple' },
+      { id: 68, topic: 'comparison', badge: '≥', en: 'At least', vi: 'Ít nhất là (lớn hơn hoặc bằng)', exEn: 'You need at least 10 points to win.', exVi: 'Bạn cần ít nhất 10 điểm để thắng.', color: 'rose' },
+      { id: 69, topic: 'comparison', badge: '≤', en: 'At most', vi: 'Nhiều nhất là (bé hơn hoặc bằng)', exEn: 'Each box holds at most 8 apples.', exVi: 'Mỗi hộp chứa nhiều nhất 8 quả táo.', color: 'rose' },
+      { id: 70, topic: 'rounding', badge: 'abc', en: 'Word form', vi: 'Dạng viết số bằng chữ', exEn: 'Word form of 405 is four hundred five.', exVi: 'Dạng viết bằng chữ của 405 là bốn trăm linh năm.', color: 'sky' },
+      { id: 71, topic: 'operations', badge: '➕', en: 'In total', vi: 'Tổng cộng tất cả', exEn: 'How much did she spend in total?', exVi: 'Bạn ấy đã tiêu tổng cộng bao nhiêu tiền?', color: 'emerald' },
+      { id: 72, topic: 'operations', badge: '📊', en: 'How many more', vi: 'Nhiều hơn bao nhiêu (phép trừ)', exEn: 'How many more cats than dogs are there?', exVi: 'Có nhiều hơn bao nhiêu con mèo so với chó?', color: 'emerald' },
+      { id: 73, topic: 'fractions', badge: '3/5', en: 'Proper fraction', vi: 'Phân số bé hơn 1 (tử < mẫu)', exEn: '3/5 is a proper fraction.', exVi: '3/5 là phân số có tử số bé hơn mẫu số.', color: 'amber' },
+      { id: 74, topic: 'fractions', badge: '=/=', en: 'Common denominator', vi: 'Mẫu số chung', exEn: 'Find a common denominator for 1/2 and 1/3.', exVi: 'Tìm mẫu số chung cho 1/2 và 1/3.', color: 'amber' },
+      { id: 75, topic: 'fractions', badge: '⅓', en: 'Third', vi: 'Một phần ba (1/3)', exEn: 'One third of 12 is 4.', exVi: 'Một phần ba của 12 là 4.', color: 'amber' },
+      { id: 76, topic: 'geometry', badge: '⬜', en: 'Square / Rectangle', vi: 'Hình vuông / Hình chữ nhật', exEn: 'A square has 4 equal sides.', exVi: 'Hình vuông có 4 cạnh bằng nhau.', color: 'purple' },
+      { id: 77, topic: 'geometry', badge: '🔺', en: 'Triangle', vi: 'Hình tam giác', exEn: 'A triangle has 3 sides and 3 angles.', exVi: 'Hình tam giác có 3 cạnh và 3 góc.', color: 'purple' },
+      { id: 78, topic: 'geometry', badge: '📏', en: 'Centimeter / Meter / Kilometer', vi: 'Xăng-ti-mét / Mét / Ki-lô-mét (độ dài)', exEn: '1 meter equals 100 centimeters.', exVi: '1 mét bằng 100 xăng-ti-mét.', color: 'purple' },
+      { id: 79, topic: 'geometry', badge: '⚖️', en: 'Kilogram / Gram', vi: 'Ki-lô-gam / Gam (khối lượng)', exEn: '1 kilogram equals 1,000 grams.', exVi: '1 ki-lô-gam bằng 1.000 gam.', color: 'purple' },
+      { id: 80, topic: 'geometry', badge: '🥤', en: 'Liter / Milliliter', vi: 'Lít / Mi-li-lít (dung tích)', exEn: '1 liter equals 1,000 milliliters.', exVi: '1 lít bằng 1.000 mi-li-lít.', color: 'purple' }
+    ];
+
+    // =========================================================================
+    // 4. PROCEDURAL ANTI-GUESSING QUESTION GENERATORS
+    // =========================================================================
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const fmt = (n) => Number(n).toLocaleString('en-US');
+    const kw = (text) => `<span class="kw-tag">${text}</span>`;
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // Generate 4 closely related numbers using permuted digits (prevents guessing!)
+    function generatePermutedFour() {
+      const lead = randInt(2, 8);
+      const pool = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9].filter(d => d !== lead));
+      const a = pool[0], b = pool[1], c = pool[2];
+      const candidates = [
+        lead * 1000 + a * 100 + b * 10 + c,
+        lead * 1000 + a * 100 + c * 10 + b,
+        lead * 1000 + b * 100 + a * 10 + c,
+        lead * 1000 + b * 100 + c * 10 + a,
+        lead * 1000 + c * 100 + a * 10 + b,
+        lead * 1000 + c * 100 + b * 10 + a
+      ];
+      return shuffle(candidates).slice(0, 4);
+    }
+
+    // --- 4A. COMPARISON GENERATORS ---
+    function genComparisonMC() {
+      const variant = randInt(0, 3);
+      // Variant 0: Greatest / Smallest with permuted digits
+      if (variant === 0) {
+        const nums = generatePermutedFour();
+        const askGreatest = Math.random() < 0.5;
+        const sorted = [...nums].sort((x, y) => x - y);
+        const ansNum = askGreatest ? sorted[3] : sorted[0];
+        const word = askGreatest ? pick(['greatest', 'largest']) : pick(['smallest', 'least']);
+        const viWord = askGreatest ? 'lớn nhất' : 'bé nhất';
+        return {
+          type: 'mc',
+          topic: 'comparison',
+          keywordLabel: word,
+          questionHtml: `Which number is the ${kw(word)}?`,
+          speakText: `Which number is the ${word}?`,
+          options: shuffle(nums).map(fmt),
+          answer: fmt(ansNum),
+          hint: `Từ khóa <b>${word}</b> có nghĩa là <b>${viWord}</b>. Hãy so sánh từng hàng từ trái sang phải (nghìn → trăm → chục → đơn vị).`,
+          explain: `<b>${word}</b> = <b>${viWord}</b>. Xếp tăng dần: ${sorted.map(fmt).join(' < ')}. Vậy đáp án đúng là <b>${fmt(ansNum)}</b>.`
+        };
+      }
+
+      // Variant 1: Greater than / Less than with tight distractors
+      if (variant === 1) {
+        const base = randInt(20, 89) * 100 + randInt(12, 88);
+        const askGreater = Math.random() < 0.5;
+        const word = askGreater ? 'greater than' : 'less than';
+        const viWord = askGreater ? 'lớn hơn (>)' : 'bé hơn (<)';
+        const delta = pick([5, 9, 10, 18, 25]);
+        let correct, d1, d2, d3;
+        if (askGreater) {
+          correct = base + delta;
+          d1 = base;
+          d2 = base - delta;
+          d3 = base - delta * 2;
+        } else {
+          correct = base - delta;
+          d1 = base;
+          d2 = base + delta;
+          d3 = base + delta * 2;
+        }
+        return {
+          type: 'mc',
+          topic: 'comparison',
+          keywordLabel: word,
+          questionHtml: `Which number is ${kw(word)} <b>${fmt(base)}</b>?`,
+          speakText: `Which number is ${word} ${base}?`,
+          options: shuffle([correct, d1, d2, d3]).map(fmt),
+          answer: fmt(correct),
+          hint: `<b>${word}</b> nghĩa là <b>${viWord}</b>. Đừng chọn nhầm số bằng đúng ${fmt(base)} nhé!`,
+          explain: `<b>${word}</b> = <b>${viWord}</b>. Trong 4 đáp án chỉ có <b>${fmt(correct)}</b> ${askGreater ? '>' : '<'} ${fmt(base)}.`
+        };
+      }
+
+      // Variant 2: Equal to with tricky expressions
+      if (variant === 2) {
+        const a = randInt(4, 9);
+        const b = randInt(3, 9);
+        const target = a * b;
+        const opts = shuffle([
+          `${a} × ${b}`,
+          `${a} + ${b}`,
+          `${a} × ${b + 1}`,
+          `${a + 1} × ${b}`
+        ]);
+        return {
+          type: 'mc',
+          topic: 'comparison',
+          keywordLabel: 'equal to',
+          questionHtml: `Which expression is ${kw('equal to')} <b>${target}</b>?`,
+          speakText: `Which expression is equal to ${target}?`,
+          options: opts,
+          answer: `${a} × ${b}`,
+          hint: `<b>equal to</b> nghĩa là <b>bằng (=)</b>.`,
+          explain: `<b>equal to</b> = <b>bằng</b>. Ta có <b>${a} × ${b} = ${target}</b>.`
+        };
+      }
+
+      // Variant 3: Ordering MC with reversed & swapped-middle traps
+      const nums = generatePermutedFour();
+      const asc = [...nums].sort((x, y) => x - y);
+      const desc = [...asc].reverse();
+      const swapMidAsc = [asc[0], asc[2], asc[1], asc[3]];
+      const swapMidDesc = [desc[0], desc[2], desc[1], desc[3]];
+      const askAsc = Math.random() < 0.5;
+      const phrase = askAsc
+        ? pick(['ascending order', 'from least to greatest'])
+        : pick(['descending order', 'from greatest to least']);
+      const viPhrase = askAsc ? 'tăng dần (bé → lớn)' : 'giảm dần (lớn → bé)';
+      const ansArr = askAsc ? asc : desc;
+      const fmtSeq = (arr) => arr.map(fmt).join(' , ');
+
+      return {
+        type: 'mc',
+        topic: 'comparison',
+        keywordLabel: phrase,
+        questionHtml: `Which list is arranged in ${kw(phrase)}?`,
+        speakText: `Which list is arranged in ${phrase}?`,
+        options: shuffle([fmtSeq(asc), fmtSeq(desc), fmtSeq(swapMidAsc), fmtSeq(swapMidDesc)]),
+        answer: fmtSeq(ansArr),
+        hint: `<b>${phrase}</b> có nghĩa là xếp theo thứ tự <b>${viPhrase}</b>. Kiểm tra kỹ cả 2 số ở giữa nhé!`,
+        explain: `<b>${phrase}</b> = <b>${viPhrase}</b>. Đáp án đúng là: <b>${fmtSeq(ansArr)}</b>.`
+      };
+    }
+
+    function genOrderInteractive() {
+      const nums = generatePermutedFour();
+      const asc = [...nums].sort((x, y) => x - y);
+      const desc = [...asc].reverse();
+      const askAsc = Math.random() < 0.5;
+      const phrase = askAsc
+        ? pick(['ascending order', 'least to greatest'])
+        : pick(['descending order', 'greatest to least']);
+      const viPhrase = askAsc ? 'tăng dần (bé → lớn)' : 'giảm dần (lớn → bé)';
+      const correctOrder = (askAsc ? asc : desc).map(fmt);
+
+      return {
+        type: 'order',
+        topic: 'comparison',
+        keywordLabel: phrase,
+        questionHtml: `Arrange these 4 numbers in ${kw(phrase)}:`,
+        speakText: `Arrange these four numbers in ${phrase}.`,
+        tiles: shuffle(nums).map(fmt),
+        correctOrder,
+        hint: `<b>${phrase}</b> = <b>${viPhrase}</b>. Chạm lần lượt từ số ${askAsc ? 'bé nhất đến lớn nhất' : 'lớn nhất đến bé nhất'}.`,
+        explain: `<b>${phrase}</b> là xếp <b>${viPhrase}</b>: <b>${correctOrder.join(' → ')}</b>.`
+      };
+    }
+
+    function genComparisonFill() {
+      const a = randInt(12, 89) * 100 + randInt(10, 95);
+      const mode = randInt(0, 2);
+      const b = mode === 0 ? a : (mode === 1 ? a + pick([9, 10, 90, 100]) : a - pick([9, 10, 90, 100]));
+      const sym = a > b ? '>' : (a < b ? '<' : '=');
+      const enSym = sym === '>' ? 'greater than' : (sym === '<' ? 'less than' : 'equal to');
+      return {
+        type: 'fill',
+        topic: 'comparison',
+        keywordLabel: 'compare (<, >, =)',
+        questionHtml: `${kw('Compare')} the two numbers. Fill in <b>&lt;</b>, <b>&gt;</b>, or <b>=</b>:<br><span class="inline-block mt-2 text-2xl sm:text-3xl font-black text-indigo-700">${fmt(a)} &nbsp; [ ? ] &nbsp; ${fmt(b)}</span>`,
+        speakText: `Compare ${a} and ${b}.`,
+        accepted: [sym],
+        displayAnswer: sym,
+        placeholder: 'Nhập < , > hoặc =',
+        quickSymbols: ['<', '=', '>'],
+        hint: `<b>Compare</b> = so sánh. Dấu <b>&gt;</b> là greater than (lớn hơn), <b>&lt;</b> là less than (bé hơn), <b>=</b> là equal to (bằng).`,
+        explain: `Vì ${fmt(a)} ${sym} ${fmt(b)} (${enSym}), nên đáp án đúng là <b>${sym}</b>.`
+      };
+    }
+
+    // --- 4B. ROUNDING & PLACE VALUE GENERATORS ---
+    function genRoundingNumberDistinct() {
+      for (let tries = 0; tries < 50; tries++) {
+        const th = randInt(2, 8);
+        const hu = randInt(1, 8);
+        const te = randInt(1, 8);
+        const on = randInt(1, 9);
+        const n = th * 1000 + hu * 100 + te * 10 + on;
+        const r10 = Math.round(n / 10) * 10;
+        const r100 = Math.round(n / 100) * 100;
+        const r1000 = Math.round(n / 1000) * 1000;
+        if (new Set([r10, r100, r1000]).size === 3) {
+          return { n, r10, r100, r1000 };
+        }
+      }
+      return { n: 4638, r10: 4640, r100: 4600, r1000: 5000 };
+    }
+
+    function genRoundingMC() {
+      if (Math.random() < 0.72) {
+        const { n, r10, r100, r1000 } = genRoundingNumberDistinct();
+        const levels = [
+          { en: 'nearest ten', vi: 'hàng chục gần nhất', val: r10 },
+          { en: 'nearest hundred', vi: 'hàng trăm gần nhất', val: r100 },
+          { en: 'nearest thousand', vi: 'hàng nghìn gần nhất', val: r1000 }
+        ];
+        const target = pick(levels);
+        let extra = target.val === r10 ? r10 + 10 : (target.val === r100 ? r100 + 100 : r1000 - 1000);
+        if ([r10, r100, r1000].includes(extra) || extra <= 0) extra = r100 + 200;
+        const opts = shuffle([r10, r100, r1000, extra]).map(fmt);
+
+        return {
+          type: 'mc',
+          topic: 'rounding',
+          keywordLabel: target.en,
+          questionHtml: `${kw('Round')} <b>${fmt(n)}</b> to the ${kw(target.en)}.`,
+          speakText: `Round ${n} to the ${target.en}.`,
+          options: opts,
+          answer: fmt(target.val),
+          hint: `Đọc kỹ hàng cần làm tròn: <b>${target.en}</b> = <b>${target.vi}</b>.`,
+          explain: `Làm tròn <b>${fmt(n)}</b>:<br>• Hàng chục (nearest ten): <b>${fmt(r10)}</b><br>• Hàng trăm (nearest hundred): <b>${fmt(r100)}</b><br>• Hàng nghìn (nearest thousand): <b>${fmt(r1000)}</b><br>Đề hỏi <b>${target.en}</b> → Chọn <b>${fmt(target.val)}</b>.`
+        };
+      } else {
+        // Place value of a digit
+        const digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 4);
+        const n = digits[0] * 1000 + digits[1] * 100 + digits[2] * 10 + digits[3];
+        const places = [
+          { idx: 0, name: 'thousands place', vi: 'hàng nghìn', val: digits[0] * 1000 },
+          { idx: 1, name: 'hundreds place', vi: 'hàng trăm', val: digits[1] * 100 },
+          { idx: 2, name: 'tens place', vi: 'hàng chục', val: digits[2] * 10 },
+          { idx: 3, name: 'ones place', vi: 'hàng đơn vị', val: digits[3] }
+        ];
+        const chosen = pick(places);
+        const d = digits[chosen.idx];
+        return {
+          type: 'mc',
+          topic: 'rounding',
+          keywordLabel: chosen.name,
+          questionHtml: `In <b>${fmt(n)}</b>, which ${kw('digit')} is in the ${kw(chosen.name)}?`,
+          speakText: `In ${n}, which digit is in the ${chosen.name}?`,
+          options: shuffle(digits.map(String)),
+          answer: String(d),
+          hint: `<b>${chosen.name}</b> là <b>${chosen.vi}</b>.`,
+          explain: `Trong số <b>${fmt(n)}</b>, chữ số ở <b>${chosen.name}</b> (${chosen.vi}) là <b>${d}</b>.`
+        };
+      }
+    }
+
+    function genRoundingFill() {
+      const { n, r10, r100, r1000 } = genRoundingNumberDistinct();
+      const target = pick([
+        { en: 'nearest ten', vi: 'hàng chục', val: r10 },
+        { en: 'nearest hundred', vi: 'hàng trăm', val: r100 },
+        { en: 'nearest thousand', vi: 'hàng nghìn', val: r1000 }
+      ]);
+      return {
+        type: 'fill',
+        topic: 'rounding',
+        keywordLabel: target.en,
+        questionHtml: `${kw('Round')} <b>${fmt(n)}</b> to the ${kw(target.en)}:`,
+        speakText: `Round ${n} to the ${target.en}.`,
+        accepted: [String(target.val), fmt(target.val)],
+        displayAnswer: fmt(target.val),
+        placeholder: 'Nhập số sau khi làm tròn...',
+        hint: `<b>${target.en}</b> = làm tròn đến <b>${target.vi}</b>.`,
+        explain: `Làm tròn <b>${fmt(n)}</b> đến <b>${target.vi}</b> (${target.en}) ta được <b>${fmt(target.val)}</b>.`
+      };
+    }
+
+    // --- 4C. OPERATIONS GENERATORS (2 NUMBERS -> SUM / DIFFERENCE / PRODUCT / QUOTIENT) ---
+    function genCleanPair() {
+      const b = randInt(2, 9);
+      const q = randInt(3, 12);
+      const a = b * q;
+      // Ensure all 4 results [a+b, a-b, a*b, a/b] are strictly distinct
+      const sum = a + b, diff = a - b, prod = a * b, quot = q;
+      if (new Set([sum, diff, prod, quot]).size === 4) {
+        return { a, b, sum, diff, prod, quot };
+      }
+      return { a: 24, b: 6, sum: 30, diff: 18, prod: 144, quot: 4 };
+    }
+
+    function genOperationsMC() {
+      const { a, b, sum, diff, prod, quot } = genCleanPair();
+      const ops = [
+        { en: 'sum', vi: 'Tổng (phép cộng)', val: sum, expr: `${a} + ${b} = ${sum}` },
+        { en: 'difference', vi: 'Hiệu (phép trừ)', val: diff, expr: `${a} − ${b} = ${diff}` },
+        { en: 'product', vi: 'Tích (phép nhân)', val: prod, expr: `${a} × ${b} = ${prod}` },
+        { en: 'quotient', vi: 'Thương (phép chia)', val: quot, expr: `${a} ÷ ${b} = ${quot}` }
+      ];
+      const chosen = pick(ops);
+      const questionHtml = chosen.en === 'quotient'
+        ? `Find the ${kw('quotient')} of <b>${a}</b> divided by <b>${b}</b>.`
+        : `Find the ${kw(chosen.en)} of <b>${a}</b> and <b>${b}</b>.`;
+
+      return {
+        type: 'mc',
+        topic: 'operations',
+        keywordLabel: chosen.en,
+        questionHtml,
+        speakText: chosen.en === 'quotient'
+          ? `Find the quotient of ${a} divided by ${b}.`
+          : `Find the ${chosen.en} of ${a} and ${b}.`,
+        options: shuffle([sum, diff, prod, quot]).map(fmt),
+        answer: fmt(chosen.val),
+        hint: `Từ khóa <b>${chosen.en}</b> là <b>${chosen.vi}</b>.`,
+        explain: `Với 2 số <b>${a}</b> và <b>${b}</b>:<br>• <b>Sum</b> (Tổng): ${a} + ${b} = ${fmt(sum)}<br>• <b>Difference</b> (Hiệu): ${a} − ${b} = ${fmt(diff)}<br>• <b>Product</b> (Tích): ${a} × ${b} = ${fmt(prod)}<br>• <b>Quotient</b> (Thương): ${a} ÷ ${b} = ${fmt(quot)}<br>→ Đáp án đúng là <b>${fmt(chosen.val)}</b>.`
+      };
+    }
+
+    function genOperationsFill() {
+      const { a, b, sum, diff, prod, quot } = genCleanPair();
+      const variant = randInt(0, 2);
+      if (variant === 0) {
+        const chosen = pick([
+          { en: 'sum', vi: 'tổng (+)', val: sum },
+          { en: 'difference', vi: 'hiệu (−)', val: diff },
+          { en: 'product', vi: 'tích (×)', val: prod },
+          { en: 'quotient', vi: 'thương (÷)', val: quot }
+        ]);
+        return {
+          type: 'fill',
+          topic: 'operations',
+          keywordLabel: chosen.en,
+          questionHtml: `What is the ${kw(chosen.en)} of <b>${a}</b> and <b>${b}</b>?`,
+          speakText: `What is the ${chosen.en} of ${a} and ${b}?`,
+          accepted: [String(chosen.val), fmt(chosen.val)],
+          displayAnswer: fmt(chosen.val),
+          placeholder: 'Nhập kết quả...',
+          hint: `<b>${chosen.en}</b> = <b>${chosen.vi}</b>.`,
+          explain: `<b>${chosen.en}</b> là <b>${chosen.vi}</b> của ${a} và ${b} → Kết quả là <b>${fmt(chosen.val)}</b>.`
+        };
+      } else if (variant === 1) {
+        const x = randInt(6, 25);
+        return {
+          type: 'fill',
+          topic: 'operations',
+          keywordLabel: 'twice as many',
+          questionHtml: `Lan has <b>${x}</b> stickers. Minh has ${kw('twice as many')} stickers as Lan. How many stickers does Minh have?`,
+          speakText: `Lan has ${x} stickers. Minh has twice as many stickers as Lan. How many stickers does Minh have?`,
+          accepted: [String(x * 2)],
+          displayAnswer: String(x * 2),
+          placeholder: 'Nhập số hình dán...',
+          hint: `<b>twice as many</b> nghĩa là <b>gấp đôi (× 2)</b>.`,
+          explain: `<b>twice as many</b> = gấp đôi → ${x} × 2 = <b>${x * 2}</b>.`
+        };
+      } else {
+        const div = randInt(4, 9);
+        const q = randInt(3, 8);
+        const rem = randInt(1, div - 1);
+        const dividend = div * q + rem;
+        return {
+          type: 'fill',
+          topic: 'operations',
+          keywordLabel: 'remainder',
+          questionHtml: `What is the ${kw('remainder')} when <b>${dividend}</b> is divided by <b>${div}</b>?`,
+          speakText: `What is the remainder when ${dividend} is divided by ${div}?`,
+          accepted: [String(rem)],
+          displayAnswer: String(rem),
+          placeholder: 'Nhập số dư...',
+          hint: `<b>remainder</b> nghĩa là <b>số dư</b> của phép chia.`,
+          explain: `${dividend} ÷ ${div} = ${q} dư <b>${rem}</b>. Vậy <b>remainder</b> = <b>${rem}</b>.`
+        };
+      }
+    }
+
+    // --- 4D. FRACTIONS GENERATORS ---
+    function genFractionsMC() {
+      const variant = randInt(0, 1);
+      if (variant === 0) {
+        const den = randInt(5, 12);
+        const num = randInt(1, den - 2);
+        const askNum = Math.random() < 0.5;
+        const word = askNum ? 'numerator' : 'denominator';
+        const viWord = askNum ? 'tử số (số ở trên)' : 'mẫu số (số ở dưới)';
+        const ans = askNum ? num : den;
+        let opts = [num, den, num + den, Math.abs(den - num)];
+        // Ensure 4 distinct options
+        while (new Set(opts).size < 4) opts.push(randInt(1, 20));
+        opts = Array.from(new Set(opts)).slice(0, 4);
+        return {
+          type: 'mc',
+          topic: 'fractions',
+          keywordLabel: word,
+          questionHtml: `In the fraction <b>${num}/${den}</b>, what is the ${kw(word)}?`,
+          speakText: `In the fraction ${num} over ${den}, what is the ${word}?`,
+          options: shuffle(opts).map(String),
+          answer: String(ans),
+          hint: `<b>${word}</b> nghĩa là <b>${viWord}</b>.`,
+          explain: `Trong phân số <b>${num}/${den}</b>: <b>numerator</b> (tử số) là <b>${num}</b>, <b>denominator</b> (mẫu số) là <b>${den}</b>.`
+        };
+      } else {
+        const baseDen = pick([2, 3, 4, 5]);
+        const baseNum = randInt(1, baseDen - 1);
+        const k = randInt(2, 4);
+        const eq = `${baseNum * k}/${baseDen * k}`;
+        const d1 = `${baseNum * k + 1}/${baseDen * k}`;
+        const d2 = `${baseNum * k}/${baseDen * k + 1}`;
+        const d3 = `${baseDen * k}/${baseNum * k}`;
+        return {
+          type: 'mc',
+          topic: 'fractions',
+          keywordLabel: 'equivalent fraction',
+          questionHtml: `Which fraction is ${kw('equivalent')} to <b>${baseNum}/${baseDen}</b>?`,
+          speakText: `Which fraction is equivalent to ${baseNum} over ${baseDen}?`,
+          options: shuffle([eq, d1, d2, d3]),
+          answer: eq,
+          hint: `<b>equivalent</b> nghĩa là <b>bằng nhau</b> (nhân cả tử và mẫu với cùng một số).`,
+          explain: `Nhân cả tử và mẫu của <b>${baseNum}/${baseDen}</b> với ${k} ta được <b>${eq}</b>.`
+        };
+      }
+    }
+
+    function genFractionsFill() {
+      const den = pick([2, 3, 4]);
+      const mult = randInt(3, 10);
+      const total = den * mult;
+      const word = den === 2 ? 'half' : (den === 3 ? 'one third' : 'a quarter');
+      const vi = den === 2 ? 'một nửa (÷ 2)' : (den === 3 ? 'một phần ba (÷ 3)' : 'một phần tư (÷ 4)');
+      return {
+        type: 'fill',
+        topic: 'fractions',
+        keywordLabel: word,
+        questionHtml: `What is ${kw(word)} of <b>${total}</b>?`,
+        speakText: `What is ${word} of ${total}?`,
+        accepted: [String(mult)],
+        displayAnswer: String(mult),
+        placeholder: 'Nhập kết quả...',
+        hint: `<b>${word}</b> nghĩa là <b>${vi}</b>.`,
+        explain: `<b>${word}</b> của ${total} = ${total} ÷ ${den} = <b>${mult}</b>.`
+      };
+    }
+
+    // --- 4E. GEOMETRY & MEASUREMENT GENERATORS ---
+    function genGeometryMC() {
+      const variant = randInt(0, 2);
+      // Variant 0: Perimeter vs Area (anti-guessing: no units revealed!)
+      if (variant === 0) {
+        let l = randInt(6, 12), w = randInt(2, 5);
+        while (2 * (l + w) === l * w) { l++; }
+        const perim = 2 * (l + w);
+        const area = l * w;
+        const semi = l + w;
+        const twoL = 2 * l;
+        const askPerim = Math.random() < 0.5;
+        const word = askPerim ? 'perimeter' : 'area';
+        const viWord = askPerim ? 'Chu vi = (Dài + Rộng) × 2' : 'Diện tích = Dài × Rộng';
+        const ans = askPerim ? perim : area;
+        let opts = Array.from(new Set([perim, area, semi, twoL]));
+        while (opts.length < 4) opts.push(area + randInt(3, 9));
+
+        return {
+          type: 'mc',
+          topic: 'geometry',
+          keywordLabel: word,
+          questionHtml: `A rectangle has ${kw('length')} <b>${l}</b> and ${kw('width')} <b>${w}</b>. What is its ${kw(word)}?`,
+          speakText: `A rectangle has length ${l} and width ${w}. What is its ${word}?`,
+          options: shuffle(opts).map(String),
+          answer: String(ans),
+          hint: `<b>${word}</b>: <b>${viWord}</b>.`,
+          explain: `Hình chữ nhật dài ${l}, rộng ${w}:<br>• <b>Perimeter</b> (Chu vi) = (${l} + ${w}) × 2 = <b>${perim}</b><br>• <b>Area</b> (Diện tích) = ${l} × ${w} = <b>${area}</b><br>→ Đáp án đúng là <b>${ans}</b>.`
+        };
+      }
+
+      // Variant 1: Angles (fixed 4 options)
+      if (variant === 1) {
+        const types = [
+          { deg: pick([30, 45, 60, 75]), en: 'Acute angle', vi: 'Góc nhọn (< 90°)' },
+          { deg: 90, en: 'Right angle', vi: 'Góc vuông (= 90°)' },
+          { deg: pick([105, 120, 135, 150]), en: 'Obtuse angle', vi: 'Góc tù (> 90° và < 180°)' },
+          { deg: 180, en: 'Straight angle', vi: 'Góc bẹt (= 180°)' }
+        ];
+        const chosen = pick(types);
+        return {
+          type: 'mc',
+          topic: 'geometry',
+          keywordLabel: chosen.en,
+          questionHtml: `An ${kw('angle')} measures <b>${chosen.deg}°</b>. What type of angle is it?`,
+          speakText: `An angle measures ${chosen.deg} degrees. What type of angle is it?`,
+          options: shuffle(['Acute angle', 'Right angle', 'Obtuse angle', 'Straight angle']),
+          answer: chosen.en,
+          hint: `Nhọn (Acute) < 90°, Vuông (Right) = 90°, Tù (Obtuse) > 90°, Bẹt (Straight) = 180°.`,
+          explain: `Góc <b>${chosen.deg}°</b> là <b>${chosen.en}</b> (${chosen.vi}).`
+        };
+      }
+
+      // Variant 2: Unit conversion
+      const conv = pick([
+        { q: 'meters', to: 'centimeters', factor: 100, n: randInt(2, 9), vi: '1 m = 100 cm' },
+        { q: 'kilograms', to: 'grams', factor: 1000, n: randInt(2, 8), vi: '1 kg = 1,000 g' },
+        { q: 'liters', to: 'milliliters', factor: 1000, n: randInt(2, 7), vi: '1 L = 1,000 mL' }
+      ]);
+      const ans = conv.n * conv.factor;
+      const opts = shuffle([ans, conv.n * 10, conv.n * (conv.factor === 100 ? 1000 : 100), ans + conv.factor]).map(fmt);
+      return {
+        type: 'mc',
+        topic: 'geometry',
+        keywordLabel: `${conv.q} → ${conv.to}`,
+        questionHtml: `<b>${conv.n}</b> ${kw(conv.q)} is equal to how many ${kw(conv.to)}?`,
+        speakText: `${conv.n} ${conv.q} is equal to how many ${conv.to}?`,
+        options: opts,
+        answer: fmt(ans),
+        hint: `Ghi nhớ đổi đơn vị: <b>${conv.vi}</b>.`,
+        explain: `Vì <b>${conv.vi}</b>, nên ${conv.n} ${conv.q} = <b>${fmt(ans)}</b> ${conv.to}.`
+      };
+    }
+
+    function genGeometryFill() {
+      const s = randInt(4, 12);
+      const askPerim = Math.random() < 0.5;
+      const word = askPerim ? 'perimeter' : 'area';
+      const ans = askPerim ? s * 4 : s * s;
+      return {
+        type: 'fill',
+        topic: 'geometry',
+        keywordLabel: word,
+        questionHtml: `A ${kw('square')} has side length <b>${s} cm</b>. Find its ${kw(word)} (only enter the number):`,
+        speakText: `A square has side length ${s} centimeters. Find its ${word}.`,
+        accepted: [String(ans)],
+        displayAnswer: String(ans),
+        placeholder: 'Nhập số...',
+        hint: `<b>Square</b> = hình vuông. <b>${word}</b> = ${askPerim ? 'cạnh × 4' : 'cạnh × cạnh'}.`,
+        explain: `Hình vuông cạnh ${s}: <b>${word}</b> = ${askPerim ? `${s} × 4` : `${s} × ${s}`} = <b>${ans}</b>.`
+      };
+    }
+
+    // --- 4F. DYNAMIC MATCHING GENERATOR ---
+    function genMatchQuestion(topic) {
+      // For operations, create a live 2-number Sum/Difference/Product/Quotient matching challenge!
+      if (topic === 'operations' || (topic === 'all' && Math.random() < 0.45)) {
+        const { a, b, sum, diff, prod, quot } = genCleanPair();
+        return {
+          type: 'match',
+          topic: 'operations',
+          keywordLabel: 'Sum / Difference / Product / Quotient',
+          title: `Nối đúng 4 phép tính của hai số ${a} và ${b}`,
+          speakText: `Match the sum, difference, product, and quotient of ${a} and ${b}.`,
+          pairs: [
+            { en: `Sum of ${a} and ${b}`, vi: fmt(sum) },
+            { en: `Difference of ${a} and ${b}`, vi: fmt(diff) },
+            { en: `Product of ${a} and ${b}`, vi: fmt(prod) },
+            { en: `Quotient of ${a} ÷ ${b}`, vi: fmt(quot) }
+          ],
+          hint: `Sum = Cộng (+), Difference = Trừ (−), Product = Nhân (×), Quotient = Chia (÷).`,
+          explain: `Với ${a} và ${b}: Sum = ${fmt(sum)}, Difference = ${fmt(diff)}, Product = ${fmt(prod)}, Quotient = ${fmt(quot)}.`
+        };
+      }
+
+      // Otherwise pick 4 distinct vocabulary cards from the chosen topic
+      const pool = topic === 'all' ? VOCABULARY : VOCABULARY.filter(v => v.topic === topic);
+      const picked = shuffle(pool).slice(0, 4);
+      return {
+        type: 'match',
+        topic: topic === 'all' ? 'mixed' : topic,
+        keywordLabel: 'Ghép cặp từ khóa',
+        title: 'Nối từ khóa Toán Tiếng Anh với nghĩa Tiếng Việt',
+        speakText: 'Match each English math keyword with its Vietnamese meaning.',
+        pairs: picked.map(v => ({ en: v.en, vi: v.vi })),
+        hint: `Đọc kỹ từng từ tiếng Anh và bấm nút 🔊 nếu cần nghe phát âm.`,
+        explain: picked.map(v => `<b>${v.en}</b> = ${v.vi}`).join('<br>')
+      };
+    }
+
+    // Master Quiz Set Generator
+    function generateQuizSet(topic, mode, length) {
+      const topicsPool = topic === 'all'
+        ? ['comparison', 'rounding', 'operations', 'fractions', 'geometry']
+        : [topic];
+
+      const questions = [];
+      for (let i = 0; i < length; i++) {
+        const t = topicsPool[i % topicsPool.length];
+        let chosenMode = mode;
+        if (mode === 'mixed') {
+          const r = Math.random();
+          if (r < 0.50) chosenMode = 'mc';
+          else if (r < 0.70) chosenMode = 'fill';
+          else if (r < 0.85) chosenMode = 'order';
+          else chosenMode = 'match';
+        }
+
+        if (chosenMode === 'order') {
+          questions.push(genOrderInteractive());
+        } else if (chosenMode === 'match') {
+          questions.push(genMatchQuestion(topic === 'all' ? t : topic));
+        } else if (chosenMode === 'fill') {
+          if (t === 'comparison') questions.push(genComparisonFill());
+          else if (t === 'rounding') questions.push(genRoundingFill());
+          else if (t === 'operations') questions.push(genOperationsFill());
+          else if (t === 'fractions') questions.push(genFractionsFill());
+          else questions.push(genGeometryFill());
+        } else {
+          // 'mc'
+          if (t === 'comparison') questions.push(genComparisonMC());
+          else if (t === 'rounding') questions.push(genRoundingMC());
+          else if (t === 'operations') questions.push(genOperationsMC());
+          else if (t === 'fractions') questions.push(genFractionsMC());
+          else questions.push(genGeometryMC());
+        }
+      }
+      return shuffle(questions);
+    }
+
+    // =========================================================================
+    // 5. APPLICATION STATE & PERSISTENCE (LOCALSTORAGE)
+    // =========================================================================
+    const STORAGE_KEY = 'mathkid4_progress_v3';
+
+    const state = {
+      activeTab: 'vocab',
+      vocabTopic: 'all',
+      searchQuery: '',
+      hideVietnamese: false,
+      revealedCards: new Set(),
+
+      // Persisted user stats
+      masteredIds: new Set(),
+      totalStars: 0,
+      streak: 0,
+      bestStreak: 0,
+      sfxEnabled: true,
+      speechMode: 'auto',     // 'auto' | 'online' | 'offline'
+
+      // Quiz Setup
+      quizTopic: 'all',
+      quizMode: 'mixed',      // 'mixed' | 'mc' | 'order' | 'fill' | 'match'
+      quizLength: 10,         // 5 | 10 | 15 | 20
+      highlightKeywords: false,
+      timerEnabled: true,
+      secondsPerQuestion: 30,
+
+      // Active Quiz Session
+      questions: [],
+      currentIdx: 0,
+      answeredCurrent: false,
+      sessionStars: 0,
+      sessionCorrect: 0,
+      missedQuestions: [],
+
+      // Timer Runtime State
+      totalTimeSec: 300,
+      remainingSec: 300,
+      elapsedSec: 0,
+      isPaused: false,
+      timedOut: false,
+      timerInterval: null,
+
+      // Interactive Ordering state
+      orderSlots: [],
+
+      // Matching state
+      matchSelectedEn: null,
+      matchMatchedIds: new Set(),
+      matchMistakes: 0
+    };
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (Array.isArray(d.masteredIds)) state.masteredIds = new Set(d.masteredIds);
+        if (typeof d.totalStars === 'number') state.totalStars = d.totalStars;
+        if (typeof d.streak === 'number') state.streak = d.streak;
+        if (typeof d.bestStreak === 'number') state.bestStreak = d.bestStreak;
+        if (typeof d.sfxEnabled === 'boolean') state.sfxEnabled = d.sfxEnabled;
+        if (['auto', 'online', 'offline'].includes(d.speechMode)) state.speechMode = d.speechMode;
+        if (typeof d.timerEnabled === 'boolean') state.timerEnabled = d.timerEnabled;
+        if (typeof d.secondsPerQuestion === 'number' && d.secondsPerQuestion >= 5 && d.secondsPerQuestion <= 300) {
+          state.secondsPerQuestion = d.secondsPerQuestion;
+        }
+      } catch (e) {}
+      SFX.setEnabled(state.sfxEnabled);
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          masteredIds: Array.from(state.masteredIds),
+          totalStars: state.totalStars,
+          streak: state.streak,
+          bestStreak: state.bestStreak,
+          sfxEnabled: state.sfxEnabled,
+          speechMode: state.speechMode,
+          timerEnabled: state.timerEnabled,
+          secondsPerQuestion: state.secondsPerQuestion
+        }));
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 6. MULTI-TIER SPEECH ENGINE (FIXES XIAOMI / CHROME ANDROID SILENCE)
+    // =========================================================================
+    let toastTimer = null;
+    function showToast(msg, icon = '🔊') {
+      const box = document.getElementById('toast-box');
+      if (!box) return;
+      document.getElementById('toast-icon').textContent = icon;
+      document.getElementById('toast-msg').textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('hidden'), 2400);
+    }
+
+    const SpeechEngine = (() => {
+      let cachedVoices = [];
+      let autoSwitchedToOnline = false;
+      let audioEl = null;
+      let speakSessionId = 0;
+      let lastEngineLabel = 'Sẵn sàng';
+
+      const ua = navigator.userAgent || '';
+      const isAndroid = /Android/i.test(ua);
+      const isXiaomi = /Xiaomi|MIUI|HyperOS|Redmi|POCO|Mi Pad/i.test(ua);
+
+      function loadVoices() {
+        try {
+          if ('speechSynthesis' in window) {
+            cachedVoices = window.speechSynthesis.getVoices() || [];
+          }
+        } catch (e) {}
+      }
+
+      if ('speechSynthesis' in window) {
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
+
+      function getAudioEl() {
+        if (!audioEl) {
+          audioEl = new Audio();
+          audioEl.preload = 'auto';
+        }
+        return audioEl;
+      }
+
+      function unlockAudio() {
+        SFX.unlock();
+        try {
+          const a = getAudioEl();
+          if (a && a.paused && !a.src) a.load();
+        } catch (e) {}
+      }
+
+      function setSpeakingIndicator(active) {
+        const icon = document.getElementById('voice-status-icon');
+        if (icon) icon.classList.toggle('animate-speak', active);
+      }
+
+      function splitIntoChunks(text, maxLen = 175) {
+        if (text.length <= maxLen) return [text];
+        const parts = text.split(/(?<=[.?!,;])\s+/);
+        const chunks = [];
+        let buf = '';
+        for (const p of parts) {
+          if ((buf + ' ' + p).trim().length <= maxLen) {
+            buf = (buf + ' ' + p).trim();
+          } else {
+            if (buf) chunks.push(buf);
+            if (p.length <= maxLen) {
+              buf = p;
+            } else {
+              const words = p.split(/\s+/);
+              buf = '';
+              for (const w of words) {
+                if ((buf + ' ' + w).trim().length <= maxLen) buf = (buf + ' ' + w).trim();
+                else {
+                  if (buf) chunks.push(buf);
+                  buf = w;
+                }
+              }
+            }
+          }
+        }
+        if (buf) chunks.push(buf);
+        return chunks.length ? chunks : [text.slice(0, maxLen)];
+      }
+
+      function stopAll() {
+        speakSessionId++;
+        setSpeakingIndicator(false);
+        try {
+          if (audioEl) {
+            audioEl.pause();
+            audioEl.onended = null;
+            audioEl.onerror = null;
+          }
+        } catch (e) {}
+        try {
+          if ('speechSynthesis' in window && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {
+            window.speechSynthesis.cancel();
+          }
+        } catch (e) {}
+      }
+
+      function playOnlineChain(text, rate, sessionId, onStatus) {
+        const chunks = splitIntoChunks(text, 175);
+        const a = getAudioEl();
+        let idx = 0;
+
+        const playChunk = (providerIdx) => {
+          if (sessionId !== speakSessionId) return;
+          if (idx >= chunks.length) {
+            setSpeakingIndicator(false);
+            return;
+          }
+          const q = encodeURIComponent(chunks[idx]);
+          const urls = [
+            {
+              name: 'Online (Google TTS)',
+              url: `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${q}`
+            },
+            {
+              name: 'Online (Youdao TTS)',
+              url: `https://dict.youdao.com/dictvoice?audio=${q}&type=2`
+            }
+          ];
+
+          if (providerIdx >= urls.length) {
+            setSpeakingIndicator(false);
+            lastEngineLabel = 'Không thể phát Online (kiểm tra mạng)';
+            if (onStatus) onStatus(lastEngineLabel, false);
+            showToast('Không thể tải giọng Online. Hãy kiểm tra kết nối mạng!', '⚠️');
+            return;
+          }
+
+          const provider = urls[providerIdx];
+          a.pause();
+          a.src = provider.url;
+          a.playbackRate = rate < 0.85 ? 0.72 : 1.0;
+
+          a.onplaying = () => {
+            if (sessionId !== speakSessionId) return;
+            setSpeakingIndicator(true);
+            lastEngineLabel = provider.name;
+            if (onStatus) onStatus(`Đang phát bằng ${provider.name}`, true);
+          };
+
+          a.onended = () => {
+            if (sessionId !== speakSessionId) return;
+            idx++;
+            playChunk(0);
+          };
+
+          a.onerror = () => {
+            if (sessionId !== speakSessionId) return;
+            playChunk(providerIdx + 1);
+          };
+
+          try {
+            const playPromise = a.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(() => {
+                if (sessionId !== speakSessionId) return;
+                playChunk(providerIdx + 1);
+              });
+            }
+          } catch (e) {
+            playChunk(providerIdx + 1);
+          }
+        };
+
+        playChunk(0);
+      }
+
+      function playOfflineWebSpeech(text, rate, sessionId, allowFallback, onStatus) {
+        if (!('speechSynthesis' in window)) {
+          if (allowFallback) {
+            autoSwitchedToOnline = true;
+            playOnlineChain(text, rate, sessionId, onStatus);
+          } else {
+            showToast('Trình duyệt không hỗ trợ Web Speech API.', '⚠️');
+          }
+          return;
+        }
+
+        loadVoices();
+        const enVoice = cachedVoices.find(v => v.lang === 'en-US')
+          || cachedVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+
+        if (allowFallback && (isAndroid || isXiaomi) && cachedVoices.length > 0 && !enVoice) {
+          autoSwitchedToOnline = true;
+          playOnlineChain(text, rate, sessionId, onStatus);
+          return;
+        }
+
+        const startSpeak = () => {
+          if (sessionId !== speakSessionId) return;
+          try {
+            window.speechSynthesis.resume();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'en-US';
+            u.rate = rate;
+            u.pitch = 1.0;
+            if (enVoice) u.voice = enVoice;
+
+            window.__activeUtterance = u;
+
+            let started = false;
+            let watchdog = null;
+
+            u.onstart = () => {
+              if (sessionId !== speakSessionId) return;
+              started = true;
+              clearTimeout(watchdog);
+              setSpeakingIndicator(true);
+              lastEngineLabel = 'Giọng trên máy (Offline)';
+              if (onStatus) onStatus('Đang phát bằng Giọng trên máy (Offline)', true);
+            };
+
+            u.onend = () => {
+              if (sessionId !== speakSessionId) return;
+              clearTimeout(watchdog);
+              setSpeakingIndicator(false);
+            };
+
+            u.onerror = () => {
+              if (sessionId !== speakSessionId) return;
+              clearTimeout(watchdog);
+              setSpeakingIndicator(false);
+              if (allowFallback) {
+                autoSwitchedToOnline = true;
+                playOnlineChain(text, rate, sessionId, onStatus);
+              } else {
+                lastEngineLabel = 'Giọng trên máy gặp lỗi';
+                if (onStatus) onStatus('Giọng trên máy không phát được — hãy thử chọn Giọng Online!', false);
+              }
+            };
+
+            if (allowFallback) {
+              watchdog = setTimeout(() => {
+                if (!started && sessionId === speakSessionId) {
+                  try { window.speechSynthesis.cancel(); } catch (e) {}
+                  autoSwitchedToOnline = true;
+                  playOnlineChain(text, rate, sessionId, onStatus);
+                }
+              }, 650);
+            }
+
+            window.speechSynthesis.speak(u);
+          } catch (e) {
+            if (allowFallback) {
+              autoSwitchedToOnline = true;
+              playOnlineChain(text, rate, sessionId, onStatus);
+            }
+          }
+        };
+
+        if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+          window.speechSynthesis.cancel();
+          setTimeout(startSpeak, 80);
+        } else {
+          startSpeak();
+        }
+      }
+
+      return {
+        unlock: unlockAudio,
+        stop: stopAll,
+        getLastEngine: () => lastEngineLabel,
+        resetAutoFallback() { autoSwitchedToOnline = false; },
+        speak(text, rate = 1.0, onStatus = null) {
+          const clean = String(text || '').replace(/\//g, ' over ').replace(/\s+/g, ' ').trim();
+          if (!clean) return;
+
+          stopAll();
+          const currentSession = speakSessionId;
+          const mode = state.speechMode || 'auto';
+
+          if (mode === 'online' || (mode === 'auto' && autoSwitchedToOnline)) {
+            playOnlineChain(clean, rate, currentSession, onStatus);
+          } else if (mode === 'offline') {
+            playOfflineWebSpeech(clean, rate, currentSession, false, onStatus);
+          } else {
+            playOfflineWebSpeech(clean, rate, currentSession, true, onStatus);
+          }
+        }
+      };
+    })();
+
+    ['touchstart', 'pointerdown', 'click'].forEach(evt => {
+      window.addEventListener(evt, () => SpeechEngine.unlock(), { once: true, passive: true });
+    });
+
+    function speakEnglish(text, rate = 1.0, event = null) {
+      if (event) event.stopPropagation();
+      SpeechEngine.speak(text, rate);
+      showToast(rate < 0.85 ? `Đọc chậm (0.7x): "${text}"` : `Đang đọc: "${text}"`, rate < 0.85 ? '🐢' : '🔊');
+    }
+
+    function testSpeaker() {
+      SFX.pop();
+      const statusEl = document.getElementById('audio-test-status');
+      if (statusEl) statusEl.textContent = '⏳ Đang phát thử "Greater than!"...';
+      SpeechEngine.speak('Greater than!', 1.0, (msg, ok) => {
+        if (statusEl) {
+          statusEl.innerHTML = ok
+            ? `<span class="text-emerald-700">✅ ${msg}</span>`
+            : `<span class="text-rose-600">⚠️ ${msg}</span>`;
+        }
+        showToast(ok ? `🔊 ${msg}` : `⚠️ ${msg}`, ok ? '✅' : '⚠️');
+      });
+    }
+
+    function openAudioModal() {
+      SFX.pop();
+      renderSpeechModeOptions();
+      document.getElementById('audio-modal').classList.remove('hidden');
+    }
+
+    function closeAudioModal() {
+      SFX.pop();
+      document.getElementById('audio-modal').classList.add('hidden');
+    }
+
+    function setSpeechMode(mode) {
+      SFX.pop();
+      state.speechMode = mode;
+      SpeechEngine.resetAutoFallback();
+      saveProgress();
+      updateHeaderUI();
+      renderSpeechModeOptions();
+      testSpeaker();
+    }
+
+    function renderSpeechModeOptions() {
+      const container = document.getElementById('speech-mode-options');
+      if (!container) return;
+      const modes = [
+        {
+          id: 'auto',
+          title: '🤖 Tự động (Khuyên dùng)',
+          desc: 'Tự nhận diện Xiaomi/Android — tự chuyển sang Giọng Online nếu giọng máy không kêu trong 0.65 giây.'
+        },
+        {
+          id: 'online',
+          title: '🌐 Giọng Online (Xiaomi / Android)',
+          desc: 'Phát trực tiếp qua âm thanh Online (Google/Youdao), luôn có tiếng trên Xiaomi Pad, hỗ trợ đọc chậm 🐢.'
+        },
+        {
+          id: 'offline',
+          title: '📱 Giọng trên máy (Offline)',
+          desc: 'Dùng bộ đọc có sẵn trên thiết bị (không cần mạng, cần máy có cài gói giọng tiếng Anh).'
+        }
+      ];
+      container.innerHTML = modes.map(m => {
+        const active = state.speechMode === m.id;
+        return `
+          <button onclick="setSpeechMode('${m.id}')"
+            class="w-full text-left p-3.5 rounded-2xl border-2 transition ${
+              active
+                ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                : 'border-slate-200 bg-slate-50 hover:border-indigo-300'
+            }">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-black text-sm ${active ? 'text-indigo-800' : 'text-slate-700'}">${m.title}</span>
+              ${active ? '<span class="text-xs font-black bg-indigo-600 text-white px-2 py-0.5 rounded-full">Đang chọn</span>' : ''}
+            </div>
+            <p class="text-xs font-semibold text-slate-500 mt-1">${m.desc}</p>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 7. HEADER & NAVIGATION UI
+    // =========================================================================
+    function updateHeaderUI() {
+      document.getElementById('header-stars').textContent = state.totalStars;
+      document.getElementById('header-streak').textContent = state.streak;
+      document.getElementById('header-mastered').textContent = `${state.masteredIds.size}/${VOCABULARY.length}`;
+      document.getElementById('tab-vocab-label').textContent = `Từ vựng (${VOCABULARY.length} từ)`;
+
+      const modeLabels = { auto: 'Giọng: Tự động', online: 'Giọng: Online', offline: 'Giọng: Máy' };
+      const shortEl = document.getElementById('voice-mode-short');
+      if (shortEl) shortEl.textContent = modeLabels[state.speechMode] || 'Giọng: Tự động';
+
+      const btn = document.getElementById('btn-sfx-toggle');
+      const icon = document.getElementById('sfx-icon');
+      const lbl = document.getElementById('sfx-label');
+      if (state.sfxEnabled) {
+        btn.className = 'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-2xl border-2 font-extrabold text-xs sm:text-sm transition active:scale-95 bg-sky-50 border-sky-200 text-sky-700';
+        icon.textContent = '🔊';
+        lbl.textContent = 'SFX';
+      } else {
+        btn.className = 'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-2xl border-2 font-extrabold text-xs sm:text-sm transition active:scale-95 bg-slate-100 border-slate-200 text-slate-400';
+        icon.textContent = '🔇';
+        lbl.textContent = 'Tắt';
+      }
+    }
+
+    function toggleSFX() {
+      state.sfxEnabled = !state.sfxEnabled;
+      SFX.setEnabled(state.sfxEnabled);
+      if (state.sfxEnabled) SFX.pop();
+      saveProgress();
+      updateHeaderUI();
+      showToast(state.sfxEnabled ? 'Đã bật âm thanh hiệu ứng!' : 'Đã tắt âm thanh hiệu ứng!', state.sfxEnabled ? '🔊' : '🔇');
+    }
+
+    function switchTab(tab) {
+      SFX.pop();
+      if (tab === 'vocab') stopQuizTimer();
+      state.activeTab = tab;
+      const tVocab = document.getElementById('tab-vocab');
+      const tQuiz = document.getElementById('tab-quiz');
+      const vVocab = document.getElementById('view-vocab');
+      const vQuiz = document.getElementById('view-quiz');
+
+      if (tab === 'vocab') {
+        tVocab.className = 'py-2 sm:py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-base transition-all flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow-md';
+        tQuiz.className = 'py-2 sm:py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-base transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white/70';
+        vVocab.classList.remove('hidden');
+        vQuiz.classList.add('hidden');
+      } else {
+        tQuiz.className = 'py-2 sm:py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-base transition-all flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow-md';
+        tVocab.className = 'py-2 sm:py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-base transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white/70';
+        vQuiz.classList.remove('hidden');
+        vVocab.classList.add('hidden');
+        renderQuizSetup();
+      }
+    }
+
+    // =========================================================================
+    // 8. TAB 1: VOCABULARY RENDERING & INTERACTIONS
+    // =========================================================================
+    function renderVocabTopicPills() {
+      const el = document.getElementById('vocab-topic-pills');
+      el.innerHTML = TOPICS.map(t => {
+        const count = t.id === 'all' ? VOCABULARY.length : VOCABULARY.filter(v => v.topic === t.id).length;
+        const active = state.vocabTopic === t.id;
+        return `
+          <button onclick="selectVocabTopic('${t.id}')"
+            class="px-3.5 py-2 rounded-2xl font-extrabold text-xs sm:text-sm transition-all flex items-center gap-1.5 border-2 active:scale-95 ${
+              active
+                ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+            }">
+            <span>${t.icon}</span> <span>${t.short} (${count})</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectVocabTopic(id) {
+      SFX.pop();
+      state.vocabTopic = id;
+      renderVocabTopicPills();
+      renderVocabGrid();
+    }
+
+    function handleSearch(val) {
+      state.searchQuery = val.trim().toLowerCase();
+      document.getElementById('btn-clear-search').classList.toggle('hidden', !val);
+      renderVocabGrid();
+    }
+
+    function clearSearch() {
+      SFX.pop();
+      state.searchQuery = '';
+      document.getElementById('vocab-search').value = '';
+      document.getElementById('btn-clear-search').classList.add('hidden');
+      renderVocabGrid();
+    }
+
+    function toggleHideVietnamese() {
+      SFX.pop();
+      state.hideVietnamese = !state.hideVietnamese;
+      state.revealedCards.clear();
+      const btn = document.getElementById('btn-hide-vi');
+      const icon = document.getElementById('hide-vi-icon');
+      const txt = document.getElementById('hide-vi-text');
+      if (state.hideVietnamese) {
+        btn.className = 'w-full py-2.5 px-3 rounded-2xl border-2 border-indigo-400 bg-indigo-50 text-indigo-800 font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2 active:scale-95';
+        icon.textContent = '👀';
+        txt.textContent = 'Đang ẩn nghĩa Việt (Bấm thẻ để lật)';
+      } else {
+        btn.className = 'w-full py-2.5 px-3 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2 active:scale-95';
+        icon.textContent = '🙈';
+        txt.textContent = 'Ẩn nghĩa tiếng Việt (Tự kiểm tra)';
+      }
+      document.getElementById('flip-hint-label').classList.toggle('hidden', !state.hideVietnamese);
+      renderVocabGrid();
+    }
+
+    function toggleCardReveal(id) {
+      if (!state.hideVietnamese) return;
+      SFX.flip();
+      if (state.revealedCards.has(id)) state.revealedCards.delete(id);
+      else state.revealedCards.add(id);
+      renderVocabGrid();
+    }
+
+    function toggleMastered(id, event) {
+      if (event) event.stopPropagation();
+      if (state.masteredIds.has(id)) {
+        state.masteredIds.delete(id);
+        SFX.pop();
+      } else {
+        state.masteredIds.add(id);
+        SFX.match();
+      }
+      saveProgress();
+      updateHeaderUI();
+      renderVocabGrid();
+    }
+
+    function quickPracticeTopic() {
+      SFX.pop();
+      state.quizTopic = state.vocabTopic;
+      switchTab('quiz');
+      startNewQuiz();
+    }
+
+    function renderVocabGrid() {
+      const grid = document.getElementById('vocab-grid');
+      const filtered = VOCABULARY.filter(item => {
+        if (state.vocabTopic !== 'all' && item.topic !== state.vocabTopic) return false;
+        if (state.searchQuery) {
+          const q = state.searchQuery;
+          return item.en.toLowerCase().includes(q)
+            || item.vi.toLowerCase().includes(q)
+            || item.badge.toLowerCase().includes(q);
+        }
+        return true;
+      });
+
+      const scopeTotal = filtered.length;
+      const scopeMastered = filtered.filter(v => state.masteredIds.has(v.id)).length;
+      const pct = scopeTotal ? Math.round((scopeMastered / scopeTotal) * 100) : 0;
+      const topicObj = TOPICS.find(t => t.id === state.vocabTopic);
+      document.getElementById('mastery-scope-label').textContent = state.vocabTopic === 'all'
+        ? '🌟 Tiến độ toàn bộ'
+        : `🌟 ${topicObj.short}`;
+      document.getElementById('mastery-text').textContent = `${scopeMastered} / ${scopeTotal} (${pct}%)`;
+      document.getElementById('mastery-bar').style.width = `${pct}%`;
+
+      document.getElementById('vocab-count-label').textContent = `Đang hiển thị ${filtered.length} / ${VOCABULARY.length} từ khóa`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-3xl p-10 border-2 border-dashed border-slate-200 text-center space-y-2">
+            <div class="text-4xl">🔎</div>
+            <p class="text-lg font-black text-slate-700">Không tìm thấy từ khóa nào!</p>
+            <p class="text-sm font-semibold text-slate-500">Bé thử xóa từ tìm kiếm hoặc chuyển sang "Tất cả" nhé.</p>
+          </div>`;
+        return;
+      }
+
+      const palette = {
+        rose: { border: 'border-rose-200', badge: 'bg-rose-100 text-rose-700', title: 'text-rose-700' },
+        sky: { border: 'border-sky-200', badge: 'bg-sky-100 text-sky-700', title: 'text-sky-700' },
+        emerald: { border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-700', title: 'text-emerald-700' },
+        amber: { border: 'border-amber-200', badge: 'bg-amber-100 text-amber-800', title: 'text-amber-700' },
+        purple: { border: 'border-purple-200', badge: 'bg-purple-100 text-purple-700', title: 'text-purple-700' }
+      };
+
+      grid.innerHTML = filtered.map(c => {
+        const p = palette[c.color] || palette.sky;
+        const mastered = state.masteredIds.has(c.id);
+        const hiddenVi = state.hideVietnamese && !state.revealedCards.has(c.id);
+        const safeEn = c.en.replace(/'/g, "\\'");
+
+        return `
+          <div onclick="toggleCardReveal(${c.id})"
+            class="bg-white rounded-3xl p-4 sm:p-5 border-2 ${mastered ? 'border-emerald-400 bg-emerald-50/20' : p.border} shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-3 ${state.hideVietnamese ? 'cursor-pointer select-none' : ''}">
+
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start gap-2.5">
+                <div class="shrink-0 min-w-[44px] h-[44px] px-2 rounded-2xl ${p.badge} flex items-center justify-center font-black text-sm sm:text-base">
+                  ${c.badge}
+                </div>
+                <h3 class="text-base sm:text-lg font-black ${p.title} leading-snug pt-0.5">${c.en}</h3>
+              </div>
+
+              <div class="flex items-center gap-1 shrink-0">
+                <button onclick="speakEnglish('${safeEn}', 1.0, event)"
+                  class="px-2.5 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-700 font-extrabold text-xs transition active:scale-90"
+                  title="Nghe phát âm chuẩn (1.0x)">
+                  🔊
+                </button>
+                <button onclick="speakEnglish('${safeEn}', 0.65, event)"
+                  class="px-2.5 py-1.5 rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-700 font-extrabold text-xs transition active:scale-90"
+                  title="Đọc chậm (0.65x)">
+                  🐢
+                </button>
+              </div>
+            </div>
+
+            ${hiddenVi ? `
+              <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center text-slate-400 font-bold text-sm">
+                👆 Bấm vào thẻ để xem nghĩa tiếng Việt
+              </div>
+            ` : `
+              <div class="space-y-2 animate-flip">
+                <div class="text-sm sm:text-base font-extrabold text-slate-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                  🇻🇳 ${c.vi}
+                </div>
+                <div class="text-xs sm:text-sm font-semibold text-slate-600 bg-slate-50 rounded-xl px-3 py-2 space-y-0.5">
+                  <div><span class="font-extrabold text-slate-800">Ex:</span> ${c.exEn}</div>
+                  <div class="text-slate-500 italic">→ ${c.exVi}</div>
+                </div>
+              </div>
+            `}
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              <span class="text-[11px] font-bold text-slate-400">
+                ${TOPICS.find(t => t.id === c.topic)?.icon || ''} ${TOPICS.find(t => t.id === c.topic)?.short || ''}
+              </span>
+              <button onclick="toggleMastered(${c.id}, event)"
+                class="px-3 py-1.5 rounded-xl text-xs font-extrabold transition active:scale-95 flex items-center gap-1 ${
+                  mastered
+                    ? 'bg-emerald-500 text-white shadow-sm'
+                    : 'bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-700'
+                }">
+                <span>${mastered ? '✅' : '⭕'}</span>
+                <span>${mastered ? 'Đã thuộc' : 'Chưa thuộc'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 9. TAB 2: QUIZ SETUP UI & TIMER SETTINGS
+    // =========================================================================
+    const QUIZ_MODES = [
+      { id: 'mixed', icon: '🎲', name: 'Hỗn hợp', desc: 'Tất cả dạng' },
+      { id: 'mc', icon: '✅', name: 'Trắc nghiệm', desc: '4 đáp án bẫy' },
+      { id: 'order', icon: '📶', name: 'Xếp thứ tự', desc: 'Chạm xếp thẻ' },
+      { id: 'fill', icon: '✏️', name: 'Điền trống', desc: 'Tự nhập đáp án' },
+      { id: 'match', icon: '🔗', name: 'Nối cặp', desc: '4 cặp từ/số' }
+    ];
+
+    function formatMMSS(totalSec) {
+      const s = Math.max(0, Math.floor(totalSec));
+      const mm = String(Math.floor(s / 60)).padStart(2, '0');
+      const ss = String(s % 60).padStart(2, '0');
+      return `${mm}:${ss}`;
+    }
+
+    function renderQuizSetup() {
+      // Topics
+      document.getElementById('setup-topic-list').innerHTML = TOPICS.map(t => {
+        const active = state.quizTopic === t.id;
+        return `
+          <button onclick="setQuizTopic('${t.id}')"
+            class="p-3 rounded-2xl border-2 text-left transition active:scale-95 flex items-center gap-2.5 ${
+              active
+                ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
+                : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-indigo-300'
+            }">
+            <span class="text-xl">${t.icon}</span>
+            <span class="font-extrabold text-xs sm:text-sm leading-tight">${t.name}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Modes
+      document.getElementById('setup-mode-list').innerHTML = QUIZ_MODES.map(m => {
+        const active = state.quizMode === m.id;
+        return `
+          <button onclick="setQuizMode('${m.id}')"
+            class="p-3 rounded-2xl border-2 text-center transition active:scale-95 flex flex-col items-center justify-center gap-1 ${
+              active
+                ? 'bg-emerald-600 border-emerald-600 text-white shadow-md'
+                : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-300'
+            }">
+            <span class="text-2xl">${m.icon}</span>
+            <span class="font-black text-xs sm:text-sm">${m.name}</span>
+            <span class="text-[11px] font-semibold ${active ? 'text-emerald-100' : 'text-slate-400'}">${m.desc}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Lengths (5 / 10 / 15 / 20 câu)
+      document.getElementById('setup-length-list').innerHTML = [5, 10, 15, 20].map(len => {
+        const active = state.quizLength === len;
+        return `
+          <button onclick="setQuizLength(${len})"
+            class="py-2.5 px-2 rounded-xl border-2 font-black text-xs sm:text-sm transition active:scale-95 ${
+              active
+                ? 'bg-sky-600 border-sky-600 text-white shadow-sm'
+                : 'bg-white border-slate-200 text-slate-600 hover:border-sky-300'
+            }">
+            ${len} câu
+          </button>
+        `;
+      }).join('');
+
+      // Keyword Highlight Toggle UI
+      const btn = document.getElementById('btn-kw-toggle');
+      const knob = document.getElementById('kw-toggle-knob');
+      btn.setAttribute('aria-checked', String(state.highlightKeywords));
+      if (state.highlightKeywords) {
+        btn.className = 'relative shrink-0 w-14 h-8 rounded-full bg-amber-500 transition-colors duration-200 focus:outline-none';
+        knob.style.transform = 'translateX(24px)';
+      } else {
+        btn.className = 'relative shrink-0 w-14 h-8 rounded-full bg-slate-300 transition-colors duration-200 focus:outline-none';
+        knob.style.transform = 'translateX(0px)';
+      }
+
+      renderTimerSetupUI();
+    }
+
+    function renderTimerSetupUI() {
+      const tBtn = document.getElementById('btn-timer-toggle');
+      const tKnob = document.getElementById('timer-toggle-knob');
+      const tLbl = document.getElementById('timer-toggle-label');
+      const tBody = document.getElementById('timer-config-body');
+      const inp = document.getElementById('input-sec-per-q');
+      const presetsEl = document.getElementById('timer-presets');
+      const formulaEl = document.getElementById('timer-formula-text');
+      if (!tBtn) return;
+
+      tBtn.setAttribute('aria-checked', String(state.timerEnabled));
+      if (state.timerEnabled) {
+        tBtn.className = 'relative shrink-0 w-14 h-8 rounded-full bg-emerald-500 transition-colors duration-200 focus:outline-none';
+        tKnob.style.transform = 'translateX(24px)';
+        tLbl.textContent = 'Đang Bật';
+        tLbl.className = 'text-xs font-black text-emerald-700';
+        tBody.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        tBtn.className = 'relative shrink-0 w-14 h-8 rounded-full bg-slate-300 transition-colors duration-200 focus:outline-none';
+        tKnob.style.transform = 'translateX(0px)';
+        tLbl.textContent = 'Đang Tắt';
+        tLbl.className = 'text-xs font-black text-slate-400';
+        tBody.classList.add('opacity-50', 'pointer-events-none');
+      }
+
+      if (inp && document.activeElement !== inp) {
+        inp.value = state.secondsPerQuestion;
+      }
+
+      const presets = [15, 20, 30, 45, 60];
+      presetsEl.innerHTML = presets.map(sec => {
+        const active = state.secondsPerQuestion === sec;
+        return `
+          <button onclick="setSecondsPerQuestion(${sec})"
+            class="px-3 py-1.5 rounded-xl border-2 font-extrabold text-xs sm:text-sm transition active:scale-95 ${
+              active
+                ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                : 'bg-white border-sky-200 text-slate-600 hover:border-indigo-300'
+            }">
+            ${sec}s
+          </button>
+        `;
+      }).join('');
+
+      const totalSec = state.secondsPerQuestion * state.quizLength;
+      formulaEl.textContent = `${state.secondsPerQuestion} giây × ${state.quizLength} câu = ${formatMMSS(totalSec)}`;
+    }
+
+    function toggleTimerSetting() {
+      SFX.pop();
+      state.timerEnabled = !state.timerEnabled;
+      saveProgress();
+      renderTimerSetupUI();
+    }
+
+    function setSecondsPerQuestion(sec) {
+      SFX.pop();
+      state.secondsPerQuestion = Math.max(5, Math.min(300, Number(sec) || 30));
+      const inp = document.getElementById('input-sec-per-q');
+      if (inp) inp.value = state.secondsPerQuestion;
+      saveProgress();
+      renderTimerSetupUI();
+    }
+
+    function handleSecondsInput(val) {
+      const parsed = parseInt(val, 10);
+      if (!isNaN(parsed) && parsed >= 5 && parsed <= 300) {
+        state.secondsPerQuestion = parsed;
+        saveProgress();
+        renderTimerSetupUI();
+      } else if (!isNaN(parsed) && parsed > 0) {
+        const totalSec = parsed * state.quizLength;
+        const formulaEl = document.getElementById('timer-formula-text');
+        if (formulaEl) formulaEl.textContent = `${parsed} giây × ${state.quizLength} câu = ${formatMMSS(totalSec)}`;
+      }
+    }
+
+    function normalizeSecondsInput(val) {
+      let parsed = parseInt(val, 10);
+      if (isNaN(parsed)) parsed = 30;
+      parsed = Math.max(5, Math.min(300, parsed));
+      state.secondsPerQuestion = parsed;
+      const inp = document.getElementById('input-sec-per-q');
+      if (inp) inp.value = parsed;
+      saveProgress();
+      renderTimerSetupUI();
+    }
+
+    function setQuizTopic(id) { SFX.pop(); state.quizTopic = id; renderQuizSetup(); }
+    function setQuizMode(id) { SFX.pop(); state.quizMode = id; renderQuizSetup(); }
+    function setQuizLength(len) { SFX.pop(); state.quizLength = len; renderQuizSetup(); }
+    function toggleHighlightSetting() {
+      SFX.pop();
+      state.highlightKeywords = !state.highlightKeywords;
+      renderQuizSetup();
+    }
+
+    // =========================================================================
+    // 10. COUNTDOWN TIMER ENGINE & ACTIVE QUIZ FLOW
+    // =========================================================================
+    function stopQuizTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+      state.isPaused = false;
+      const overlay = document.getElementById('quiz-pause-overlay');
+      if (overlay) overlay.classList.add('hidden');
+      const pIcon = document.getElementById('pause-icon');
+      const pLbl = document.getElementById('pause-label');
+      if (pIcon) pIcon.textContent = '⏸️';
+      if (pLbl) pLbl.textContent = 'Tạm dừng';
+    }
+
+    function startQuizTimer() {
+      stopQuizTimer();
+      state.elapsedSec = 0;
+      state.timedOut = false;
+      state.isPaused = false;
+
+      const timerBox = document.getElementById('quiz-timer-box');
+      const barWrap = document.getElementById('timer-bar-wrapper');
+
+      if (state.timerEnabled) {
+        state.totalTimeSec = state.secondsPerQuestion * state.questions.length;
+        state.remainingSec = state.totalTimeSec;
+        timerBox.classList.remove('hidden');
+        barWrap.classList.remove('hidden');
+        updateTimerDisplay();
+      } else {
+        state.totalTimeSec = 0;
+        state.remainingSec = 0;
+        timerBox.classList.add('hidden');
+        barWrap.classList.add('hidden');
+      }
+
+      state.timerInterval = setInterval(() => {
+        if (state.isPaused) return;
+        state.elapsedSec++;
+
+        if (state.timerEnabled) {
+          state.remainingSec = Math.max(0, state.remainingSec - 1);
+          updateTimerDisplay();
+
+          if (state.remainingSec > 0 && state.remainingSec <= 10) {
+            SFX.tick();
+          }
+
+          if (state.remainingSec <= 0) {
+            handleTimeUp();
+          }
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const clock = document.getElementById('timer-clock');
+      const badge = document.getElementById('timer-badge');
+      const bar = document.getElementById('timer-progress-bar');
+      if (!clock || !badge || !bar) return;
+
+      clock.textContent = formatMMSS(state.remainingSec);
+      const ratio = state.totalTimeSec > 0 ? (state.remainingSec / state.totalTimeSec) : 0;
+      bar.style.width = `${Math.max(0, Math.min(100, ratio * 100))}%`;
+
+      if (state.remainingSec <= 10) {
+        badge.className = 'flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border-2 border-rose-500 bg-rose-100 text-rose-700 font-black text-base sm:text-lg tabular-nums animate-urgent';
+        bar.className = 'h-full bg-rose-500 rounded-full transition-all duration-1000 ease-linear';
+      } else if (ratio <= 0.3) {
+        badge.className = 'flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border-2 border-amber-400 bg-amber-50 text-amber-800 font-black text-base sm:text-lg tabular-nums transition-colors';
+        bar.className = 'h-full bg-amber-500 rounded-full transition-all duration-1000 ease-linear';
+      } else {
+        badge.className = 'flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-black text-base sm:text-lg tabular-nums transition-colors';
+        bar.className = 'h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-linear';
+      }
+    }
+
+    function togglePauseQuiz() {
+      if (!state.timerEnabled || !state.timerInterval) return;
+      SFX.pop();
+      state.isPaused = !state.isPaused;
+      const overlay = document.getElementById('quiz-pause-overlay');
+      const pIcon = document.getElementById('pause-icon');
+      const pLbl = document.getElementById('pause-label');
+      if (state.isPaused) {
+        overlay.classList.remove('hidden');
+        pIcon.textContent = '▶️';
+        pLbl.textContent = 'Tiếp tục';
+      } else {
+        overlay.classList.add('hidden');
+        pIcon.textContent = '⏸️';
+        pLbl.textContent = 'Tạm dừng';
+      }
+    }
+
+    function handleTimeUp() {
+      stopQuizTimer();
+      state.timedOut = true;
+      SFX.timeout();
+      showToast('⏰ Hết giờ làm bài! Đang tổng kết kết quả...', '⏰');
+
+      const startIdx = state.answeredCurrent ? state.currentIdx + 1 : state.currentIdx;
+      for (let i = startIdx; i < state.questions.length; i++) {
+        const q = state.questions[i];
+        const correctAns = q.type === 'mc'
+          ? q.answer
+          : q.type === 'fill'
+            ? q.displayAnswer
+            : q.type === 'order'
+              ? q.correctOrder.join(' → ')
+              : 'Nối đủ 4 cặp';
+        state.missedQuestions.push({
+          keyword: `⏰ Hết giờ • ${q.keywordLabel || 'Từ khóa toán'}`,
+          questionHtml: q.questionHtml || q.title,
+          userAns: 'Chưa kịp trả lời',
+          correctAns,
+          explainHtml: q.explain
+        });
+      }
+
+      showSummary();
+    }
+
+    function startNewQuiz() {
+      SFX.pop();
+      state.questions = generateQuizSet(state.quizTopic, state.quizMode, state.quizLength);
+      state.currentIdx = 0;
+      state.sessionStars = 0;
+      state.sessionCorrect = 0;
+      state.missedQuestions = [];
+
+      document.getElementById('quiz-setup').classList.add('hidden');
+      document.getElementById('quiz-summary').classList.add('hidden');
+      document.getElementById('quiz-active').classList.remove('hidden');
+
+      renderCurrentQuestion();
+      startQuizTimer();
+    }
+
+    function returnToSetup() {
+      SFX.pop();
+      stopQuizTimer();
+      document.getElementById('quiz-active').classList.add('hidden');
+      document.getElementById('quiz-summary').classList.add('hidden');
+      document.getElementById('quiz-setup').classList.remove('hidden');
+      renderQuizSetup();
+    }
+
+    function applyKeywordHighlights(forceOn = false) {
+      const shouldHighlight = forceOn || state.highlightKeywords;
+      document.querySelectorAll('#quiz-card .kw-tag').forEach(el => {
+        el.classList.toggle('kw-active', shouldHighlight);
+      });
+    }
+
+    function triggerHint() {
+      SFX.pop();
+      const q = state.questions[state.currentIdx];
+      applyKeywordHighlights(true);
+      const box = document.getElementById('quiz-hint-box');
+      document.getElementById('quiz-hint-content').innerHTML = q.hint;
+      box.classList.remove('hidden');
+    }
+
+    function renderCurrentQuestion() {
+      const q = state.questions[state.currentIdx];
+      state.answeredCurrent = false;
+
+      document.getElementById('quiz-feedback').classList.add('hidden');
+      document.getElementById('quiz-hint-box').classList.add('hidden');
+
+      const total = state.questions.length;
+      document.getElementById('quiz-progress-text').textContent = `Câu ${state.currentIdx + 1} / ${total}`;
+      document.getElementById('quiz-progress-bar').style.width = `${(state.currentIdx / total) * 100}%`;
+
+      const badges = {
+        mc: '✅ Trắc nghiệm',
+        order: '📶 Xếp thứ tự',
+        fill: '✏️ Điền chỗ trống',
+        match: '🔗 Nối cặp'
+      };
+      document.getElementById('quiz-type-badge').textContent = badges[q.type];
+
+      const card = document.getElementById('quiz-card');
+      const safeSpeak = (q.speakText || '').replace(/'/g, "\\'");
+
+      const headerControls = `
+        <div class="flex items-center gap-1.5 shrink-0 self-start">
+          <button onclick="speakEnglish('${safeSpeak}', 0.92, event)"
+            class="px-3 py-2 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-700 font-extrabold text-xs sm:text-sm flex items-center gap-1 transition active:scale-95">
+            <span>🔊</span> Nghe đề
+          </button>
+          <button onclick="triggerHint()"
+            class="px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 font-extrabold text-xs sm:text-sm flex items-center gap-1 transition active:scale-95">
+            <span>💡</span> Gợi ý
+          </button>
+        </div>
+      `;
+
+      // --- 1. MULTIPLE CHOICE ---
+      if (q.type === 'mc') {
+        const letters = ['A', 'B', 'C', 'D'];
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div class="text-lg sm:text-2xl font-extrabold text-slate-800 leading-relaxed">${q.questionHtml}</div>
+            ${headerControls}
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            ${q.options.map((opt, idx) => `
+              <button id="mc-opt-${idx}" onclick="checkMC(${idx})"
+                class="text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/70 font-extrabold text-base sm:text-lg text-slate-700 transition-all flex items-center gap-3 active:scale-95">
+                <span class="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-black shrink-0">${letters[idx]}</span>
+                <span class="break-words">${opt}</span>
+              </button>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // --- 2. INTERACTIVE ORDERING ---
+      else if (q.type === 'order') {
+        state.orderSlots = [];
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div class="text-lg sm:text-2xl font-extrabold text-slate-800 leading-relaxed">${q.questionHtml}</div>
+            ${headerControls}
+          </div>
+
+          <div class="bg-indigo-50/60 border-2 border-indigo-100 rounded-2xl p-4 space-y-2">
+            <p class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Thứ tự bé chọn (bấm vào ô đã điền để bỏ ra):</p>
+            <div id="order-slots-container" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+          </div>
+
+          <div class="space-y-2">
+            <p class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Bấm từng thẻ số bên dưới để xếp vào ô:</p>
+            <div id="order-tiles-container" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button id="btn-check-order" onclick="checkOrder()" disabled
+              class="px-7 py-3.5 rounded-2xl bg-slate-200 text-slate-400 font-black text-base transition">
+              Kiểm tra thứ tự ✔️
+            </button>
+          </div>
+        `;
+        renderOrderBoard();
+      }
+
+      // --- 3. FILL IN THE BLANK ---
+      else if (q.type === 'fill') {
+        const quickBtns = q.quickSymbols
+          ? `<div class="flex items-center justify-center gap-3 pt-1">
+              ${q.quickSymbols.map(sym => `
+                <button onclick="fillSymbol('${sym}')"
+                  class="w-16 h-14 rounded-2xl border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-black text-2xl transition active:scale-90">
+                  ${sym}
+                </button>
+              `).join('')}
+            </div>`
+          : '';
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div class="text-lg sm:text-2xl font-extrabold text-slate-800 leading-relaxed flex-1">${q.questionHtml}</div>
+            ${headerControls}
+          </div>
+
+          ${quickBtns}
+
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <input id="fill-input" type="text" autocomplete="off"
+              placeholder="${q.placeholder}"
+              onkeydown="if(event.key === 'Enter') checkFill()"
+              class="flex-1 px-5 py-3.5 rounded-2xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none text-lg font-extrabold text-slate-800 bg-slate-50 focus:bg-white transition text-center sm:text-left" />
+            <button id="btn-check-fill" onclick="checkFill()"
+              class="px-7 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-base shadow-md transition active:scale-95">
+              Kiểm tra ✔️
+            </button>
+          </div>
+        `;
+        setTimeout(() => document.getElementById('fill-input')?.focus(), 80);
+      }
+
+      // --- 4. MATCHING ---
+      else if (q.type === 'match') {
+        state.matchSelectedEn = null;
+        state.matchMatchedIds = new Set();
+        state.matchMistakes = 0;
+
+        const leftItems = shuffle(q.pairs.map((p, i) => ({ id: i, text: p.en })));
+        const rightItems = shuffle(q.pairs.map((p, i) => ({ id: i, text: p.vi })));
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div>
+              <h3 class="text-lg sm:text-2xl font-black text-slate-800">🔗 ${q.title}</h3>
+              <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1">Bấm 1 thẻ bên trái, sau đó bấm thẻ tương ứng bên phải.</p>
+            </div>
+            ${headerControls}
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 sm:gap-5 pt-2">
+            <div class="space-y-2.5">
+              ${leftItems.map(item => `
+                <button id="match-en-${item.id}" onclick="selectMatchEn(${item.id})"
+                  class="w-full p-3.5 sm:p-4 rounded-2xl border-2 border-indigo-200 bg-indigo-50/50 hover:border-indigo-400 font-extrabold text-xs sm:text-base text-indigo-900 transition active:scale-95 text-center">
+                  ${item.text}
+                </button>
+              `).join('')}
+            </div>
+            <div class="space-y-2.5">
+              ${rightItems.map(item => `
+                <button id="match-vi-${item.id}" onclick="selectMatchVi(${item.id})"
+                  class="w-full p-3.5 sm:p-4 rounded-2xl border-2 border-amber-200 bg-amber-50/50 hover:border-amber-400 font-extrabold text-xs sm:text-base text-slate-800 transition active:scale-95 text-center">
+                  ${item.text}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      applyKeywordHighlights(false);
+    }
+
+    // --- Answer Checking Helpers ---
+    function recordAnswer(isCorrect, userAns, correctAns) {
+      const q = state.questions[state.currentIdx];
+      state.answeredCurrent = true;
+      applyKeywordHighlights(true);
+
+      if (isCorrect) {
+        SFX.correct();
+        state.sessionCorrect++;
+        state.sessionStars += 10;
+        state.totalStars += 10;
+        state.streak++;
+        if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+      } else {
+        SFX.wrong();
+        state.streak = 0;
+        state.missedQuestions.push({
+          keyword: q.keywordLabel || 'Từ khóa toán',
+          questionHtml: q.questionHtml || q.title,
+          userAns,
+          correctAns,
+          explainHtml: q.explain
+        });
+      }
+
+      saveProgress();
+      updateHeaderUI();
+
+      const fb = document.getElementById('quiz-feedback');
+      const fIcon = document.getElementById('feedback-icon');
+      const fTitle = document.getElementById('feedback-title');
+      const fExplain = document.getElementById('feedback-explain');
+      const nextBtn = document.getElementById('btn-next-q');
+
+      if (isCorrect) {
+        fb.className = 'rounded-3xl p-5 border-2 border-emerald-300 bg-emerald-50 text-emerald-900 shadow-sm space-y-4 animate-pop';
+        fIcon.textContent = '🎉';
+        fTitle.textContent = 'Chính xác! +10 ⭐';
+      } else {
+        fb.className = 'rounded-3xl p-5 border-2 border-rose-300 bg-rose-50 text-rose-900 shadow-sm space-y-4 animate-pop';
+        fIcon.textContent = '💡';
+        fTitle.textContent = `Chưa đúng rồi! Đáp án đúng là: ${correctAns}`;
+      }
+
+      fExplain.innerHTML = q.explain;
+      nextBtn.textContent = state.currentIdx + 1 >= state.questions.length
+        ? 'Xem kết quả 🏆'
+        : 'Câu tiếp theo ➡️';
+      fb.classList.remove('hidden');
+
+      document.getElementById('quiz-progress-bar').style.width = `${((state.currentIdx + 1) / state.questions.length) * 100}%`;
+    }
+
+    function checkMC(idx) {
+      if (state.answeredCurrent) return;
+      const q = state.questions[state.currentIdx];
+      const chosen = q.options[idx];
+      const isCorrect = chosen === q.answer;
+
+      q.options.forEach((opt, i) => {
+        const el = document.getElementById(`mc-opt-${i}`);
+        if (!el) return;
+        el.disabled = true;
+        if (opt === q.answer) {
+          el.className = 'text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-100 font-extrabold text-base sm:text-lg text-emerald-900 flex items-center gap-3';
+        } else if (i === idx && !isCorrect) {
+          el.className = 'text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-100 font-extrabold text-base sm:text-lg text-rose-900 flex items-center gap-3 animate-shake';
+        } else {
+          el.className = 'text-left p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 opacity-60 font-extrabold text-base sm:text-lg text-slate-400 flex items-center gap-3';
+        }
+      });
+
+      recordAnswer(isCorrect, chosen, q.answer);
+    }
+
+    // --- Interactive Ordering Logic ---
+    function renderOrderBoard() {
+      const q = state.questions[state.currentIdx];
+      const slotsEl = document.getElementById('order-slots-container');
+      const tilesEl = document.getElementById('order-tiles-container');
+      const checkBtn = document.getElementById('btn-check-order');
+      if (!slotsEl || !tilesEl) return;
+
+      slotsEl.innerHTML = [0, 1, 2, 3].map(i => {
+        const val = state.orderSlots[i];
+        if (val) {
+          return `
+            <button onclick="removeOrderSlot(${i})" ${state.answeredCurrent ? 'disabled' : ''}
+              class="p-3.5 rounded-2xl border-2 border-indigo-500 bg-white text-indigo-800 font-black text-lg shadow-sm transition active:scale-95">
+              <span class="block text-[10px] font-extrabold text-indigo-400 mb-0.5">#${i + 1}</span>
+              ${val}
+            </button>
+          `;
+        }
+        return `
+          <div class="p-3.5 rounded-2xl border-2 border-dashed border-indigo-200 bg-white/60 text-indigo-300 font-black text-base text-center flex flex-col items-center justify-center min-h-[68px]">
+            <span class="text-[10px] font-extrabold">Ô #${i + 1}</span>
+            <span>?</span>
+          </div>
+        `;
+      }).join('');
+
+      tilesEl.innerHTML = q.tiles.map((val, idx) => {
+        const used = state.orderSlots.includes(val);
+        return `
+          <button onclick="pickOrderTile(${idx})" ${used || state.answeredCurrent ? 'disabled' : ''}
+            class="p-3.5 rounded-2xl border-2 font-black text-lg transition ${
+              used
+                ? 'border-slate-100 bg-slate-100 text-slate-300 cursor-not-allowed'
+                : 'border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 shadow-xs active:scale-95'
+            }">
+            ${val}
+          </button>
+        `;
+      }).join('');
+
+      const ready = state.orderSlots.length === 4 && !state.answeredCurrent;
+      checkBtn.disabled = !ready;
+      checkBtn.className = ready
+        ? 'px-7 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-base shadow-md transition active:scale-95'
+        : 'px-7 py-3.5 rounded-2xl bg-slate-200 text-slate-400 font-black text-base transition';
+    }
+
+    function pickOrderTile(tileIdx) {
+      if (state.answeredCurrent) return;
+      const q = state.questions[state.currentIdx];
+      const val = q.tiles[tileIdx];
+      if (!state.orderSlots.includes(val) && state.orderSlots.length < 4) {
+        SFX.pop();
+        state.orderSlots.push(val);
+        renderOrderBoard();
+      }
+    }
+
+    function removeOrderSlot(slotIdx) {
+      if (state.answeredCurrent) return;
+      SFX.pop();
+      state.orderSlots.splice(slotIdx, 1);
+      renderOrderBoard();
+    }
+
+    function checkOrder() {
+      if (state.answeredCurrent || state.orderSlots.length < 4) return;
+      const q = state.questions[state.currentIdx];
+      const isCorrect = state.orderSlots.every((v, i) => v === q.correctOrder[i]);
+      renderOrderBoard();
+      recordAnswer(isCorrect, state.orderSlots.join(' → '), q.correctOrder.join(' → '));
+    }
+
+    // --- Fill-in-the-blank Logic ---
+    function fillSymbol(sym) {
+      if (state.answeredCurrent) return;
+      SFX.pop();
+      const inp = document.getElementById('fill-input');
+      if (inp) {
+        inp.value = sym;
+        inp.focus();
+      }
+    }
+
+    function checkFill() {
+      if (state.answeredCurrent) return;
+      const q = state.questions[state.currentIdx];
+      const inp = document.getElementById('fill-input');
+      const raw = (inp?.value || '').trim();
+      if (!raw) {
+        SFX.wrong();
+        inp?.classList.add('animate-shake');
+        setTimeout(() => inp?.classList.remove('animate-shake'), 400);
+        return;
+      }
+
+      const norm = raw.replace(/\s+/g, '').replace(/,/g, '').toLowerCase();
+      const isCorrect = q.accepted.some(a => a.replace(/\s+/g, '').replace(/,/g, '').toLowerCase() === norm);
+
+      inp.disabled = true;
+      const btn = document.getElementById('btn-check-fill');
+      if (btn) btn.disabled = true;
+
+      if (isCorrect) {
+        inp.className = 'flex-1 px-5 py-3.5 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 text-lg font-black text-center sm:text-left';
+      } else {
+        inp.className = 'flex-1 px-5 py-3.5 rounded-2xl border-2 border-rose-500 bg-rose-50 text-rose-800 text-lg font-black text-center sm:text-left animate-shake';
+      }
+
+      recordAnswer(isCorrect, raw, q.displayAnswer);
+    }
+
+    // --- Matching Logic ---
+    function selectMatchEn(id) {
+      if (state.answeredCurrent || state.matchMatchedIds.has(id)) return;
+      SFX.pop();
+      if (state.matchSelectedEn !== null) {
+        const prev = document.getElementById(`match-en-${state.matchSelectedEn}`);
+        if (prev && !state.matchMatchedIds.has(state.matchSelectedEn)) {
+          prev.className = 'w-full p-3.5 sm:p-4 rounded-2xl border-2 border-indigo-200 bg-indigo-50/50 hover:border-indigo-400 font-extrabold text-xs sm:text-base text-indigo-900 transition active:scale-95 text-center';
+        }
+      }
+      state.matchSelectedEn = id;
+      const cur = document.getElementById(`match-en-${id}`);
+      if (cur) {
+        cur.className = 'w-full p-3.5 sm:p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-600 text-white font-black text-xs sm:text-base shadow-md transition text-center';
+      }
+    }
+
+    function selectMatchVi(id) {
+      if (state.answeredCurrent || state.matchMatchedIds.has(id) || state.matchSelectedEn === null) return;
+      const enId = state.matchSelectedEn;
+      const enBtn = document.getElementById(`match-en-${enId}`);
+      const viBtn = document.getElementById(`match-vi-${id}`);
+
+      if (enId === id) {
+        SFX.match();
+        state.matchMatchedIds.add(id);
+        state.matchSelectedEn = null;
+        if (enBtn) {
+          enBtn.disabled = true;
+          enBtn.className = 'w-full p-3.5 sm:p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-100 text-emerald-800 font-extrabold text-xs sm:text-base text-center opacity-80';
+        }
+        if (viBtn) {
+          viBtn.disabled = true;
+          viBtn.className = 'w-full p-3.5 sm:p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-100 text-emerald-800 font-extrabold text-xs sm:text-base text-center opacity-80';
+        }
+
+        const q = state.questions[state.currentIdx];
+        if (state.matchMatchedIds.size === q.pairs.length) {
+          const isPerfect = state.matchMistakes === 0;
+          recordAnswer(isPerfect, isPerfect ? 'Nối đúng 4/4' : `Nối sai ${state.matchMistakes} lần`, 'Nối đúng cả 4 cặp');
+        }
+      } else {
+        SFX.wrong();
+        state.matchMistakes++;
+        if (viBtn) {
+          viBtn.classList.add('animate-shake', 'border-rose-500', 'bg-rose-100');
+          setTimeout(() => {
+            viBtn.classList.remove('animate-shake', 'border-rose-500', 'bg-rose-100');
+          }, 420);
+        }
+      }
+    }
+
+    function nextQuestion() {
+      SFX.pop();
+      if (state.currentIdx + 1 >= state.questions.length) {
+        showSummary();
+      } else {
+        state.currentIdx++;
+        renderCurrentQuestion();
+      }
+    }
+
+    function showSummary() {
+      stopQuizTimer();
+      document.getElementById('quiz-active').classList.add('hidden');
+      document.getElementById('quiz-summary').classList.remove('hidden');
+
+      if (!state.timedOut) {
+        SFX.fanfare();
+        launchConfetti();
+      }
+
+      const total = state.questions.length;
+      const acc = Math.round((state.sessionCorrect / total) * 100);
+      const answeredCount = Math.max(1, state.timedOut
+        ? (state.answeredCurrent ? state.currentIdx + 1 : state.currentIdx)
+        : total);
+      const avgSec = Math.round(state.elapsedSec / answeredCount);
+
+      document.getElementById('summary-trophy').textContent = state.timedOut ? '⏰' : '🏆';
+      document.getElementById('summary-score').textContent = `${state.sessionCorrect}/${total}`;
+      document.getElementById('summary-accuracy').textContent = `${acc}%`;
+      document.getElementById('summary-stars').textContent = `+${state.sessionStars}`;
+      document.getElementById('summary-time').textContent = formatMMSS(state.elapsedSec);
+      document.getElementById('summary-speed').textContent = `${avgSec}s/câu`;
+
+      const sub = document.getElementById('summary-subtitle');
+      if (state.timedOut) sub.textContent = '⏰ Đã hết thời gian làm bài! Bé hãy xem lại các câu chưa kịp làm hoặc làm nhầm bên dưới nhé.';
+      else if (acc === 100) sub.textContent = 'Xuất sắc 100%! Bé đã đọc hiểu đề Toán tiếng Anh cực kỳ chuẩn xác!';
+      else if (acc >= 75) sub.textContent = 'Làm tốt lắm! Bé đang tiến bộ rất nhanh với các từ khóa lớp 4.';
+      else sub.textContent = 'Cố lên nhé! Xem lại các từ khóa bị nhầm bên dưới rồi làm bộ đề mới nha.';
+
+      const missedSec = document.getElementById('summary-missed-section');
+      const missedList = document.getElementById('summary-missed-list');
+      if (state.missedQuestions.length > 0) {
+        missedSec.classList.remove('hidden');
+        missedList.innerHTML = state.missedQuestions.map((m, i) => `
+          <div class="p-4 rounded-2xl bg-rose-50/60 border border-rose-200 space-y-1.5 text-sm">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-black text-rose-700">Câu nhầm #${i + 1}</span>
+              <span class="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full text-xs font-black">🔑 ${m.keyword}</span>
+            </div>
+            <div class="font-bold text-slate-800">${m.questionHtml}</div>
+            ${m.userAns ? `<div class="text-xs sm:text-sm"><span class="text-rose-600 font-bold">Bé chọn: ${m.userAns}</span> &nbsp;|&nbsp; <span class="text-emerald-700 font-black">Đúng: ${m.correctAns}</span></div>` : ''}
+            <div class="text-slate-600 text-xs sm:text-sm pt-1">${m.explainHtml}</div>
+          </div>
+        `).join('');
+      } else {
+        missedSec.classList.add('hidden');
+      }
+    }
+
+    // =========================================================================
+    // 11. INITIALIZE APP
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadProgress();
+      updateHeaderUI();
+      renderVocabTopicPills();
+      renderVocabGrid();
+      renderQuizSetup();
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+    });
+  </script>
+</body>
+</html>
