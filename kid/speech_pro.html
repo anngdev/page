@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luyện Đọc Pro — Karaoke, Khẩu Hình, Ghi Âm & Líu Lưỡi</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Tùy chỉnh hiệu ứng từ Karaoke */
+    .karaoke-word {
+      display: inline-block;
+      padding: 0.12em 0.28em;
+      margin: 0.08em 0.04em;
+      border-radius: 0.45rem;
+      transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease, opacity 0.14s ease;
+      cursor: pointer;
+    }
+    .karaoke-word:hover {
+      background-color: rgba(99, 102, 241, 0.12);
+    }
+    .karaoke-word.word-read {
+      opacity: 0.42;
+    }
+    .karaoke-word.word-active {
+      background-color: #4f46e5;
+      color: #ffffff;
+      opacity: 1;
+      transform: scale(1.06);
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+      font-weight: 700;
+    }
+    .dark .karaoke-word.word-active {
+      background-color: #6366f1;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45);
+    }
+    .karaoke-word.word-breath {
+      background-color: #059669 !important;
+      color: #ffffff !important;
+      opacity: 1 !important;
+      transform: scale(1.03);
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+      font-weight: 700;
+    }
+    .dark .karaoke-word.word-breath {
+      background-color: #10b981 !important;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);
+    }
+
+    /* Chuyển động nhẹ cho hình minh họa khẩu hình */
+    @keyframes mouthPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .mouth-animate {
+      animation: mouthPulse 2.4s ease-in-out infinite;
+    }
+
+    /* Thanh cuộn tinh gọn */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.45);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.65);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen pb-32 sm:pb-28 transition-colors duration-200">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="sticky top-0 z-30 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-brand-500/25 shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white truncate">Luyện Đọc Pro</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Karaoke tốc độ chuẩn Việt • Khẩu hình • Líu lưỡi • Ghi âm</p>
+        </div>
+      </div>
+
+      <!-- Chuyển Sáng / Tối -->
+      <button id="btn-theme-toggle" type="button" aria-label="Đổi giao diện Sáng/Tối"
+        class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-300 transition shrink-0">
+        <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        </svg>
+        <svg id="icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Thanh điều hướng 3 chế độ -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 pb-3">
+      <nav class="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80" role="tablist">
+        <button data-tab="karaoke" type="button" role="tab"
+          class="tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white dark:bg-slate-900 text-brand-600 dark:text-brand-400 shadow-sm">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+          </svg>
+          <span class="truncate">Tốc Độ Đọc</span>
+        </button>
+        <button data-tab="mouth" type="button" role="tab"
+          class="tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+          </svg>
+          <span class="truncate">Khẩu Hình</span>
+        </button>
+        <button data-tab="twister" type="button" role="tab"
+          class="tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+          </svg>
+          <span class="truncate">Câu Líu Lưỡi</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== NỘI DUNG CHÍNH ==================== -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-5 space-y-6">
+
+    <!-- ==================== TAB 1: TỐC ĐỘ ĐỌC (KARAOKE) ==================== -->
+    <section id="panel-karaoke" class="tab-panel space-y-5">
+      <!-- Thư viện 100 bài luyện giọng & Tự nhập -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-3.5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Thư viện 100 bài luyện giọng</h2>
+              <span id="library-match-count" class="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">100 / 100 bài</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Tuyển chọn bài đọc chuẩn MC, sách nói, thuyết trình, voiceover & luyện hơi • Nhấn vào bất kỳ từ nào để nhảy vị trí</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btn-random-sample" type="button"
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
+              </svg>
+              Ngẫu nhiên
+            </button>
+            <button id="btn-open-custom-text" type="button"
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-brand-50 hover:bg-brand-100 dark:bg-brand-900/40 dark:hover:bg-brand-900/70 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+              Tự nhập
+            </button>
+            <button id="btn-toggle-library" type="button"
+              class="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+              <span id="library-toggle-label">Thu gọn</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="library-body" class="space-y-3">
+          <!-- Bộ lọc & Tìm kiếm -->
+          <div class="flex flex-col sm:flex-row gap-2.5">
+            <div class="relative flex-1">
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <input id="sample-search-input" type="text" placeholder="Tìm theo tên bài, số bài (#15) hoặc từ khóa..."
+                class="w-full pl-9 pr-3 py-2 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            </div>
+            <select id="sample-category-filter"
+              class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="all">Tất cả chuyên mục (100 bài)</option>
+              <option value="Bản tin & MC">Bản tin & MC (15 bài)</option>
+              <option value="Sách nói & Tản văn">Sách nói & Tản văn (15 bài)</option>
+              <option value="Thuyết trình">Thuyết trình & Diễn giả (15 bài)</option>
+              <option value="Voiceover & TVC">Voiceover & Quảng cáo (13 bài)</option>
+              <option value="Podcast & Chữa lành">Podcast & Chữa lành (12 bài)</option>
+              <option value="Kể chuyện & Ngụ ngôn">Kể chuyện & Ngụ ngôn (10 bài)</option>
+              <option value="Diễn cảm & Triết lý">Diễn cảm & Triết lý (10 bài)</option>
+              <option value="Luyện hơi & Khẩu hình">Luyện hơi & Khẩu hình (10 bài)</option>
+            </select>
+          </div>
+
+          <!-- Lưới 100 bài đọc có thanh cuộn gọn -->
+          <div id="sample-buttons" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
+            <!-- Render bằng JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Bảng điều khiển tốc độ, ngắt nghỉ dấu câu & cỡ chữ -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+          <!-- Tốc độ đọc (tiếng/phút - âm tiết tiếng Việt) -->
+          <div class="lg:col-span-6 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <label for="wpm-slider" class="text-sm font-semibold text-slate-700 dark:text-slate-200">Tốc độ đọc</label>
+                <span class="text-[11px] text-slate-400 dark:text-slate-500 ml-1">(tiếng/phút • chuẩn tiếng Việt)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="wpm-level-badge" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300">Chuẩn</span>
+                <span id="wpm-value" class="text-sm font-extrabold text-brand-600 dark:text-brand-400">200 tiếng/phút</span>
+              </div>
+            </div>
+            <input id="wpm-slider" type="range" min="80" max="400" step="5" value="200"
+              class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-600" />
+            <div class="flex flex-wrap gap-1.5">
+              <button data-wpm="150" type="button" class="wpm-preset px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">Chậm (150)</button>
+              <button data-wpm="200" type="button" class="wpm-preset px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 transition">Chuẩn (200)</button>
+              <button data-wpm="250" type="button" class="wpm-preset px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">Nhanh (250)</button>
+              <button data-wpm="320" type="button" class="wpm-preset px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">Siêu tốc (320)</button>
+            </div>
+          </div>
+
+          <!-- Cỡ chữ, Ngắt nghỉ dấu câu & Đếm ngược -->
+          <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-center">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="fontsize-slider" class="text-sm font-semibold text-slate-700 dark:text-slate-200">Cỡ chữ</label>
+                <span id="fontsize-value" class="text-xs font-bold text-slate-500 dark:text-slate-400">24px</span>
+              </div>
+              <input id="fontsize-slider" type="range" min="18" max="42" step="2" value="24"
+                class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-600" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="pause-mode-select" class="text-sm font-semibold text-slate-700 dark:text-slate-200 block">
+                Ngắt nghỉ lấy hơi (dấu câu)
+              </label>
+              <select id="pause-mode-select"
+                class="w-full px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <option value="natural" selected>Tự nhiên (Phẩy +0.35s • Chấm +0.80s)</option>
+                <option value="deep">Lấy hơi sâu (Phẩy +0.55s • Chấm +1.15s)</option>
+                <option value="brisk">Nhịp nhanh (Phẩy +0.20s • Chấm +0.50s)</option>
+                <option value="none">Không nghỉ thêm</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70">
+              <span class="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">Đếm ngược 3-2-1 trước khi đọc</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="countdown-toggle" type="checkbox" checked class="sr-only peer" />
+                <div class="w-11 h-6 bg-slate-300 dark:bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khung hiển thị Karaoke -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <!-- Header khung đọc -->
+        <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span id="karaoke-current-title" class="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">#01 • Bản tin chuyển đổi số</span>
+            <span id="karaoke-breath-indicator" class="hidden px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 animate-pulse shrink-0">
+              💨 Lấy hơi...
+            </span>
+          </div>
+          <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"></span> Đã đọc</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-brand-600"></span> Đang đọc</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Lấy hơi</span>
+          </div>
+        </div>
+
+        <!-- Viewport văn bản -->
+        <div class="relative">
+          <div id="karaoke-viewport"
+            class="p-6 sm:p-8 h-72 sm:h-80 overflow-y-auto leading-relaxed text-slate-800 dark:text-slate-100 select-none"
+            style="font-size: 24px;">
+            <!-- Các từ sẽ render bằng JS -->
+          </div>
+
+          <!-- Overlay đếm ngược 3-2-1 -->
+          <div id="karaoke-countdown-overlay" class="hidden absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+            <span class="text-xs font-semibold uppercase tracking-widest text-brand-300 mb-2">Chuẩn bị hít hơi...</span>
+            <span id="karaoke-countdown-number" class="text-7xl font-black text-white drop-shadow-lg">3</span>
+          </div>
+        </div>
+
+        <!-- Thanh tiến độ & Nút phát -->
+        <div class="px-5 py-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 space-y-3">
+          <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+            <div id="karaoke-progress-bar" class="h-full bg-gradient-to-r from-brand-500 to-violet-500 transition-all duration-150" style="width: 0%;"></div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <button id="btn-karaoke-play" type="button"
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/25 transition">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                <span>Bắt đầu đọc</span>
+              </button>
+              <button id="btn-karaoke-reset" type="button"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl font-semibold text-sm bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+                </svg>
+                Làm lại
+              </button>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <span id="karaoke-progress-text">0 / 0 tiếng</span>
+              <span id="karaoke-est-time">Ước tính: 0s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: LUYỆN KHẨU HÌNH MIỆNG ==================== -->
+    <section id="panel-mouth" class="tab-panel hidden space-y-6">
+      <!-- Hàng trên: Gương soi khẩu hình + Khởi động cơ miệng -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Gương soi Webcam -->
+        <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-4">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 dark:text-white">Gương soi khẩu hình</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Quan sát độ mở môi, hàm và lưỡi trực tiếp</p>
+            </div>
+            <button id="btn-webcam-toggle" type="button"
+              class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition">
+              Bật gương
+            </button>
+          </div>
+
+          <div class="relative aspect-video rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center border border-slate-200 dark:border-slate-800">
+            <video id="webcam-video" autoplay playsinline muted class="hidden w-full h-full object-cover scale-x-[-1]"></video>
+            <div id="webcam-placeholder" class="text-center p-5 space-y-2">
+              <div class="w-12 h-12 mx-auto rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+              </div>
+              <p class="text-xs text-slate-400">Nhấn <strong>Bật gương</strong> để dùng camera trước (chỉ xử lý cục bộ trên máy bạn)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 bài khởi động cơ miệng -->
+        <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 dark:text-white">Khởi động cơ miệng (30 giây / bài)</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Làm mềm cơ hàm, môi và lưỡi trước khi luyện đọc tốc độ cao</p>
+          </div>
+          <div id="warmup-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- Render bằng JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Luyện Nguyên âm mở & Phụ âm dễ nhầm -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Thẻ luyện khẩu hình chuẩn Việt</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Chọn nhóm âm để xem hình minh họa khẩu hình và câu thực hành đi kèm</p>
+          </div>
+          <div class="flex gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
+            <button data-mouth-group="vowels" type="button" class="mouth-group-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-900 text-brand-600 dark:text-brand-400 shadow-sm">Nguyên âm mở</button>
+            <button data-mouth-group="consonants" type="button" class="mouth-group-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400">Phụ âm dễ nhầm</button>
+          </div>
+        </div>
+
+        <div id="mouth-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: CÂU KHÓ LÍU LƯỠI ==================== -->
+    <section id="panel-twister" class="tab-panel hidden space-y-5">
+      <!-- Khu vực thử thách Karaoke lặp 3 vòng -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="twister-active-tag" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">Nhóm L / N</span>
+            <span id="twister-active-diff" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">Trung bình</span>
+            <span id="twister-round-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">Vòng 1/3 • 170 tiếng/phút</span>
+          </div>
+          <button id="btn-twister-random" type="button"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+            🎲 Câu ngẫu nhiên
+          </button>
+        </div>
+
+        <!-- Khung hiển thị câu líu lưỡi -->
+        <div id="twister-stage"
+          class="min-h-[120px] p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-center text-center text-xl sm:text-2xl font-bold leading-relaxed text-slate-900 dark:text-white">
+          <!-- Render từng từ bằng JS -->
+        </div>
+
+        <!-- Điều khiển tốc độ & Phát 3 vòng -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-1">
+          <div class="flex-1 max-w-sm space-y-1.5">
+            <div class="flex justify-between text-xs font-semibold">
+              <span class="text-slate-600 dark:text-slate-300">Tốc độ khởi điểm (+25 tiếng/phút mỗi vòng)</span>
+              <span id="twister-speed-label" class="text-brand-600 dark:text-brand-400 font-bold">170 tiếng/phút</span>
+            </div>
+            <input id="twister-speed-slider" type="range" min="100" max="350" step="10" value="170"
+              class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-600" />
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btn-twister-play" type="button"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/25 transition">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+              <span>Chạy thử thách 3 vòng</span>
+            </button>
+            <button id="btn-twister-reset" type="button"
+              class="px-3.5 py-2.5 rounded-xl font-semibold text-sm bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+              Đặt lại
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danh sách 16 câu líu lưỡi -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">Bộ 16 câu líu lưỡi tiếng Việt</h2>
+          <div class="flex flex-wrap gap-1.5">
+            <button data-diff="all" type="button" class="twister-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-600 text-white">Tất cả</button>
+            <button data-diff="Dễ" type="button" class="twister-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Dễ</button>
+            <button data-diff="Trung bình" type="button" class="twister-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Trung bình</button>
+            <button data-diff="Khó" type="button" class="twister-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Khó</button>
+          </div>
+        </div>
+
+        <div id="twister-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== THANH GHI ÂM CỐ ĐỊNH DƯỚI CÙNG ==================== -->
+  <footer class="fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-8px_25px_rgba(15,23,42,0.08)]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
+      <!-- Nút Ghi âm & Tạm dừng -->
+      <div class="flex items-center gap-2.5">
+        <button id="btn-record-toggle" type="button"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/25 transition">
+          <span id="record-dot" class="w-2.5 h-2.5 rounded-full bg-white"></span>
+          <span id="record-btn-label">Ghi âm</span>
+        </button>
+        <button id="btn-record-pause" type="button" disabled
+          class="hidden inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 transition">
+          Tạm dừng
+        </button>
+        <span id="record-timer" class="text-sm font-mono font-bold text-slate-700 dark:text-slate-200 min-w-[52px]">00:00</span>
+      </div>
+
+      <!-- Sóng âm trực quan -->
+      <div class="flex-1 min-w-[140px] h-10 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 overflow-hidden px-2 flex items-center">
+        <canvas id="waveform-canvas" class="w-full h-8 block"></canvas>
+      </div>
+
+      <!-- Nút mở danh sách bản ghi -->
+      <button id="btn-open-recordings" type="button"
+        class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 transition shrink-0">
+        <svg class="w-4 h-4 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+        </svg>
+        <span>Bản ghi</span>
+        <span id="recordings-count-badge" class="px-1.5 py-0.5 rounded-full text-[11px] font-extrabold bg-brand-600 text-white">0</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL TỰ NHẬP VĂN BẢN ==================== -->
+  <div id="custom-text-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-xl shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Tự nhập văn bản luyện đọc</h3>
+        <button id="btn-close-custom-modal" type="button" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div>
+          <label for="custom-title-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tiêu đề bài đọc</label>
+          <input id="custom-title-input" type="text" placeholder="Ví dụ: Bài thuyết trình dự án..."
+            class="w-full px-3.5 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+        <div>
+          <label for="custom-body-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Nội dung văn bản</label>
+          <textarea id="custom-body-input" rows="6" placeholder="Dán hoặc gõ đoạn văn tiếng Việt bạn muốn luyện đọc tại đây..."
+            class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+        </div>
+      </div>
+      <div class="px-5 py-3.5 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
+        <button id="btn-cancel-custom-modal" type="button" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">Hủy</button>
+        <button id="btn-apply-custom-text" type="button" class="px-4 py-2 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition">Áp dụng vào Karaoke</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DANH SÁCH BẢN GHI ÂM ==================== -->
+  <div id="recordings-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[82vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">Danh sách bản ghi âm</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Nghe lại để kiểm tra tốc độ, độ tròn chữ và nhịp lấy hơi</p>
+        </div>
+        <button id="btn-close-recordings-modal" type="button" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
+      </div>
+      <div id="recordings-list" class="p-5 overflow-y-auto space-y-3 flex-1">
+        <!-- Render bằng JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST THÔNG BÁO ==================== -->
+  <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2 pointer-events-none max-w-xs w-full"></div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    /*************************************************************************
+     * 1. DỮ LIỆU MẪU (100 BÀI LUYỆN GIỌNG, KHẨU HÌNH, KHỞI ĐỘNG, CÂU LÍU LƯỠI)
+     *************************************************************************/
+    const RAW_READING_SAMPLES = [
+      // === 1. BẢN TIN & MC (15 bài) ===
+      ['Bản tin & MC', 'Bản tin chuyển đổi số', 'Thưa quý vị và các bạn, trong những năm gần đây, chuyển đổi số đang trở thành động lực quan trọng thúc đẩy sự phát triển kinh tế và xã hội tại Việt Nam. Từ các đô thị lớn cho đến những vùng nông thôn xa xôi, công nghệ số đã giúp người dân tiếp cận dịch vụ công nhanh chóng, minh bạch và thuận tiện hơn bao giờ hết. Tuy nhiên, để quá trình này thực sự bền vững, mỗi cá nhân cần chủ động nâng cao kỹ năng số và bảo vệ an toàn thông tin cá nhân trên không gian mạng.'],
+      ['Bản tin & MC', 'Dự báo thời tiết miền Trung', 'Kính chào quý vị khán giả, bản tin dự báo thời tiết hôm nay xin được bắt đầu với khu vực miền Trung. Từ Thanh Hóa đến Thừa Thiên Huế, sáng sớm có sương mù nhẹ vài nơi, trưa và chiều trời hửng nắng dịu mát. Nhiệt độ cao nhất dao động từ hai mươi sáu đến hai mươi chín độ C. Về đêm, gió đông bắc thổi nhẹ, vùng núi phía tây trời se lạnh. Quý vị ra ngoài vào sáng sớm nên mang theo áo khoác mỏng để giữ ấm cho sức khỏe.'],
+      ['Bản tin & MC', 'Bản tin kinh tế buổi sáng', 'Chào mừng quý vị đến với bản tin kinh tế tài chính buổi sáng. Trong quý vừa qua, kim ngạch xuất khẩu nông sản chủ lực của nước ta ghi nhận mức tăng trưởng ấn tượng, đặc biệt ở nhóm hàng cà phê, gạo chất lượng cao và trái cây tươi. Các doanh nghiệp đã chú trọng hơn vào quy trình sản xuất xanh, truy xuất nguồn gốc minh bạch và bao bì thân thiện môi trường. Đây là tín hiệu tích cực giúp hàng Việt khẳng định vị thế vững chắc trên thị trường quốc tế.'],
+      ['Bản tin & MC', 'Bản tin thể thao sôi động', 'Thưa quý vị, không khí trên sân vận động quốc gia tối qua thực sự bùng nổ trước màn trình diễn đầy quả cảm của đội tuyển nước nhà. Ngay từ những phút đầu tiên, các cầu thủ đã chủ động dâng cao đội hình, phối hợp mạch lạc và liên tục tạo ra sóng gió trước khung thành đối phương. Bàn thắng quyết định ở phút thứ tám mươi hai không chỉ mang về chiến thắng thuyết phục, mà còn thắp sáng niềm tự hào trong trái tim hàng triệu người hâm mộ cả nước.'],
+      ['Bản tin & MC', 'Lời mở đầu MC sự kiện Gala', 'Nồng nhiệt chào đón toàn thể quý vị đại biểu, quý đối tác và các anh chị em đồng nghiệp đã có mặt trong đêm tiệc Gala đầy ý nghĩa tối hôm nay! Một năm đã trôi qua với biết bao nỗ lực, thử thách và cả những cột mốc rực rỡ đáng tự hào. Đêm nay, hãy tạm gác lại những bộn bề công việc, để chúng ta cùng nhau nâng ly chúc mừng, sẻ chia niềm vui và tiếp thêm ngọn lửa nhiệt huyết cho một chặng đường mới bứt phá hơn nữa!'],
+      ['Bản tin & MC', 'Bản tin công nghệ AI', 'Trí tuệ nhân tạo đang thay đổi sâu sắc cách con người làm việc, học tập và sáng tạo mỗi ngày. Tại diễn đàn công nghệ vừa diễn ra, nhiều chuyên gia nhận định rằng công nghệ không sinh ra để thay thế con người, mà là cánh tay đắc lực giúp giải phóng sức lao động khỏi những tác vụ lặp đi lặp lại. Người biết làm chủ công cụ mới, kết hợp cùng tư duy nhân văn và khả năng giao tiếp tinh tế, sẽ luôn nắm giữ lợi thế vượt trội trong tương lai.'],
+      ['Bản tin & MC', 'Bản tin văn hóa di sản', 'Tối nay, lễ hội ánh sáng và âm nhạc truyền thống chính thức khai mạc tại không gian phố cổ, thu hút hàng nghìn người dân địa phương cùng du khách thập phương. Những giai điệu nhã nhạc cung đình, kết hợp cùng nghệ thuật trình diễn hiện đại, đã mang đến một bức tranh giao thoa đầy cuốn hút giữa quá khứ và hiện tại. Sự kiện không chỉ tôn vinh bản sắc văn hóa dân tộc, mà còn góp phần quảng bá hình ảnh đất nước mến khách đến bạn bè năm châu.'],
+      ['Bản tin & MC', 'Bản tin giao thông giờ cao điểm', 'Kính thưa quý thính giả đang lưu thông trên đường, hiện tại là bảy giờ ba mươi phút sáng, mật độ phương tiện tại các tuyến cửa ngõ thành phố đang tăng khá nhanh. Tại khu vực ngã tư trung tâm, dòng xe di chuyển chậm do ảnh hưởng của cơn mưa rào nhẹ đầu ngày. Lực lượng cảnh sát giao thông đã có mặt kịp thời để điều tiết phân luồng. Kính chúc quý vị giữ vững tay lái, tuân thủ tín hiệu đèn và di chuyển thật an toàn.'],
+      ['Bản tin & MC', 'Bản tin du lịch xanh', 'Xu hướng du lịch xanh và du lịch trải nghiệm cộng đồng đang trở thành lựa chọn hàng đầu của nhiều gia đình trẻ trong kỳ nghỉ năm nay. Thay vì những lịch trình dày đặc, du khách ưu tiên tìm về những bản làng yên bình, tự tay thu hoạch nông sản, thưởng thức ẩm thực bản địa và hạn chế tối đa rác thải nhựa. Cách đi du lịch có trách nhiệm này không chỉ mang lại sự thư thái đích thực, mà còn giúp bảo tồn thiên nhiên bền vững.'],
+      ['Bản tin & MC', 'Bản tin giáo dục kỹ năng', 'Trong chương trình giáo dục hiện đại, việc rèn luyện kỹ năng đọc hiểu, thuyết trình và làm việc nhóm cho học sinh ngày càng được nhà trường và phụ huynh đặc biệt quan tâm. Nhiều câu lạc bộ đọc sách, sân khấu học đường và diễn đàn tranh biện đã được thành lập, tạo môi trường cởi mở để các em tự tin bày tỏ quan điểm cá nhân. Khi trẻ biết lắng nghe và diễn đạt rõ ràng, cánh cửa tri thức sẽ mở rộng hơn bao giờ hết.'],
+      ['Bản tin & MC', 'Bản tin sức khỏe cộng đồng', 'Chuyên mục Sống Khỏe hôm nay xin gửi tới quý vị một lưu ý quan trọng về giấc ngủ. Theo các bác sĩ chuyên khoa, việc sử dụng thiết bị điện tử quá sát giờ đi ngủ khiến ánh sáng xanh ức chế quá trình tiết hóc môn tự nhiên, làm giấc ngủ chập chờn và kém sâu. Quý vị nên tắt màn hình ít nhất ba mươi phút trước khi lên giường, đọc vài trang sách nhẹ nhàng và hít thở đều để cơ thể phục hồi năng lượng trọn vẹn.'],
+      ['Bản tin & MC', 'Bản tin môi trường & trồng rừng', 'Hưởng ứng chiến dịch Vì một Việt Nam xanh, cuối tuần qua, hơn hai nghìn tình nguyện viên trẻ đã cùng nhau trồng mới mười nghìn cây bản địa tại khu vực rừng phòng hộ ven biển. Dưới cái nắng nhẹ của buổi sáng, những bàn tay lấm lem bùn đất vẫn nở nụ cười rạng rỡ. Mỗi mầm xanh được gieo xuống hôm nay sẽ trở thành lá chắn vững chãi trước thiên tai và là món quà vô giá gửi lại cho thế hệ mai sau.'],
+      ['Bản tin & MC', 'Lời dẫn chương trình văn nghệ', 'Kính thưa quý vị, âm nhạc có một sức mạnh kỳ diệu, đó là khả năng chạm tới những rung động sâu thẳm nhất trong tâm hồn mà đôi khi ngôn từ không thể diễn tả hết. Tiếp nối không khí ấm áp của chương trình, xin mời quý vị cùng thả lỏng tâm trí để thưởng thức một giai điệu ngọt ngào, viết về tình yêu quê hương đất nước qua phần trình bày đầy cảm xúc ngay sau đây. Xin một tràng pháo tay thật nồng nhiệt!'],
+      ['Bản tin & MC', 'Lời bế mạc hội thảo trang trọng', 'Thưa quý vị đại biểu và các vị khách quý, sau một ngày làm việc nghiêm túc, sôi nổi với nhiều tham luận chất lượng, hội thảo của chúng ta đã hoàn thành toàn bộ nội dung đề ra. Thay mặt ban tổ chức, xin trân trọng cảm ơn những ý kiến đóng góp tâm huyết của các chuyên gia và sự đồng hành của toàn thể quý vị. Kính chúc quý vị sức khỏe, hạnh phúc và hẹn gặp lại trong những sự kiện ý nghĩa tiếp theo. Xin chân thành cảm ơn!'],
+      ['Bản tin & MC', 'Bản tin khởi nghiệp trẻ', 'Trong làn sóng đổi mới sáng tạo hiện nay, ngày càng nhiều bạn trẻ lựa chọn quay trở về quê hương để khởi nghiệp từ chính những sản vật địa phương. Bằng kiến thức quản trị hiện đại và khả năng kể chuyện khéo léo trên nền tảng số, họ đã nâng tầm những món quà quê mộc mạc thành thương hiệu được người tiêu dùng tin yêu. Hành trình ấy tuy nhiều chông gai, nhưng luôn tràn đầy niềm tin và khát vọng cống hiến.'],
+
+      // === 2. SÁCH NÓI & TẢN VĂN (15 bài) ===
+      ['Sách nói & Tản văn', 'Chiều cuối thu bên sông', 'Chiều cuối thu, gió heo may khẽ lùa qua những tán bàng đang ngả sang màu đỏ thẫm. Trên con đường nhỏ ven sông, ông lão bán tò he vẫn kiên nhẫn nặn từng bông hoa, từng chú chim nhỏ bằng thứ bột gạo nhuộm màu tự nhiên. Đôi bàn tay gầy guộc, hằn sâu dấu vết thời gian của ông thoăn thoắt như đang kể lại cả một miền ký ức tuổi thơ êm đềm. Giữa nhịp sống phố thị hối hả, khoảnh khắc giản dị ấy bỗng khiến lòng người dịu lại đến lạ thường.'],
+      ['Sách nói & Tản văn', 'Mưa chiều trên phố Huế', 'Mưa Huế không ồn ã, vội vã, mà cứ rơi rả rích, dịu dàng như một bản nhạc không lời. Ngồi bên khung cửa sổ gỗ cũ kỹ, nhìn những giọt nước lăn dài trên mái ngói rêu phong và mặt sông Hương bảng lảng sương khói, ta bỗng thấy thời gian như ngừng trôi. Trong tiếng mưa rơi đều đặn, hương trà sen thoang thoảng lan khắp căn phòng nhỏ, sưởi ấm cõi lòng người lữ khách phương xa.'],
+      ['Sách nói & Tản văn', 'Sớm mai mùa thu Hà Nội', 'Có những buổi sớm mai mùa thu, chỉ cần bước chân ra khỏi ngõ là đã chạm phải làn gió mát lành pha chút hương hoa sữa nồng nàn. Ánh nắng vàng óng như mật rót xuống những hàng cây sấu cổ thụ, in bóng lấp lánh trên vỉa hè lát gạch. Bên gánh hàng rong, mùi cốm mới thơm dịu gói trong lá sen xanh khiến ai đi qua cũng muốn dừng lại, hít hà thật sâu để giữ trọn vẹn dư vị của một mùa đẹp nhất trong năm.'],
+      ['Sách nói & Tản văn', 'Sài Gòn những đêm không ngủ', 'Khi ánh đèn đường bật sáng, Sài Gòn lại khoác lên mình một chiếc áo rực rỡ và tràn đầy sức sống. Dòng xe vẫn nối đuôi nhau tấp nập trên những đại lộ rộng thênh thang, còn trong những con hẻm nhỏ, tiếng cười nói rôm rả bên ly cà phê sữa đá vẫn kéo dài đến tận khuya. Thành phố này bao dung và hào sảng, luôn mở rộng vòng tay đón nhận những giấc mơ trẻ từ khắp mọi miền đất nước tìm về.'],
+      ['Sách nói & Tản văn', 'Mùi cà phê buổi sáng', 'Tôi có thói quen thức dậy sớm hơn thường lệ mười lăm phút, chỉ để tự tay pha cho mình một phin cà phê nóng. Nghe từng giọt nâu sánh đặc rơi chậm rãi xuống đáy ly thủy tinh, lòng người cũng theo đó mà lắng lại. Hương cà phê rang mộc lan tỏa trong không gian yên tĩnh của buổi sớm, như một lời chào dịu dàng nhắc nhở rằng, dù hôm nay có bận rộn đến đâu, ta vẫn xứng đáng có một khởi đầu thật thảnh thơi.'],
+      ['Sách nói & Tản văn', 'Chuyến tàu đêm xuyên Việt', 'Tiếng còi tàu vang lên trầm ấm, kéo theo nhịp bánh sắt lăn đều trên đường ray giữa màn đêm tĩnh mịch. Ngồi tựa đầu bên ô cửa kính, tôi lặng lẽ ngắm nhìn những ánh đèn làng quê lướt qua như những đốm lửa nhỏ ấm áp. Đi tàu hỏa dạy ta sự kiên nhẫn, dạy ta biết tận hưởng từng chặng đường đi qua chứ không chỉ nóng lòng chờ đợi ga cuối. Đêm trên tàu thật dài, nhưng cũng thật bình yên.'],
+      ['Sách nói & Tản văn', 'Khu vườn nhỏ của ngoại', 'Sau ngôi nhà ngói ba gian của ngoại là một khu vườn xanh mướt quanh năm. Nào là giàn mướp trổ hoa vàng rực, hàng cau vươn cao đón nắng, cho đến mấy luống rau thơm ngoại chăm chút mỗi sáng sớm. Tuổi thơ tôi lớn lên cùng tiếng chim sâu lích rích trong vòm lá và mùi đất ẩm sau những cơn mưa rào mùa hạ. Sau này đi qua bao nhiêu thành phố hoa lệ, góc vườn xưa vẫn là nơi bình yên nhất trong ký ức.'],
+      ['Sách nói & Tản văn', 'Trang sách cũ thơm mùi thời gian', 'Mỗi cuốn sách cũ đều mang trong mình một linh hồn riêng. Những trang giấy đã ngả sang màu vàng ấm, vài dòng ghi chú nắn nót bằng bút chì ở lề trang, hay chiếc lá khô ép vội từ một mùa thu nào đó đều gợi lên bao cảm xúc bâng khuâng. Đọc sách không chỉ là tiếp nhận tri thức, mà còn là cuộc trò chuyện thầm lặng giữa tâm hồn ta với những người đi trước qua hàng thế kỷ.'],
+      ['Sách nói & Tản văn', 'Bữa cơm chiều sum vầy', 'Dù ngoài kia có biết bao món ngon vật lạ, chẳng gì có thể sánh bằng mâm cơm chiều nóng hổi do mẹ nấu. Chỉ đơn giản là bát canh cua đồng ngọt mát, đĩa cà pháo giòn tan và nồi cá kho tộ thơm lừng mùi tiêu bắc, vậy mà sao ngon đến thế. Trong ánh đèn vàng ấm áp, cả nhà quây quần kể nhau nghe chuyện buồn vui suốt một ngày dài. Hạnh phúc, hóa ra, đôi khi chỉ gói gọn trong một bữa cơm đủ đầy tiếng cười.'],
+      ['Sách nói & Tản văn', 'Đêm trăng bên bờ biển', 'Đêm nay trăng tròn vành vạnh, trải một dải lụa bạc lấp lánh trên mặt biển bao la. Tiếng sóng vỗ rì rào vào bờ cát trắng như khúc hát ru dịu êm của đại dương. Đi chân trần trên cát mịn, lắng nghe gió biển thổi lồng lộng qua mái tóc, mọi âu lo thường nhật bỗng trở nên thật nhỏ bé. Trước thiên nhiên rộng lớn, con người học được cách khiêm nhường và trân trọng từng hơi thở của cuộc sống.'],
+      ['Sách nói & Tản văn', 'Gió mùa đông bắc về', 'Sáng nay mở cửa, một làn gió lạnh bất chợt ùa vào khiến tôi khẽ rùng mình. Vậy là gió mùa đông bắc đã thực sự về trên phố. Người đi đường vội vàng khoác thêm chiếc áo len dày, quàng khăn ấm và đi sát vào nhau hơn. Mùa đông mang theo cái rét ngọt, nhưng cũng khiến ta biết quý trọng hơn hơi ấm của một cái nắm tay, một ly trà gừng nóng hổi và ánh lửa bập bùng bên bếp than hồng.'],
+      ['Sách nói & Tản văn', 'Hạt mưa đầu mùa hạ', 'Sau nhiều ngày nắng gắt, bầu trời bỗng chuyển sang màu xám bạc, rồi những hạt mưa đầu mùa nặng hạt thi nhau rơi xuống mái tôn lộp độp. Mùi ngai ngái của đất khô gặp nước bốc lên, thân quen đến kỳ lạ. Cây cối ngoài vườn như được tắm mát, vươn mình xanh tươi trở lại. Cơn mưa rào đến nhanh rồi cũng tạnh nhanh, để lại bầu trời trong veo và một chiếc cầu vồng rực rỡ phía chân trời.'],
+      ['Sách nói & Tản văn', 'Ánh đèn lồng phố cổ', 'Khi hoàng hôn buông xuống, hàng trăm chiếc đèn lồng đủ sắc màu dọc hai bên bờ sông Hoài đồng loạt tỏa sáng. Ánh sáng lung linh phản chiếu xuống mặt nước, tạo nên một khung cảnh huyền ảo như bước ra từ trang cổ tích. Dòng người chậm rãi tản bộ qua những ngôi nhà tường vàng mái ngói, lắng nghe tiếng hát bài chòi vang vọng đâu đây. Phố cổ đẹp không chỉ ở dáng vẻ bên ngoài, mà ở nhịp sống thong dong đầy chất thơ.'],
+      ['Sách nói & Tản văn', 'Con đường làng mùa lúa chín', 'Tháng năm về, cả cánh đồng quê như được khoác lên tấm thảm vàng rực rỡ trải dài đến tận chân trời. Gió thổi nhẹ làm những bông lúa trĩu hạt xô vào nhau tạo nên tiếng rì rào vui tai. Trên con đường đê quen thuộc, hương lúa chín thơm ngào ngạt hòa quyện cùng mùi rơm rạ phơi nắng, đánh thức cả một trời thương nhớ trong lòng những người con xa xứ.'],
+      ['Sách nói & Tản văn', 'Lời ru ngọt ngào của mẹ', 'Ngày còn thơ bé, tôi thường chìm vào giấc ngủ trên chiếc võng đay kẽo kẹt cùng lời ru à ơi trầm bổng của mẹ. Khi ấy tôi chưa hiểu hết ý nghĩa sâu xa trong từng câu ca dao, chỉ thấy giọng mẹ sao mà êm ái, che chở đến thế. Năm tháng trôi qua, tóc mẹ đã điểm bạc, nhưng giai điệu yêu thương ấy vẫn luôn ngân vang trong trái tim tôi như một điểm tựa bình yên suốt cuộc đời.'],
+
+      // === 3. THUYẾT TRÌNH & DIỄN GIẢ (15 bài) ===
+      ['Thuyết trình', 'Sức hút của giọng nói tự tin', 'Xin chào tất cả mọi người! Bạn có bao giờ tự hỏi điều gì tạo nên sức hút của một người diễn giả xuất sắc không? Đó không chỉ nằm ở những trang trình chiếu đẹp mắt, mà quan trọng hơn cả là giọng nói rõ ràng, nhịp điệu chắc chắn và sự kết nối chân thành với khán giả. Khi bạn kiểm soát tốt hơi thở, nhấn nhá đúng trọng tâm và biết dừng nghỉ hợp lý, từng câu chữ bạn nói ra sẽ mang theo năng lượng tích cực đầy thuyết phục.'],
+      ['Thuyết trình', 'Nghệ thuật lắng nghe sâu', 'Chúng ta thường dành nhiều năm để học cách nói sao cho hay, nhưng lại ít khi dành thời gian học cách lắng nghe sao cho trọn vẹn. Lắng nghe thực sự không phải là im lặng chờ đến lượt mình phát biểu, mà là mở rộng tâm trí để thấu hiểu cảm xúc và thông điệp ẩn sau lời nói của người đối diện. Khi bạn lắng nghe bằng cả trái tim, bạn đang trao đi món quà tôn trọng quý giá nhất trong mọi mối quan hệ.'],
+      ['Thuyết trình', 'Sức mạnh của thói quen nhỏ', 'Nhiều người tin rằng muốn thay đổi cuộc đời phải bắt đầu từ những quyết định thật lớn lao. Nhưng thực tế lại chứng minh điều ngược lại: thành công bền vững được xây nên từ những thói quen nhỏ bé lặp lại mỗi ngày. Chỉ cần tốt hơn một phần trăm hôm qua, đọc thêm năm trang sách, hay luyện giọng mười phút mỗi sáng, sau một năm bạn sẽ ngạc nhiên trước phiên bản trưởng thành và bản lĩnh của chính mình.'],
+      ['Thuyết trình', 'Vượt qua nỗi sợ đám đông', 'Đứng trước hàng trăm ánh mắt và cảm thấy tim đập nhanh, lòng bàn tay đổ mồ hôi là trải nghiệm hoàn toàn bình thường của bất kỳ ai. Thay vì cố gắng chối bỏ sự hồi hộp ấy, hãy mỉm cười đón nhận nó như nguồn năng lượng giúp bạn tập trung hơn. Hãy hít một hơi thật sâu xuống bụng, nhìn vào một gương mặt thân thiện dưới khán phòng và nhớ rằng: khán giả ở đây không phải để phán xét, mà để lắng nghe giá trị bạn mang tới.'],
+      ['Thuyết trình', 'Giá trị của những lần vấp ngã', 'Không có con đường nào dẫn tới đỉnh cao mà trải đầy hoa hồng. Thất bại không phải là dấu chấm hết cho ước mơ của bạn, mà là một người thầy nghiêm khắc chỉ ra những lỗ hổng ta cần hoàn thiện. Điều làm nên sự khác biệt giữa người thành công và người bỏ cuộc không nằm ở việc ai ít vấp ngã hơn, mà ở việc ai đủ dũng cảm đứng dậy, rút ra bài học và bước tiếp với tâm thế vững vàng hơn.'],
+      ['Thuyết trình', 'Kỷ luật tạo nên tự do', 'Nghe có vẻ nghịch lý, nhưng chính kỷ luật bản thân lại là chìa khóa mở ra cánh cửa tự do đích thực. Khi bạn kỷ luật với sức khỏe, bạn có tự do tận hưởng cuộc sống mà không lo bệnh tật. Khi bạn kỷ luật với thời gian và tài chính, bạn có tự do theo đuổi những đam mê của riêng mình. Đừng chờ cảm hứng mới bắt đầu, hãy để kỷ luật dẫn đường, rồi cảm hứng sẽ tự khắc theo sau.'],
+      ['Thuyết trình', 'Tư duy phản biện thời đại số', 'Mỗi ngày, chúng ta tiếp nhận hàng nghìn luồng thông tin khác nhau từ mạng xã hội, báo chí và các cuộc trò chuyện. Nếu không rèn luyện tư duy phản biện, ta rất dễ bị cuốn theo cảm xúc đám đông hoặc tin vào những thông tin chưa kiểm chứng. Hãy tập thói quen đặt câu hỏi: nguồn tin này từ đâu, bằng chứng là gì, và còn góc nhìn nào khác không? Sự tỉnh táo chính là la bàn quý giá nhất trong kỷ nguyên thông tin.'],
+      ['Thuyết trình', 'Quản lý thời gian hiệu quả', 'Mỗi người trên thế giới này, dù giàu hay nghèo, đều được trao công bằng đúng hai mươi bốn giờ mỗi ngày. Bí quyết của những người làm việc hiệu quả không phải là cố gắng làm thật nhiều việc cùng lúc, mà là biết chọn đúng việc quan trọng nhất để dồn toàn bộ tâm trí. Hãy học cách nói không với những điều gây xao nhãng, để dành thời gian xứng đáng cho mục tiêu lớn và những người bạn yêu thương.'],
+      ['Thuyết trình', 'Lãnh đạo bằng sự thấu cảm', 'Một nhà lãnh đạo giỏi không chỉ là người đưa ra mệnh lệnh chính xác, mà còn là người biết truyền cảm hứng và khơi dậy tiềm năng trong mỗi thành viên. Quyền lực có thể khiến người khác tuân theo trong chốc lát, nhưng chỉ có sự thấu cảm, công bằng và tinh thần sẵn sàng đồng hành mới giữ chân được nhân tài lâu dài. Khi nhân viên cảm thấy được tin tưởng, họ sẽ tạo nên những kết quả vượt ngoài mong đợi.'],
+      ['Thuyết trình', 'Học tập suốt đời', 'Tấm bằng đại học không phải là điểm kết thúc của hành trình học hỏi, mà chỉ là tấm vé khởi hành bước vào trường đời rộng lớn. Thế giới đang thay đổi với tốc độ chóng mặt, những kiến thức hôm nay rất có thể sẽ trở nên cũ kỹ chỉ sau vài năm nữa. Giữ cho mình một tâm thế tò mò, khiêm tốn học hỏi từ sách vở, từ đồng nghiệp và từ cả những người trẻ hơn là cách tốt nhất để ta không bao giờ tụt lại phía sau.'],
+      ['Thuyết trình', 'Giao tiếp không bạo lực', 'Trong những cuộc tranh luận căng thẳng, chúng ta thường vô tình dùng lời nói sắc nhọn để bảo vệ cái tôi của mình, mà quên mất rằng mục đích cuối cùng là tìm ra giải pháp chung. Giao tiếp không bạo lực bắt đầu từ việc gọi tên cảm xúc thật của bản thân một cách bình tĩnh, thay vì đổ lỗi hay chỉ trích đối phương. Một lời nói ôn hòa nhưng rõ ràng luôn có sức mạnh hóa giải xung đột gấp trăm lần sự nóng giận.'],
+      ['Thuyết trình', 'Sáng tạo từ điều giản dị', 'Nhiều người nghĩ rằng sáng tạo là đặc quyền của các nghệ sĩ hay nhà phát minh thiên tài. Thực ra, sáng tạo hiện diện ngay trong cách bạn sắp xếp lại bàn làm việc, cải tiến một quy trình cũ cho gọn hơn, hay kể một câu chuyện quen thuộc theo góc nhìn mới mẻ. Hãy cho phép bản thân quan sát thế giới xung quanh bằng đôi mắt tò mò, bạn sẽ phát hiện ra vô vàn ý tưởng tuyệt vời ngay trước mắt.'],
+      ['Thuyết trình', 'Xây dựng thương hiệu cá nhân', 'Thương hiệu cá nhân không phải là thứ hào nhoáng bạn tự tô vẽ trên mạng xã hội, mà là những gì người khác nhắc về bạn khi bạn không có mặt trong căn phòng. Nó được tạo nên từ chữ tín trong từng lời hứa, thái độ tận tâm với công việc và phong cách ứng xử văn minh mỗi ngày. Hãy sống chân thật và kiên trì tạo ra giá trị hữu ích, uy tín của bạn sẽ tự nhiên lan tỏa.'],
+      ['Thuyết trình', 'Sức mạnh của tinh thần đồng đội', 'Muốn đi nhanh hãy đi một mình, nhưng muốn đi xa chắc chắn phải đi cùng nhau. Trong một tập thể gắn kết, điểm mạnh của người này sẽ bù đắp cho điểm yếu của người kia, biến những mục tiêu tưởng chừng bất khả thi thành hiện thực. Khi mỗi cá nhân biết đặt lợi ích chung lên trên cái tôi riêng biệt, cả đội ngũ sẽ trở thành một khối thống nhất không gì lay chuyển nổi.'],
+      ['Thuyết trình', 'Dám bước ra khỏi vùng an toàn', 'Vùng an toàn là một nơi thật dễ chịu, nhưng chẳng có bông hoa nào nở rộ nếu hạt giống cứ mãi nằm yên trong vỏ bọc. Mọi bước ngoặt đáng tự hào trong đời đều bắt đầu từ khoảnh khắc bạn chấp nhận thử một điều mới mẻ dù còn đôi chút e ngại. Hôm nay, hãy thử làm một việc nhỏ mà trước đây bạn từng chần chừ, bạn sẽ thấy giới hạn của mình rộng lớn hơn bạn tưởng rất nhiều!'],
+
+      // === 4. VOICEOVER & QUẢNG CÁO TVC (13 bài) ===
+      ['Voiceover & TVC', 'TVC Trà thảo mộc thiên nhiên', 'Giữa nhịp sống hối hả đầy áp lực, đôi khi cơ thể bạn chỉ cần một khoảng lặng thanh mát để cân bằng trở lại. Được tuyển chọn từ những búp trà non tinh khiết và chín loại thảo mộc quý trên vùng cao nguyên lộng gió, mỗi ngụm trà mang đến vị ngọt thanh dịu nhẹ, đánh thức nguồn năng lượng an lành từ bên trong. Thanh mát từng khoảnh khắc, sống khỏe trọn niềm vui!'],
+      ['Voiceover & TVC', 'TVC Cà phê nguyên chất', 'Đánh thức ngày mới bằng hương thơm quyến rũ của những hạt cà phê chín mọng từ vùng đất đỏ bazan Tây Nguyên. Qua quy trình rang xay chuẩn mực giữ trọn tinh túy tự nhiên, từng giọt cà phê đậm đà, hậu vị ngọt sâu sẽ khơi nguồn cảm hứng sáng tạo bất tận cho bạn. Cà phê nguyên bản — Đậm chất riêng, bứt phá mọi giới hạn!'],
+      ['Voiceover & TVC', 'Quảng bá du lịch miền Trung', 'Hãy để trái tim bạn rung động trước vẻ đẹp kỳ vĩ của dải đất miền Trung di sản! Nơi có những bãi biển xanh ngọc bích trải dài bất tận, những công trình kiến trúc cổ kính nhuốm màu thời gian và nền ẩm thực tinh tế làm say lòng mọi du khách. Xách ba lô lên và khám phá hành trình di sản đầy cảm xúc ngay mùa hè này!'],
+      ['Voiceover & TVC', 'TVC Xe điện thông minh', 'Tương lai của di chuyển xanh đã thực sự bắt đầu. Thiết kế khí động học sang trọng, vận hành êm ái không tiếng ồn cùng công nghệ trợ lý ảo thông minh thấu hiểu từng thao tác của người lái. Không khói bụi, tiết kiệm vượt trội và an toàn tối đa trên mọi cung đường. Lựa chọn hôm nay, kiến tạo hành tinh xanh cho ngày mai!'],
+      ['Voiceover & TVC', 'TVC Đồng hồ chế tác tinh xảo', 'Thời gian không chỉ được đo bằng những con số, mà được khắc ghi qua từng khoảnh khắc đáng giá trong cuộc đời. Từng chi tiết siêu nhỏ được chế tác thủ công tỉ mỉ dưới bàn tay của những nghệ nhân bậc thầy, kết hợp cùng mặt kính chống trầy hoàn hảo. Đẳng cấp vượt thời gian, khẳng định bản lĩnh người dẫn đầu.'],
+      ['Voiceover & TVC', 'TVC Sữa tươi thảo nguyên', 'Từ những cánh đồng cỏ xanh mướt trải dài dưới ánh nắng ban mai, dòng sữa tươi nguyên chất được thu hoạch và đóng hộp khép kín chỉ trong vòng hai mươi bốn giờ. Giàu canxi, vitamin và dưỡng chất tự nhiên, tiếp thêm nguồn năng lượng dồi dào cho cả gia đình mỗi ngày. Ngon thuần khiết, khỏe vững vàng!'],
+      ['Voiceover & TVC', 'TVC Nệm êm cho giấc ngủ sâu', 'Sau tám tiếng làm việc căng thẳng, điều tuyệt vời nhất chính là được ngả lưng trên chiếc giường êm ái. Với cấu trúc đa tầng nâng đỡ chuẩn xác đường cong cột sống và lớp vải thoáng khí dịu nhẹ với làn da, bạn sẽ dễ dàng chìm vào giấc ngủ sâu trọn vẹn đến tận sáng mai. Ngủ ngon hơn, sống trọn vẹn hơn!'],
+      ['Voiceover & TVC', 'TVC Nhà thông minh', 'Chào mừng bạn trở về nhà! Chỉ với một chạm nhẹ hoặc một câu lệnh bằng giọng nói, ánh đèn dịu ấm tự động bật sáng, rèm cửa khép lại và giai điệu yêu thích vang lên khắp căn phòng. Công nghệ nhà thông minh giúp bạn tiết kiệm năng lượng, bảo vệ tổ ấm hai mươi bốn trên bảy và tận hưởng cuộc sống tiện nghi trong tầm tay.'],
+      ['Voiceover & TVC', 'TVC Thời trang bền vững', 'Thời trang đẹp không chỉ là khoác lên mình những thiết kế tinh tế, mà còn là sự tử tế với thiên nhiên. Sử dụng chất liệu sợi tre và bông hữu cơ mềm mại, thoáng mát, bộ sưu tập mới mang đến cảm giác tự do, thanh lịch trong từng chuyển động. Tối giản để tỏa sáng, bền vững để yêu thương!'],
+      ['Voiceover & TVC', 'TVC Nước hoa tinh tế', 'Mỗi mùi hương là một câu chuyện không lời lưu giữ ký ức khó phai. Khởi đầu tươi mát với hương cam bergamot dịu nhẹ, hòa quyện cùng nét quyến rũ của hoa nhài đêm và kết thúc ấm áp bằng gỗ đàn hương sâu lắng. Chỉ một làn hương khẽ thoảng qua, đủ để dấu ấn của bạn ở lại mãi trong tâm trí người đối diện.'],
+      ['Voiceover & TVC', 'TVC Ứng dụng học ngoại ngữ', 'Bạn muốn giao tiếp tiếng Anh tự tin nhưng luôn bận rộn không có thời gian đến lớp? Chỉ với mười lăm phút luyện tập mỗi ngày cùng gia sư trí tuệ nhân tạo sửa phát âm chi tiết theo thời gian thực, lộ trình học được thiết kế riêng cho trình độ của bạn. Tải ứng dụng ngay hôm nay và tự tin bước ra thế giới!'],
+      ['Voiceover & TVC', 'TVC Ngân hàng số tiện lợi', 'Mọi giao dịch tài chính giờ đây trở nên đơn giản hơn bao giờ hết. Chuyển tiền tức thì không mất phí, thanh toán hóa đơn chỉ trong ba giây và quản lý chi tiêu thông minh với biểu đồ trực quan rõ ràng. Công nghệ bảo mật đa lớp chuẩn quốc tế giúp bạn hoàn toàn an tâm. Ngân hàng số thế hệ mới — Nhanh gọn, an toàn, luôn bên bạn!'],
+      ['Voiceover & TVC', 'TVC Bảo hiểm gia đình', 'Cuộc sống luôn ẩn chứa những điều bất ngờ, nhưng tình yêu thương bạn dành cho gia đình thì luôn vững chắc. Một kế hoạch bảo vệ tài chính toàn diện hôm nay chính là chiếc ô che chở bình an cho người thân yêu trước mọi sóng gió ngày mai. Chủ động chuẩn bị để mỗi ngày bên nhau đều trọn vẹn nụ cười an tâm.'],
+
+      // === 5. PODCAST & CHỮA LÀNH (12 bài) ===
+      ['Podcast & Chữa lành', 'Thở chậm lại một chút', 'Chào bạn, hôm nay của bạn thế nào? Nếu cả ngày vừa qua bạn đã phải chạy đua với quá nhiều hạn chót, quá nhiều kỳ vọng và những dòng tin nhắn không ngừng đổ về, thì ngay lúc này, hãy cho phép mình dừng lại một chút nhé. Thả lỏng đôi vai đang gồng cứng, hít một hơi thật sâu, rồi thở ra thật chậm. Mọi chuyện rồi sẽ ổn thôi, bạn đã cố gắng rất nhiều rồi.'],
+      ['Podcast & Chữa lành', 'Học cách buông bỏ nhẹ nhàng', 'Có những nỗi buồn ta giữ mãi trong lòng không phải vì nó quá nặng, mà vì ta chưa chịu đặt nó xuống. Quá khứ dù đẹp đẽ hay tiếc nuối cũng đã thuộc về ngày hôm qua, còn đôi tay bạn hôm nay cần được rảnh rang để đón lấy những điều tốt đẹp mới mẻ đang chờ phía trước. Buông bỏ không phải là yếu đuối, mà là một lựa chọn đầy dũng cảm để trái tim được bình yên.'],
+      ['Podcast & Chữa lành', 'Bình yên nằm ở bên trong', 'Chúng ta thường đi tìm sự bình yên ở một chuyến du lịch thật xa, một công việc lương cao hơn, hay một lời công nhận từ người khác. Nhưng rồi ta nhận ra, nếu tâm trí vẫn đầy rẫy lo âu và so sánh, thì đi đến đâu ta cũng thấy chật chội. Bình yên thực sự không phải là nơi không có bão tố, mà là khi lòng ta đủ vững vàng và dịu êm ngay giữa những ồn ào của cuộc sống.'],
+      ['Podcast & Chữa lành', 'Yêu thương chính mình nhiều hơn', 'Bạn rất giỏi an ủi bạn bè khi họ vấp ngã, luôn dịu dàng và kiên nhẫn với những người xung quanh, nhưng đã bao lâu rồi bạn chưa nói một lời tử tế với chính mình? Đừng quá khắt khe mỗi khi bạn lỡ làm sai một việc nhỏ. Hãy ôm lấy bản thân, lắng nghe cơ thể khi nó mệt mỏi và trân trọng chính mình như cách bạn trân trọng người bạn thân nhất đời.'],
+      ['Podcast & Chữa lành', 'Khi bạn cảm thấy mệt mỏi', 'Sẽ có những ngày bạn thức dậy mà chẳng còn chút động lực nào, mọi thứ xung quanh bỗng trở nên xám xịt và nặng nề. Xin hãy nhớ rằng, bạn hoàn toàn có quyền được mệt mỏi, được nghỉ ngơi và không cần phải tỏ ra mạnh mẽ suốt ba trăm sáu mươi lăm ngày trong năm. Cứ nghỉ một nhịp cho lại sức, khi nắng lên, ta lại thong thả bước tiếp.'],
+      ['Podcast & Chữa lành', 'Đừng so sánh hành trình của mình', 'Mỗi loài hoa có một mùa nở rộ khác nhau, và mỗi con người cũng có một múi giờ riêng cho cuộc đời mình. Có người thành công rực rỡ ở tuổi đôi mươi, cũng có người tìm thấy hạnh phúc đích thực khi đã đi qua nửa đời người. Đừng mang chương đầu tiên của cuộc đời bạn đi so sánh với chương thứ hai mươi của người khác. Bạn không hề chậm trễ, bạn đang đi đúng nhịp của riêng mình.'],
+      ['Podcast & Chữa lành', 'Niềm vui từ những điều nhỏ bé', 'Hạnh phúc không phải lúc nào cũng là những cột mốc rầm rộ. Đôi khi, nó chỉ là cảm giác dễ chịu khi bước vào căn phòng thơm mùi tinh dầu, là một bông hoa nhỏ bất ngờ nở bên ban công, hay một tin nhắn hỏi thăm ấm áp từ người bạn cũ. Khi ta biết chậm lại và mở lòng đón nhận những điều giản dị ấy, mỗi ngày bình thường đều trở nên thật đáng sống.'],
+      ['Podcast & Chữa lành', 'Một ngày không màn hình', 'Hãy thử tưởng tượng một ngày cuối tuần bạn tạm cất chiếc điện thoại vào ngăn kéo, không lướt mạng xã hội, không kiểm tra thư công việc. Thay vào đó, bạn tự nấu một bữa ăn ngon, đi dạo dưới hàng cây xanh, đọc một cuốn sách giấy và trò chuyện trực tiếp với người thân. Bạn sẽ bất ngờ nhận ra thời gian bỗng trở nên dài hơn, và tâm trí nhẹ nhõm hơn bao giờ hết.'],
+      ['Podcast & Chữa lành', 'Lòng biết ơn mỗi buổi sáng', 'Trước khi bước xuống giường vào mỗi buổi sáng, hãy thử nghĩ về ba điều nhỏ bé khiến bạn thấy biết ơn. Đó có thể là một giấc ngủ ngon, một cơ thể khỏe mạnh, hay ánh nắng dịu dàng đang chiếu qua khung cửa sổ. Thực hành lòng biết ơn không làm biến mất những khó khăn, nhưng nó giúp ta nhìn thấy nguồn sáng tích cực luôn hiện hữu xung quanh mình.'],
+      ['Podcast & Chữa lành', 'Chấp nhận sự không hoàn hảo', 'Nỗi ám ảnh phải trở nên hoàn hảo thường khiến ta chần chừ không dám bắt đầu, và chẳng bao giờ thấy hài lòng với kết quả mình làm ra. Thực tế, chính những vết nứt, những nét vụng về đáng yêu mới làm nên vẻ đẹp chân thật của con người. Hoàn thành luôn tốt hơn hoàn hảo. Hãy cho phép mình được sai, được sửa và được lớn lên từng ngày.'],
+      ['Podcast & Chữa lành', 'Viết thư cho phiên bản tương lai', 'Nếu hôm nay bạn viết một bức thư gửi cho chính mình của năm năm sau, bạn sẽ nhắn nhủ điều gì? Có lẽ bạn sẽ cảm ơn bản thân vì đã không bỏ cuộc trong những ngày gian khó nhất, vì đã giữ được trái tim ấm áp trước những va vấp của cuộc đời. Hãy sống hôm nay thật trọn vẹn, để phiên bản tương lai khi ngoảnh lại sẽ mỉm cười đầy tự hào.'],
+      ['Podcast & Chữa lành', 'Gửi những tâm hồn đang cô đơn', 'Đêm khuya là lúc cảm giác cô đơn dễ ghé thăm nhất, khiến ta thấy mình như đang lạc lõng giữa thành phố triệu dân. Nhưng bạn biết không, ở đâu đó ngoài kia cũng có rất nhiều người đang mang những tâm sự giống bạn, cũng đang nỗ lực từng ngày để sống tốt hơn. Bạn không hề đơn độc. Chúc bạn một đêm thật ngon giấc và sớm mai thức dậy với trái tim thật nhẹ nhàng.'],
+
+      // === 6. KỂ CHUYỆN & NGỤ NGÔN (10 bài) ===
+      ['Kể chuyện & Ngụ ngôn', 'Câu chuyện Rùa và Thỏ', 'Ngày xửa ngày xưa, trong khu rừng xanh, chú Thỏ kiêu ngạo luôn chê cười bác Rùa chậm chạp. Một hôm, cả hai quyết định thi chạy đến ngọn đồi phía xa. Thỏ phóng đi như bay, bỏ xa Rùa một quãng dài, rồi chủ quan nằm ngủ dưới gốc cây mát. Trong khi đó, bác Rùa vẫn kiên trì nhích từng bước chậm rãi mà không hề dừng lại. Khi Thỏ giật mình tỉnh giấc, Rùa đã chạm đích trong tiếng reo hò vang dội của muôn loài.'],
+      ['Kể chuyện & Ngụ ngôn', 'Chiếc bình nứt', 'Một người gánh nước có hai chiếc bình lớn treo ở hai đầu đòn gánh. Một chiếc bình nguyên vẹn luôn mang về đủ đầy nước, còn chiếc bình kia có một vết nứt nhỏ nên khi về tới nhà chỉ còn lại một nửa. Chiếc bình nứt buồn bã xin lỗi chủ nhân. Ông lão mỉm cười chỉ dọc lối đi: nhờ nước rỉ ra từ vết nứt ấy mà ông đã gieo hạt hoa bên đường, tạo nên một con đường hoa rực rỡ mỗi ngày. Ai cũng có giá trị riêng, ngay cả từ những khiếm khuyết của mình.'],
+      ['Kể chuyện & Ngụ ngôn', 'Hai người bạn và con gấu', 'Hai người bạn cùng đi qua khu rừng rậm thì bất ngờ gặp một con gấu to lớn lao tới. Người thứ nhất nhanh chân trèo tót lên cành cây cao, bỏ mặc bạn mình ở dưới. Người còn lại không kịp chạy, đành nằm im nín thở giả chết. Con gấu tiến lại gần, ngửi quanh tai anh rồi lẳng lặng bỏ đi. Khi người kia tụt xuống hỏi gấu đã thì thầm gì, anh đáp: gấu khuyên tôi đừng bao giờ kết bạn với kẻ bỏ rơi mình lúc hoạn nạn.'],
+      ['Kể chuyện & Ngụ ngôn', 'Đôi cánh của chú bướm', 'Một cậu bé nhìn thấy chiếc kén bướm đang cựa quậy với một khe hở nhỏ. Thương chú bướm vất vả mãi chưa chui ra được, cậu lấy kéo cắt rộng chiếc kén để giúp nó. Chú bướm thoát ra dễ dàng, nhưng thân hình sưng phồng còn đôi cánh thì teo tóp, mãi mãi không thể bay lên bầu trời. Cậu không biết rằng, chính cuộc đấu tranh chui qua khe hẹp là cách tự nhiên đẩy dưỡng chất vào đôi cánh để bướm đủ sức vỗ cánh bay cao.'],
+      ['Kể chuyện & Ngụ ngôn', 'Hạt giống và người nông dân', 'Người nông dân gieo xuống mảnh vườn màu mỡ hai hạt giống nhỏ. Hạt thứ nhất sợ bóng tối lòng đất, sợ sương gió bên ngoài nên cứ thu mình mãi không dám nảy mầm. Hạt thứ hai can đảm vươn rễ bám sâu vào đất, đón nắng mưa và lớn dần thành cây cổ thụ xanh tươi, tỏa bóng mát cho cả vùng. Cuộc sống luôn tưởng thưởng cho những ai dám dấn thân và vượt qua nỗi sợ ban đầu.'],
+      ['Kể chuyện & Ngụ ngôn', 'Ngọn hải đăng cũ', 'Trên mỏm đá cheo leo ngoài cửa biển có một ngọn hải đăng đã đứng vững suốt hơn một trăm năm. Đêm nào cũng vậy, dù trời quang mây tạnh hay giông bão mịt mù, người gác đèn vẫn cần mẫn thắp sáng ngọn đèn xoay tròn, dẫn lối cho những con tàu đánh cá trở về bến an toàn. Có những công việc thầm lặng không cần ai tung hô, nhưng lại mang ý nghĩa vô cùng lớn lao cho cuộc đời.'],
+      ['Kể chuyện & Ngụ ngôn', 'Chú kiến chăm chỉ', 'Suốt mùa hè nắng ấm, đàn kiến nhỏ bé miệt mài tha từng hạt thóc, mẩu bánh về tổ tích trữ. Chú ve sầu ngồi trên cành cây cao cất tiếng ca rộn rã, trêu chọc kiến sao cứ phải vất vả sớm hôm. Thế rồi mùa đông lạnh giá ập đến, tuyết phủ trắng xóa, ve sầu đói rét chẳng tìm đâu ra thức ăn, đành ngậm ngùi sang gõ cửa nhà kiến. Sự chuẩn bị chu đáo từ hôm nay sẽ giúp ta vững vàng trước mọi biến cố ngày mai.'],
+      ['Kể chuyện & Ngụ ngôn', 'Bài học từ hòn đá giữa đường', 'Ngày xưa, một vị vua đặt một tảng đá lớn chắn ngang con đường chính rồi ẩn mình quan sát. Nhiều thương nhân giàu có đi qua chỉ bực bội phàn nàn rồi vòng sang bên cạnh. Cuối cùng, một anh nông dân gánh rau dừng lại, dùng hết sức đẩy tảng đá sang lề đường cho mọi người dễ đi. Dưới chỗ tảng đá cũ, anh bất ngờ tìm thấy một túi tiền vàng kèm bức thư của nhà vua: phần thưởng này dành cho người biết biến trở ngại thành cơ hội.'],
+      ['Kể chuyện & Ngụ ngôn', 'Cậu bé và hàng rào đinh', 'Một cậu bé rất hay nóng nảy nên cha cậu đưa cho cậu một túi đinh và bảo: mỗi lần nổi giận, hãy đóng một cây đinh lên hàng rào gỗ. Ngày đầu tiên, cậu đóng tới mấy chục cây đinh. Dần dần, cậu học được cách kiềm chế cơn giận và nhổ hết số đinh cũ ra. Người cha lúc này mới chỉ vào hàng rào và nói: đinh đã nhổ hết, nhưng những lỗ thủng trên gỗ sẽ không bao giờ lành lại như xưa. Lời nói lúc nóng giận cũng để lại vết sẹo y như vậy.'],
+      ['Kể chuyện & Ngụ ngôn', 'Ngọn nến không sợ tắt', 'Trong một căn phòng tối, có bốn ngọn nến đang cháy là Bình An, Niềm Tin, Tình Yêu và Hy Vọng. Gió lạnh thổi qua khiến ba ngọn nến đầu tiên lần lượt tắt lịm. Một em bé bước vào, bật khóc vì sợ bóng tối. Lúc ấy, ngọn nến thứ tư khẽ lên tiếng: đừng lo lắng, miễn là tôi vẫn còn cháy, ta có thể dùng ngọn lửa này để thắp sáng lại cả ba ngọn nến kia. Tên tôi là Hy Vọng.'],
+
+      // === 7. DIỄN CẢM & TRIẾT LÝ (10 bài) ===
+      ['Diễn cảm & Triết lý', 'Thời gian là dòng sông', 'Thời gian trôi đi lặng lẽ như dòng sông chảy mãi ra biển lớn, chẳng bao giờ quay ngược trở lại. Chúng ta không thể níu giữ năm tháng ngừng trôi, nhưng hoàn toàn có thể quyết định cách mình sống trong từng khoảnh khắc hiện tại. Đừng để những ngày tháng quý giá trôi qua trong sự chần chừ và hối tiếc. Hãy yêu thương khi còn có thể, và hành động ngay khi trái tim vẫn còn rực cháy đam mê.'],
+      ['Diễn cảm & Triết lý', 'Hạnh phúc là một hành trình', 'Nhiều người vẫn nghĩ rằng hạnh phúc nằm ở một điểm đến thật xa: khi mua được căn nhà lớn, khi đạt được chức vị cao, hay khi mọi việc đều hoàn hảo. Nhưng nếu chỉ mãi chạy theo đích đến mà quên ngắm nhìn cảnh đẹp hai bên đường, ta sẽ bỏ lỡ biết bao điều kỳ diệu. Hạnh phúc không phải là phần thưởng ở cuối con đường, hạnh phúc chính là cách ta bước đi mỗi ngày.'],
+      ['Diễn cảm & Triết lý', 'Giữ tâm tĩnh giữa bão giông', 'Cuộc đời không phải lúc nào cũng phẳng lặng như mặt hồ mùa thu. Sẽ có những ngày sóng gió bất ngờ ập tới, cuốn đi những dự định ta đã dày công vun đắp. Trong khoảnh khắc chao đảo ấy, điều quý giá nhất không phải là sức mạnh để chống lại cơn bão, mà là sự điềm tĩnh để quan sát, hít thở sâu và giữ cho bánh lái của mình không đi chệch hướng. Sau cơn mưa, bầu trời bao giờ cũng trong sáng hơn.'],
+      ['Diễn cảm & Triết lý', 'Giá trị của lời xin lỗi', 'Nói lời xin lỗi chân thành chưa bao giờ là biểu hiện của sự thua cuộc, mà là dấu hiệu của một tâm hồn trưởng thành và dũng cảm. Khi ta dám thừa nhận sai lầm của mình mà không viện cớ bao biện, ta đang đặt mối quan hệ lên cao hơn cái tôi nhỏ bé. Một lời xin lỗi đúng lúc có thể hàn gắn những rạn nứt tưởng chừng khó cứu vãn và gieo lại niềm tin ấm áp.'],
+      ['Diễn cảm & Triết lý', 'Sức mạnh của lời khen chân thành', 'Một lời động viên đúng lúc đôi khi có thể thay đổi cả một ngày u ám của ai đó, thậm chí thay đổi cả cuộc đời họ. Đừng tiết kiệm những lời khen ngợi chân thành khi bạn nhìn thấy sự nỗ lực của người khác, dù đó chỉ là một việc rất nhỏ. Lời nói tử tế chẳng tốn tiền mua, nhưng lại có sức lan tỏa kỳ diệu, sưởi ấm cả người nghe lẫn người trao đi.'],
+      ['Diễn cảm & Triết lý', 'Tiếng gọi của đại dương', 'Đứng trước biển lớn mênh mông, nghe từng đợt sóng bạc đầu vỗ vào ghềnh đá, lòng người bỗng trào dâng một cảm giác tự do khó tả. Đại dương bao la dạy ta biết mơ những giấc mơ rộng lớn, biết mở lòng đón nhận muôn dòng sông đổ về mà không hề phân biệt. Con tàu nằm trong bến cảng thì rất an toàn, nhưng đó không phải là lý do con tàu được đóng ra.'],
+      ['Diễn cảm & Triết lý', 'Ngọn lửa đam mê', 'Trong mỗi con người đều có một ngọn lửa nhỏ mang tên đam mê. Nếu không được chăm chút, ngọn lửa ấy sẽ dần lụi tàn dưới lớp tro bụi của sự bận rộn và nỗi lo cơm áo gạo tiền. Hãy dành ra ít nhất một khoảng thời gian nhỏ mỗi tuần để làm điều khiến mắt bạn sáng lên và trái tim bạn rộn ràng. Chính ngọn lửa ấy sẽ giữ cho tâm hồn bạn mãi trẻ trung và tràn đầy nhựa sống.'],
+      ['Diễn cảm & Triết lý', 'Mùa xuân trong ánh mắt', 'Người ta thường nói mùa xuân bắt đầu khi hoa đào nở thắm và én bay rợp trời. Nhưng với tôi, mùa xuân thực sự bắt đầu từ ánh mắt tràn đầy hy vọng của con người. Khi lòng ta biết mở cửa đón nhận điều mới mẻ, biết tha thứ cho những muộn phiền cũ kỹ và mỉm cười trước sớm mai, thì dù ngoài kia đang là đông lạnh hay hạ nồng, mùa xuân vẫn luôn hiện hữu ngay bên trong ta.'],
+      ['Diễn cảm & Triết lý', 'Tình bạn tri kỷ', 'Giữa dòng đời vạn biến, có được một người bạn tri kỷ là món quà vô giá của số phận. Tri kỷ không cần phải gặp gỡ mỗi ngày hay trò chuyện không dứt, mà là người dù xa cách bao lâu, khi ngồi lại bên nhau vẫn thấy thân thuộc như chưa từng có khoảng cách. Đó là người mừng rỡ thật lòng khi bạn thành công, và lặng lẽ đưa bờ vai tựa vào những lúc bạn yếu lòng nhất.'],
+      ['Diễn cảm & Triết lý', 'Sống trọn từng khoảnh khắc', 'Quá khứ đã khép lại, tương lai thì chưa tới, thứ duy nhất thuộc về bạn ngay lúc này chính là khoảnh khắc hiện tại. Khi uống một tách trà, hãy thực sự cảm nhận hương thơm và vị ấm của trà. Khi trò chuyện với người thân, hãy đặt điện thoại xuống và nhìn vào mắt họ. Sống trọn vẹn với từng giây phút đang diễn ra là bí quyết giản dị nhất để cuộc đời trở nên sâu sắc và ý nghĩa.'],
+
+      // === 8. LUYỆN HƠI & KHẨU HÌNH (10 bài) ===
+      ['Luyện hơi & Khẩu hình', 'Luyện mở rộng khẩu hình A - O - E', 'Sáng sớm ba má ra ga đón bà ngoại từ Nha Trang về nhà ăn cỗ. Cả nhà quây quần bên mâm cơm có cá kho, canh rau ngót và hoa quả tươi ngon. Em bé ngồi nghe mẹ kể chuyện dưới rặng tre xanh mát, tiếng cười giòn tan vang khắp sân nhà. Hãy mở rộng khẩu hình miệng thật thoải mái ở các nguyên âm mở để giọng đọc vang, sáng và tròn vành rõ chữ.'],
+      ['Luyện hơi & Khẩu hình', 'Luyện đọc câu dài & lấy hơi bụng', 'Để đọc tốt những câu văn dài mà không bị hụt hơi hay chới với ở cuối câu, người đọc cần hít hơi sâu xuống bụng, giữ vai thả lỏng, mở rộng khoang miệng và phân chia cụm từ thật hợp lý theo đúng ý nghĩa của câu. Tại mỗi dấu phẩy, hãy khẽ lấy một nhịp hơi ngắn nhẹ nhàng; tại mỗi dấu chấm, hãy nghỉ trọn nhịp để hơi thở ổn định trước khi bước vào câu tiếp theo.'],
+      ['Luyện hơi & Khẩu hình', 'Luyện phân biệt L và N', 'Nàng Lan lên núi lấy lá non về nấu nồi nước lá nóng cho bà nội. Nắng sớm lung linh chiếu qua những tán lá lấp lánh sương đêm, làm lòng người lâng lâng niềm vui khó tả. Luyện nói năng lưu loát luôn đòi hỏi sự kiên nhẫn mỗi ngày: nhớ bật nhẹ đầu lưỡi khi đọc âm L và để hơi rung nhẹ qua cánh mũi khi phát âm chữ N.'],
+      ['Luyện hơi & Khẩu hình', 'Luyện phân biệt Tr và Ch', 'Buổi trưa trời trong xanh, nắng chiếu chan hòa trên triền đê chạy dọc triền sông. Chú chim chích chòe chuyền cành trên ngọn tre cao, cất tiếng hót trong trẻo chào đón đoàn trẻ nhỏ tan trường trở về nhà. Khi luyện đoạn này, hãy uốn cong đầu lưỡi dứt khoát cho âm Tr và giữ lưỡi thẳng tự nhiên cho âm Ch.'],
+      ['Luyện hơi & Khẩu hình', 'Luyện phân biệt S và X', 'Sáng sớm sương xuống trắng xóa trên dòng sông xanh biếc, xa xa là dãy núi sừng sững ẩn hiện trong mây. Những chiếc thuyền nhỏ xuôi dòng san sát nhau, mang theo hoa sen xanh tươi và sản vật địa phương ra chợ sớm. Hãy giữ luồng hơi xát thật đều, phân biệt rõ tiếng gió dày của âm S và tiếng gió mảnh của âm X.'],
+      ['Luyện hơi & Khẩu hình', 'Luyện phân biệt R, D và Gi', 'Gió dịu dàng thổi qua khu rừng rậm, mang theo hương thơm dễ chịu của hoa dại sau cơn mưa rào. Dòng suối róc rách chảy qua những ghềnh đá rêu phong, hòa cùng tiếng chim gọi bầy rộn ràng khắp không gian. Tập rung nhẹ đầu lưỡi ở âm R và thả mềm lưỡi ở âm D, Gi để câu văn nghe thật tinh tế và chuẩn mực.'],
+      ['Luyện hơi & Khẩu hình', 'Luyện thanh hỏi và thanh ngã', 'Buổi chiều ở bãi biển cũ, những cơn gió thổi nhè nhẹ làm dải cát trắng mịn khẽ bay. Chị Thủy cẩn thận giữ chiếc mũ vải màu sữa, vừa đi dạo vừa kể chuyện cổ tích cho bé Dũng nghe. Thanh hỏi xuống giọng trầm rồi hơi vút nhẹ, còn thanh ngã cần có độ ngắt thanh quản rõ ràng rồi vút lên cao.'],
+      ['Luyện hơi & Khẩu hình', 'Đọc số liệu & ngày tháng chuẩn MC', 'Theo báo cáo công bố ngày mười lăm tháng mười năm hai nghìn không trăm hai mươi sáu, tổng sản lượng điện tái tạo đã đạt mức hai mươi bảy phẩy năm phần trăm, tăng bốn phẩy tám phần trăm so với cùng kỳ năm ngoái. Mục tiêu đến năm hai nghìn không trăm ba mươi, con số này sẽ vượt ngưỡng ba mươi lăm phần trăm trên phạm vi toàn quốc.'],
+      ['Luyện hơi & Khẩu hình', 'Luyện ngữ điệu câu hỏi & cảm thán', 'Bạn có tin rằng chỉ một thay đổi nhỏ trong giọng nói cũng có thể tạo nên ấn tượng khác biệt hoàn toàn không? Thật kỳ diệu phải không nào! Khi đặt câu hỏi, hãy nâng nhẹ ngữ điệu ở cuối câu để khơi gợi sự tò mò. Khi đọc câu cảm thán, hãy đẩy nguồn năng lượng tích cực từ hơi bụng ra ngoài để truyền cảm hứng mạnh mẽ tới người nghe!'],
+      ['Luyện hơi & Khẩu hình', 'Luyện giọng trầm ấm thư giãn', 'Đêm đã về khuya, thành phố dần chìm vào khoảng không gian yên tĩnh và dịu êm. Hãy hạ tông giọng xuống một chút, đọc thật chậm rãi, rõ ràng và thả lỏng hoàn toàn cơ cổ. Cảm nhận sự rung nhẹ nơi lồng ngực theo từng tiếng ngân vang. Hít vào sự bình an, thở ra mọi căng thẳng, và tận hưởng vẻ đẹp trầm ấm trong chính giọng nói của bạn.']
+    ];
+
+    const READING_SAMPLES = RAW_READING_SAMPLES.map(([category, title, text], idx) => ({
+      id: `sample-${idx + 1}`,
+      num: idx + 1,
+      category,
+      title,
+      badge: category,
+      text
+    }));
+
+    const PAUSE_MODES = {
+      natural: { commaMs: 350, sentenceMs: 800, label: 'Tự nhiên' },
+      deep:    { commaMs: 550, sentenceMs: 1150, label: 'Lấy hơi sâu' },
+      brisk:   { commaMs: 200, sentenceMs: 500, label: 'Nhịp nhanh' },
+      none:    { commaMs: 0,   sentenceMs: 0,   label: 'Không nghỉ thêm' }
+    };
+
+    const WARMUP_EXERCISES = [
+      {
+        id: 'warmup-1',
+        title: 'Phồng má – Hóp má',
+        desc: 'Hít hơi làm phồng căng hai má 3 giây rồi hóp sâu lại. Giúp thư giãn cơ má và môi.',
+        duration: 30
+      },
+      {
+        id: 'warmup-2',
+        title: 'Xoay lưỡi quanh răng',
+        desc: 'Khép môi, dùng đầu lưỡi xoay tròn quanh mặt ngoài hàm răng theo chiều kim đồng hồ rồi đảo ngược.',
+        duration: 30
+      },
+      {
+        id: 'warmup-3',
+        title: 'Rung môi (Lip Trill)',
+        desc: 'Thả lỏng môi và thổi hơi đều tạo tiếng "Brrr..." lên xuống cao độ để làm ấm dây thanh.',
+        duration: 30
+      }
+    ];
+
+    const MOUTH_CARDS = {
+      vowels: [
+        {
+          sound: 'A',
+          name: 'Mở rộng hàm tự nhiên',
+          tip: 'Hạ hàm dưới rộng khoảng 2 ngón tay, lưỡi đặt phẳng thấp, âm thanh thoát ra vang và sáng.',
+          practice: 'Ba má ra ga Nha Trang ăn cá.',
+          svg: '<ellipse cx="60" cy="40" rx="26" ry="20" fill="#f43f5e" stroke="#be123c" stroke-width="3"/><ellipse cx="60" cy="44" rx="16" ry="11" fill="#881337"/><path d="M46 49 Q60 41 74 49" fill="#fb7185"/>'
+        },
+        {
+          sound: 'O',
+          name: 'Tròn môi mở vừa',
+          tip: 'Hai môi tạo hình tròn đều, hơi đẩy nhẹ về phía trước, giữ khoảng rỗng trong khoang miệng.',
+          practice: 'Con cò có cổ cong cong.',
+          svg: '<circle cx="60" cy="40" r="18" fill="#f43f5e" stroke="#be123c" stroke-width="3"/><circle cx="60" cy="40" r="10" fill="#881337"/>'
+        },
+        {
+          sound: 'Ô',
+          name: 'Tròn môi khép hơn O',
+          tip: 'Chu môi tròn nhỏ hơn âm O, đẩy môi ra trước nhiều hơn để âm ấm và dày.',
+          practice: 'Cô giáo tổ chức lễ hội cổ truyền.',
+          svg: '<circle cx="60" cy="40" r="14" fill="#f43f5e" stroke="#be123c" stroke-width="3.5"/><circle cx="60" cy="40" r="7" fill="#881337"/>'
+        },
+        {
+          sound: 'U',
+          name: 'Chu môi nhỏ tối đa',
+          tip: 'Chụm tròn hai môi thật gọn như đang thổi sáo, giữ hơi đi thẳng mượt mà.',
+          practice: 'Chú chuột chui rúc dưới bụi trúc.',
+          svg: '<circle cx="60" cy="40" r="11" fill="#f43f5e" stroke="#be123c" stroke-width="4"/><circle cx="60" cy="40" r="4.5" fill="#881337"/>'
+        },
+        {
+          sound: 'I',
+          name: 'Căng ngang khóe miệng',
+          tip: 'Kéo nhẹ hai khóe miệng sang hai bên như đang mỉm cười, răng gần khép nhưng không cắn chặt.',
+          practice: 'Chị Chi đi thi ghi điểm mười.',
+          svg: '<path d="M26 40 Q60 28 94 40 Q60 52 26 40 Z" fill="#f43f5e" stroke="#be123c" stroke-width="3"/><path d="M36 40 Q60 35 84 40 Q60 45 36 40 Z" fill="#ffffff"/>'
+        },
+        {
+          sound: 'E',
+          name: 'Mở ngang kết hợp hạ hàm',
+          tip: 'Kéo nhẹ khóe môi sang ngang nhưng mở hàm rộng hơn âm I, đầu lưỡi chạm nhẹ răng dưới.',
+          practice: 'Em bé nghe mẹ kể chuyện dưới tre.',
+          svg: '<ellipse cx="60" cy="40" rx="30" ry="13" fill="#f43f5e" stroke="#be123c" stroke-width="3"/><ellipse cx="60" cy="40" rx="20" ry="7" fill="#881337"/>'
+        }
+      ],
+      consonants: [
+        {
+          sound: 'L / N',
+          name: 'Đầu lưỡi bật vs Âm mũi',
+          tip: 'L: Cong đầu lưỡi chạm chân răng trên rồi bật xuống. N: Dẹt lưỡi chạm lợi trên, hơi rung nhẹ qua mũi.',
+          practice: 'Nàng Lan lên núi lấy lá non nấu nước.',
+          svg: '<ellipse cx="60" cy="40" rx="24" ry="14" fill="#f43f5e" stroke="#be123c" stroke-width="3"/><path d="M44 46 Q60 28 76 46" stroke="#fde047" stroke-width="4" fill="none" stroke-linecap="round"/>'
+        },
+        {
+          sound: 'Tr / Ch',
+          name: 'Uốn lưỡi vs Thẳng lưỡi',
+          tip: 'Tr: Uốn cong đầu lưỡi chạm vòm cứng rồi bật mạnh. Ch: Giữ lưỡi thẳng, mặt lưỡi chạm lợi nhẹ nhàng.',
+          practice: 'Buổi trưa trời trong, chim chích chuyền cành tre.',
+          svg: '<ellipse cx="60" cy="40" rx="24" ry="14" fill="#f43f5e" stroke="#be123c" stroke-width="3"/><path d="M45 45 C52 32, 68 32, 75 45" stroke="#38bdf8" stroke-width="4" fill="none" stroke-linecap="round"/>'
+        },
+        {
+          sound: 'S / X',
+          name: 'Gió dày uốn lưỡi vs Gió mảnh',
+          tip: 'S: Hơi uốn đầu lưỡi, hơi xát ra dày và nặng. X: Đầu lưỡi đặt sau răng dưới, hơi thoát ra mảnh và nhẹ.',
+          practice: 'Sáng sớm sương xuống trắng xóa dòng sông xanh.',
+          svg: '<path d="M30 40 Q60 30 90 40 Q60 50 30 40 Z" fill="#f43f5e" stroke="#be123c" stroke-width="3"/><line x1="38" y1="40" x2="82" y2="40" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="4 3"/>'
+        },
+        {
+          sound: 'R / D / Gi',
+          name: 'Rung đầu lưỡi vs Mềm lưỡi',
+          tip: 'R: Uốn đầu lưỡi và rung nhẹ theo luồng hơi. D / Gi: Thả mềm lưỡi tự nhiên, không rung.',
+          practice: 'Gió dịu dàng thổi qua rừng rậm róc rách suối reo.',
+          svg: '<ellipse cx="60" cy="40" rx="23" ry="14" fill="#f43f5e" stroke="#be123c" stroke-width="3"/><path d="M44 42 Q52 34 60 42 T76 42" stroke="#34d399" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
+        }
+      ]
+    };
+
+    const TONGUE_TWISTERS = [
+      { id: 1, group: 'L / N', diff: 'Dễ', text: 'Nồi đồng nấu ốc, nồi đất nấu ếch.' },
+      { id: 2, group: 'L / N', diff: 'Trung bình', text: 'Lúa nếp là lúa nếp làng, lúa lên lớp lớp lòng nàng lâng lâng.' },
+      { id: 3, group: 'L / N', diff: 'Khó', text: 'Nói năng nên luyện luôn luôn, nói lời lưu loát luyện luôn lúc này.' },
+      { id: 4, group: 'L / N', diff: 'Khó', text: 'Nếu nói lầm lẫn lần này, thì lại nói lại nói năng cho lành.' },
+      { id: 5, group: 'Tr / Ch', diff: 'Dễ', text: 'Chị nhặt rau rồi luộc, em nhặt rau luộc rồi.' },
+      { id: 6, group: 'Tr / Ch', diff: 'Trung bình', text: 'Buổi trưa ăn bưởi chua, buổi chiều ăn chuối chín.' },
+      { id: 7, group: 'Tr / Ch', diff: 'Khó', text: 'Trời trong trăng tròn, chú trâu trắng thong thả trên triền đê.' },
+      { id: 8, group: 'S / X', diff: 'Trung bình', text: 'Sáng sớm sương xuống sân sau, sóng xô xào xạc xa xăm.' },
+      { id: 9, group: 'S / X', diff: 'Khó', text: 'Sáu sào sắn xen sáu sào sen, sen xanh sắn sẫm sóng sánh sương sớm.' },
+      { id: 10, group: 'R / D / Gi', diff: 'Trung bình', text: 'Rung rinh rặng trúc rợp bóng, rì rào dòng suối róc rách.' },
+      { id: 11, group: 'R / D / Gi', diff: 'Khó', text: 'Giờ giải lao, giám đốc giữ giỏ giấy gói giày da giả.' },
+      { id: 12, group: 'Vần khó', diff: 'Dễ', text: 'Con cá mòi béo để gốc quéo cho mèo đói ăn.' },
+      { id: 13, group: 'Vần khó', diff: 'Trung bình', text: 'Ông bụt ở chùa Bùi cầm bùa đuổi chuột.' },
+      { id: 14, group: 'Vần khó', diff: 'Khó', text: 'Anh Hạnh ăn hành hăng, anh Hanh ăn hành héo.' },
+      { id: 15, group: 'Thanh điệu', diff: 'Trung bình', text: 'Mẹ mua mắm muối mặn mà, bà bán bánh bèo béo bở.' },
+      { id: 16, group: 'Thanh điệu', diff: 'Khó', text: 'Bà Ba béo bán bánh bèo bên bờ biển bị bão bay bạt.' }
+    ];
+
+    /*************************************************************************
+     * 2. TRẠNG THÁI ỨNG DỤNG (STATE)
+     *************************************************************************/
+    const state = {
+      activeTab: 'karaoke',
+      // Tab 1: Karaoke
+      currentSampleId: 'sample-1',
+      sampleSearch: '',
+      sampleCategory: 'all',
+      libraryCollapsed: false,
+      pauseMode: 'natural',
+      karaokeTitle: `#01 • ${READING_SAMPLES[0].title}`,
+      karaokeWords: [],
+      karaokeIndex: -1,
+      karaokeWpm: 200,
+      karaokePlaying: false,
+      karaokeTimer: null,
+      karaokeBreathTimer: null,
+      karaokeCountdownTimer: null,
+
+      // Tab 2: Khẩu hình & Webcam
+      mouthGroup: 'vowels',
+      webcamStream: null,
+      warmupTimers: {},
+
+      // Tab 3: Câu líu lưỡi
+      twisterFilter: 'all',
+      activeTwisterId: 1,
+      twisterBaseSpeed: 170,
+      twisterWords: [],
+      twisterIndex: -1,
+      twisterRound: 1,
+      twisterPlaying: false,
+      twisterTimer: null,
+
+      // Ghi âm & Sóng âm
+      isRecording: false,
+      isRecordPaused: false,
+      mediaRecorder: null,
+      audioChunks: [],
+      audioStream: null,
+      audioContext: null,
+      analyser: null,
+      waveformRaf: null,
+      recordStartTime: 0,
+      recordElapsedSec: 0,
+      recordTimerInterval: null,
+      recordings: []
+    };
+
+    /*************************************************************************
+     * 3. HÀM TIỆN ÍCH CHUNG (ESCAPE HTML, TOAST, THEME, TABS)
+     *************************************************************************/
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        info: 'bg-slate-900 dark:bg-slate-800 text-white border-slate-700',
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        warning: 'bg-amber-500 text-white border-amber-400'
+      };
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-semibold transition-all duration-300 opacity-0 translate-y-2 ${colors[type] || colors.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0', 'translate-y-2');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    function initTheme() {
+      try {
+        const saved = localStorage.getItem('luyen_doc_theme');
+        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+
+      document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        try {
+          localStorage.setItem('luyen_doc_theme', isDark ? 'dark' : 'light');
+        } catch (e) {}
+      });
+    }
+
+    function initTabs() {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const panels = document.querySelectorAll('.tab-panel');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.tab;
+          if (target === state.activeTab) return;
+          state.activeTab = target;
+
+          // Tạm dừng các vòng chạy đang hoạt động khi chuyển tab
+          pauseKaraoke();
+          stopTwisterChallenge();
+
+          tabBtns.forEach(b => {
+            const active = b.dataset.tab === target;
+            b.classList.toggle('bg-white', active);
+            b.classList.toggle('dark:bg-slate-900', active);
+            b.classList.toggle('text-brand-600', active);
+            b.classList.toggle('dark:text-brand-400', active);
+            b.classList.toggle('shadow-sm', active);
+            b.classList.toggle('text-slate-600', !active);
+            b.classList.toggle('dark:text-slate-400', !active);
+          });
+
+          panels.forEach(p => {
+            p.classList.toggle('hidden', p.id !== `panel-${target}`);
+          });
+        });
+      });
+    }
+
+    /*************************************************************************
+     * 4. TAB 1: TỐC ĐỘ ĐỌC (KARAOKE / TELEPROMPTER)
+     *************************************************************************/
+    function renderSampleButtons() {
+      const container = document.getElementById('sample-buttons');
+      const keyword = state.sampleSearch.trim().toLowerCase();
+      const filtered = READING_SAMPLES.filter(s => {
+        const matchCat = state.sampleCategory === 'all' || s.category === state.sampleCategory;
+        if (!matchCat) return false;
+        if (!keyword) return true;
+        const numTag = `#${String(s.num).padStart(2, '0')}`;
+        return (
+          s.title.toLowerCase().includes(keyword) ||
+          s.category.toLowerCase().includes(keyword) ||
+          s.text.toLowerCase().includes(keyword) ||
+          numTag.includes(keyword) ||
+          String(s.num) === keyword
+        );
+      });
+
+      const countBadge = document.getElementById('library-match-count');
+      if (countBadge) countBadge.textContent = `${filtered.length} / ${READING_SAMPLES.length} bài`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center text-xs sm:text-sm text-slate-500 py-6">Không tìm thấy bài đọc nào phù hợp từ khóa “${escapeHtml(state.sampleSearch)}”.</p>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(s => {
+        const active = state.currentSampleId === s.id;
+        const numStr = String(s.num).padStart(2, '0');
+        const wordCount = s.text.trim().split(/\s+/).length;
+        return `
+          <button data-sample-id="${s.id}" type="button"
+            class="sample-btn text-left p-2.5 rounded-xl border transition-all ${
+              active
+                ? 'bg-brand-50 dark:bg-brand-900/30 border-brand-500 ring-1 ring-brand-500'
+                : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700'
+            }">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                <span class="text-brand-600 dark:text-brand-400 mr-1">#${numStr}</span>${escapeHtml(s.title)}
+              </span>
+              <span class="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 shrink-0">${wordCount} tiếng</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10px] font-semibold text-brand-600 dark:text-brand-400 truncate">${escapeHtml(s.category)}</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.sample-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sample = READING_SAMPLES.find(x => x.id === btn.dataset.sampleId);
+          if (sample) {
+            state.currentSampleId = sample.id;
+            renderSampleButtons();
+            const numStr = String(sample.num).padStart(2, '0');
+            loadKaraokeText(`#${numStr} • ${sample.title}`, sample.text);
+          }
+        });
+      });
+    }
+
+    function loadKaraokeText(title, text) {
+      pauseKaraoke();
+      state.karaokeTitle = title;
+      state.karaokeWords = text.trim().split(/\s+/).filter(Boolean);
+      state.karaokeIndex = -1;
+
+      document.getElementById('karaoke-current-title').textContent = title;
+      const viewport = document.getElementById('karaoke-viewport');
+      viewport.innerHTML = state.karaokeWords
+        .map((w, i) => `<span class="karaoke-word" data-index="${i}">${escapeHtml(w)}</span>`)
+        .join(' ');
+      viewport.scrollTop = 0;
+
+      // Nhấn vào từ bất kỳ để nhảy vị trí đọc
+      viewport.querySelectorAll('.karaoke-word').forEach(span => {
+        span.addEventListener('click', () => {
+          const idx = Number(span.dataset.index);
+          state.karaokeIndex = idx;
+          updateKaraokeHighlight(false, false);
+        });
+      });
+
+      updateKaraokeStats();
+      updateKaraokePlayButton();
+    }
+
+    function getPunctuationPauseMs(word) {
+      const mode = PAUSE_MODES[state.pauseMode] || PAUSE_MODES.natural;
+      if (!word) return { ms: 0, kind: '' };
+      if (/[.!?…]["”'’)\]]*$/.test(word)) {
+        return { ms: mode.sentenceMs, kind: 'sentence' };
+      }
+      if (/[,;:—–]["”'’)\]]*$/.test(word)) {
+        return { ms: mode.commaMs, kind: 'comma' };
+      }
+      return { ms: 0, kind: '' };
+    }
+
+    function setBreathIndicator(show, kind = 'sentence') {
+      const el = document.getElementById('karaoke-breath-indicator');
+      if (!el) return;
+      if (!show) {
+        el.classList.add('hidden');
+        return;
+      }
+      el.textContent = kind === 'sentence' ? '💨 Hết câu • Lấy hơi sâu' : '💨 Ngắt phẩy • Lấy hơi nhẹ';
+      el.classList.remove('hidden');
+    }
+
+    function updateWpmLevelBadge(wpm) {
+      const badge = document.getElementById('wpm-level-badge');
+      if (!badge) return;
+      let label = 'Chuẩn';
+      let cls = 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300';
+      if (wpm < 140) {
+        label = 'Rất chậm';
+        cls = 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300';
+      } else if (wpm < 170) {
+        label = 'Chậm • Rõ chữ';
+        cls = 'bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300';
+      } else if (wpm < 220) {
+        label = 'Chuẩn tiếng Việt';
+        cls = 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300';
+      } else if (wpm < 270) {
+        label = 'Nhanh';
+        cls = 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300';
+      } else {
+        label = 'Siêu tốc';
+        cls = 'bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300';
+      }
+      badge.textContent = label;
+      badge.className = `px-2 py-0.5 rounded-full text-[11px] font-bold ${cls}`;
+    }
+
+    function updateKaraokeStats() {
+      const total = state.karaokeWords.length;
+      const current = Math.max(0, state.karaokeIndex + 1);
+      document.getElementById('karaoke-progress-text').textContent = `${current} / ${total} tiếng`;
+      const pct = total > 0 ? Math.min(100, (current / total) * 100) : 0;
+      document.getElementById('karaoke-progress-bar').style.width = `${pct}%`;
+
+      let totalPauseMs = 0;
+      for (const w of state.karaokeWords) {
+        totalPauseMs += getPunctuationPauseMs(w).ms;
+      }
+      const estSec = Math.ceil((total / state.karaokeWpm) * 60 + totalPauseMs / 1000);
+      const mins = Math.floor(estSec / 60);
+      const secs = estSec % 60;
+      document.getElementById('karaoke-est-time').textContent =
+        `Ước tính: ${mins > 0 ? mins + 'p ' : ''}${secs}s`;
+    }
+
+    function updateKaraokePlayButton() {
+      const btn = document.getElementById('btn-karaoke-play');
+      if (state.karaokePlaying) {
+        btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg><span>Tạm dừng</span>`;
+      } else {
+        const label = state.karaokeIndex > -1 && state.karaokeIndex < state.karaokeWords.length - 1 ? 'Tiếp tục đọc' : 'Bắt đầu đọc';
+        btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span>${label}</span>`;
+      }
+    }
+
+    function updateKaraokeHighlight(autoScroll = true, isBreathing = false) {
+      const viewport = document.getElementById('karaoke-viewport');
+      const spans = viewport.querySelectorAll('.karaoke-word');
+      spans.forEach((span, idx) => {
+        span.classList.remove('word-read', 'word-active', 'word-breath');
+        if (idx < state.karaokeIndex) {
+          span.classList.add('word-read');
+        } else if (idx === state.karaokeIndex) {
+          span.classList.add(isBreathing ? 'word-breath' : 'word-active');
+          if (autoScroll) {
+            const targetTop = span.offsetTop - (viewport.clientHeight / 2) + (span.clientHeight / 2);
+            viewport.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+          }
+        }
+      });
+      updateKaraokeStats();
+    }
+
+    function startKaraokeLoop() {
+      state.karaokePlaying = true;
+      updateKaraokePlayButton();
+
+      const step = () => {
+        if (!state.karaokePlaying) return;
+        setBreathIndicator(false);
+        state.karaokeIndex++;
+        if (state.karaokeIndex >= state.karaokeWords.length) {
+          pauseKaraoke();
+          showToast('Tuyệt vời! Bạn đã hoàn thành bài luyện đọc.', 'success');
+          return;
+        }
+        updateKaraokeHighlight(true, false);
+
+        const baseMs = (60 / state.karaokeWpm) * 1000;
+        const word = state.karaokeWords[state.karaokeIndex] || '';
+        const pause = getPunctuationPauseMs(word);
+
+        if (pause.ms > 0) {
+          state.karaokeBreathTimer = setTimeout(() => {
+            if (!state.karaokePlaying) return;
+            updateKaraokeHighlight(false, true);
+            setBreathIndicator(true, pause.kind);
+            state.karaokeTimer = setTimeout(step, pause.ms);
+          }, baseMs);
+        } else {
+          state.karaokeTimer = setTimeout(step, baseMs);
+        }
+      };
+
+      step();
+    }
+
+    function startKaraokeWithOptionalCountdown() {
+      if (state.karaokeIndex >= state.karaokeWords.length - 1) {
+        state.karaokeIndex = -1;
+      }
+      const useCountdown = document.getElementById('countdown-toggle').checked;
+      if (!useCountdown || state.karaokeIndex > -1) {
+        startKaraokeLoop();
+        return;
+      }
+
+      const overlay = document.getElementById('karaoke-countdown-overlay');
+      const numEl = document.getElementById('karaoke-countdown-number');
+      let count = 3;
+      numEl.textContent = count;
+      overlay.classList.remove('hidden');
+      state.karaokePlaying = true;
+      updateKaraokePlayButton();
+
+      state.karaokeCountdownTimer = setInterval(() => {
+        count--;
+        if (count <= 0) {
+          clearInterval(state.karaokeCountdownTimer);
+          overlay.classList.add('hidden');
+          if (state.karaokePlaying) startKaraokeLoop();
+        } else {
+          numEl.textContent = count;
+        }
+      }, 750);
+    }
+
+    function pauseKaraoke() {
+      state.karaokePlaying = false;
+      clearTimeout(state.karaokeTimer);
+      clearTimeout(state.karaokeBreathTimer);
+      clearInterval(state.karaokeCountdownTimer);
+      setBreathIndicator(false);
+      document.getElementById('karaoke-countdown-overlay').classList.add('hidden');
+      updateKaraokePlayButton();
+    }
+
+    function setKaraokeWpm(newWpm) {
+      state.karaokeWpm = Number(newWpm);
+      document.getElementById('wpm-slider').value = state.karaokeWpm;
+      document.getElementById('wpm-value').textContent = `${state.karaokeWpm} tiếng/phút`;
+      updateWpmLevelBadge(state.karaokeWpm);
+      updateKaraokeStats();
+
+      document.querySelectorAll('.wpm-preset').forEach(btn => {
+        const active = Number(btn.dataset.wpm) === state.karaokeWpm;
+        btn.classList.toggle('bg-brand-100', active);
+        btn.classList.toggle('dark:bg-brand-900/50', active);
+        btn.classList.toggle('text-brand-700', active);
+        btn.classList.toggle('dark:text-brand-300', active);
+        btn.classList.toggle('bg-slate-100', !active);
+        btn.classList.toggle('dark:bg-slate-800', !active);
+      });
+    }
+
+    function initKaraokeControls() {
+      renderSampleButtons();
+      loadKaraokeText(`#01 • ${READING_SAMPLES[0].title}`, READING_SAMPLES[0].text);
+      setKaraokeWpm(200);
+
+      // Tìm kiếm, lọc chuyên mục, thu gọn & chọn ngẫu nhiên trong thư viện 100 bài
+      document.getElementById('sample-search-input').addEventListener('input', (e) => {
+        state.sampleSearch = e.target.value;
+        renderSampleButtons();
+      });
+
+      document.getElementById('sample-category-filter').addEventListener('change', (e) => {
+        state.sampleCategory = e.target.value;
+        renderSampleButtons();
+      });
+
+      document.getElementById('btn-toggle-library').addEventListener('click', () => {
+        state.libraryCollapsed = !state.libraryCollapsed;
+        document.getElementById('library-body').classList.toggle('hidden', state.libraryCollapsed);
+        document.getElementById('library-toggle-label').textContent = state.libraryCollapsed ? 'Mở rộng' : 'Thu gọn';
+      });
+
+      document.getElementById('btn-random-sample').addEventListener('click', () => {
+        const pool = READING_SAMPLES.filter(s =>
+          (state.sampleCategory === 'all' || s.category === state.sampleCategory) &&
+          s.id !== state.currentSampleId
+        );
+        const list = pool.length > 0 ? pool : READING_SAMPLES;
+        const pick = list[Math.floor(Math.random() * list.length)];
+        state.currentSampleId = pick.id;
+        renderSampleButtons();
+        const numStr = String(pick.num).padStart(2, '0');
+        loadKaraokeText(`#${numStr} • ${pick.title}`, pick.text);
+        showToast(`Đã chọn bài #${numStr}: ${pick.title}`, 'info');
+      });
+
+      // Chọn chế độ ngắt nghỉ lấy hơi theo dấu câu
+      document.getElementById('pause-mode-select').addEventListener('change', (e) => {
+        state.pauseMode = e.target.value;
+        updateKaraokeStats();
+      });
+
+      // Thanh trượt tốc độ (tiếng/phút)
+      document.getElementById('wpm-slider').addEventListener('input', (e) => {
+        setKaraokeWpm(e.target.value);
+      });
+
+      document.querySelectorAll('.wpm-preset').forEach(btn => {
+        btn.addEventListener('click', () => setKaraokeWpm(btn.dataset.wpm));
+      });
+
+      // Thanh trượt cỡ chữ
+      document.getElementById('fontsize-slider').addEventListener('input', (e) => {
+        const size = e.target.value;
+        document.getElementById('fontsize-value').textContent = `${size}px`;
+        document.getElementById('karaoke-viewport').style.fontSize = `${size}px`;
+      });
+
+      // Phát / Tạm dừng / Làm lại
+      document.getElementById('btn-karaoke-play').addEventListener('click', () => {
+        if (state.karaokePlaying) {
+          pauseKaraoke();
+        } else {
+          startKaraokeWithOptionalCountdown();
+        }
+      });
+
+      document.getElementById('btn-karaoke-reset').addEventListener('click', () => {
+        pauseKaraoke();
+        state.karaokeIndex = -1;
+        updateKaraokeHighlight(false, false);
+        document.getElementById('karaoke-viewport').scrollTop = 0;
+      });
+
+      // Modal tự nhập văn bản
+      const modal = document.getElementById('custom-text-modal');
+      const closeModal = () => modal.classList.add('hidden');
+      document.getElementById('btn-open-custom-text').addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        document.getElementById('custom-body-input').focus();
+      });
+      document.getElementById('btn-close-custom-modal').addEventListener('click', closeModal);
+      document.getElementById('btn-cancel-custom-modal').addEventListener('click', closeModal);
+      document.getElementById('btn-apply-custom-text').addEventListener('click', () => {
+        const title = document.getElementById('custom-title-input').value.trim() || 'Văn bản tự nhập';
+        const body = document.getElementById('custom-body-input').value.trim();
+        if (!body) {
+          showToast('Vui lòng nhập nội dung văn bản trước khi áp dụng.', 'warning');
+          return;
+        }
+        state.currentSampleId = 'custom';
+        renderSampleButtons();
+        loadKaraokeText(title, body);
+        closeModal();
+        showToast('Đã nạp văn bản của bạn vào khung Karaoke!', 'success');
+      });
+    }
+
+    /*************************************************************************
+     * 5. TAB 2: LUYỆN KHẨU HÌNH MIỆNG & GƯƠNG WEBCAM
+     *************************************************************************/
+    function renderWarmups() {
+      const grid = document.getElementById('warmup-grid');
+      grid.innerHTML = WARMUP_EXERCISES.map(ex => `
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex flex-col justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">${escapeHtml(ex.title)}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">${escapeHtml(ex.desc)}</p>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-slate-200/70 dark:border-slate-700/70">
+            <span id="timer-${ex.id}" class="text-sm font-mono font-extrabold text-brand-600 dark:text-brand-400">${ex.duration}s</span>
+            <button data-warmup-id="${ex.id}" type="button"
+              class="warmup-start-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white transition">
+              Bắt đầu
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.warmup-start-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.warmupId;
+          const ex = WARMUP_EXERCISES.find(x => x.id === id);
+          if (!ex) return;
+
+          if (state.warmupTimers[id]) {
+            clearInterval(state.warmupTimers[id]);
+            delete state.warmupTimers[id];
+            document.getElementById(`timer-${id}`).textContent = `${ex.duration}s`;
+            btn.textContent = 'Bắt đầu';
+            return;
+          }
+
+          let remain = ex.duration;
+          btn.textContent = 'Dừng';
+          state.warmupTimers[id] = setInterval(() => {
+            remain--;
+            document.getElementById(`timer-${id}`).textContent = `${remain}s`;
+            if (remain <= 0) {
+              clearInterval(state.warmupTimers[id]);
+              delete state.warmupTimers[id];
+              document.getElementById(`timer-${id}`).textContent = `${ex.duration}s`;
+              btn.textContent = 'Bắt đầu';
+              showToast(`Hoàn thành bài khởi động: ${ex.title}!`, 'success');
+            }
+          }, 1000);
+        });
+      });
+    }
+
+    function renderMouthCards() {
+      const grid = document.getElementById('mouth-cards-grid');
+      const items = MOUTH_CARDS[state.mouthGroup] || [];
+
+      grid.innerHTML = items.map(item => `
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <span class="inline-block px-2.5 py-0.5 rounded-lg text-sm font-extrabold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">${escapeHtml(item.sound)}</span>
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white mt-1">${escapeHtml(item.name)}</h3>
+            </div>
+            <div class="w-24 h-16 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 120 80" class="w-20 h-14 mouth-animate">${item.svg}</svg>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${escapeHtml(item.tip)}</p>
+          <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Câu thực hành</span>
+            <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100">“${escapeHtml(item.practice)}”</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function initMouthControls() {
+      renderWarmups();
+      renderMouthCards();
+
+      document.querySelectorAll('.mouth-group-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.mouthGroup = btn.dataset.mouthGroup;
+          document.querySelectorAll('.mouth-group-btn').forEach(b => {
+            const active = b.dataset.mouthGroup === state.mouthGroup;
+            b.classList.toggle('bg-white', active);
+            b.classList.toggle('dark:bg-slate-900', active);
+            b.classList.toggle('text-brand-600', active);
+            b.classList.toggle('dark:text-brand-400', active);
+            b.classList.toggle('shadow-sm', active);
+            b.classList.toggle('text-slate-600', !active);
+            b.classList.toggle('dark:text-slate-400', !active);
+          });
+          renderMouthCards();
+        });
+      });
+
+      // Bật / Tắt gương Webcam
+      const btnWebcam = document.getElementById('btn-webcam-toggle');
+      const video = document.getElementById('webcam-video');
+      const placeholder = document.getElementById('webcam-placeholder');
+
+      btnWebcam.addEventListener('click', async () => {
+        if (state.webcamStream) {
+          state.webcamStream.getTracks().forEach(t => t.stop());
+          state.webcamStream = null;
+          video.srcObject = null;
+          video.classList.add('hidden');
+          placeholder.classList.remove('hidden');
+          btnWebcam.textContent = 'Bật gương';
+          return;
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          showToast('Trình duyệt của bạn không hỗ trợ truy cập Camera.', 'error');
+          return;
+        }
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+          state.webcamStream = stream;
+          video.srcObject = stream;
+          video.classList.remove('hidden');
+          placeholder.classList.add('hidden');
+          btnWebcam.textContent = 'Tắt gương';
+        } catch (err) {
+          showToast('Không thể mở camera. Hãy kiểm tra quyền truy cập camera của trình duyệt.', 'error');
+        }
+      });
+    }
+
+    /*************************************************************************
+     * 6. TAB 3: CÂU KHÓ LÍU LƯỠI (KARAOKE 3 VÒNG TĂNG TỐC)
+     *************************************************************************/
+    function getTwisterRoundSpeed() {
+      return state.twisterBaseSpeed + (state.twisterRound - 1) * 25;
+    }
+
+    function updateTwisterRoundBadge() {
+      document.getElementById('twister-round-badge').textContent =
+        `Vòng ${state.twisterRound}/3 • ${getTwisterRoundSpeed()} tiếng/phút`;
+    }
+
+    function selectTwister(id) {
+      stopTwisterChallenge();
+      const item = TONGUE_TWISTERS.find(t => t.id === id) || TONGUE_TWISTERS[0];
+      state.activeTwisterId = item.id;
+      state.twisterWords = item.text.trim().split(/\s+/);
+      state.twisterIndex = -1;
+      state.twisterRound = 1;
+
+      document.getElementById('twister-active-tag').textContent = `Nhóm ${item.group}`;
+      document.getElementById('twister-active-diff').textContent = item.diff;
+      updateTwisterRoundBadge();
+
+      const stage = document.getElementById('twister-stage');
+      stage.innerHTML = state.twisterWords
+        .map((w, i) => `<span class="karaoke-word" data-tidx="${i}">${escapeHtml(w)}</span>`)
+        .join(' ');
+
+      renderTwisterList();
+    }
+
+    function renderTwisterList() {
+      const container = document.getElementById('twister-list');
+      const list = TONGUE_TWISTERS.filter(t => state.twisterFilter === 'all' || t.diff === state.twisterFilter);
+
+      container.innerHTML = list.map(t => {
+        const active = t.id === state.activeTwisterId;
+        const diffColors = {
+          'Dễ': 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
+          'Trung bình': 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+          'Khó': 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300'
+        };
+        return `
+          <button data-twister-id="${t.id}" type="button"
+            class="twister-item text-left p-3.5 rounded-xl border transition-all ${
+              active
+                ? 'bg-brand-50 dark:bg-brand-900/30 border-brand-500 ring-1 ring-brand-500'
+                : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-brand-300'
+            }">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-200">${escapeHtml(t.group)}</span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${diffColors[t.diff] || ''}">${escapeHtml(t.diff)}</span>
+            </div>
+            <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug">${escapeHtml(t.text)}</p>
+          </button>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.twister-item').forEach(btn => {
+        btn.addEventListener('click', () => selectTwister(Number(btn.dataset.twisterId)));
+      });
+    }
+
+    function updateTwisterHighlight() {
+      const spans = document.querySelectorAll('#twister-stage .karaoke-word');
+      spans.forEach((span, idx) => {
+        span.classList.remove('word-read', 'word-active');
+        if (idx < state.twisterIndex) span.classList.add('word-read');
+        else if (idx === state.twisterIndex) span.classList.add('word-active');
+      });
+    }
+
+    function startTwisterChallenge() {
+      state.twisterPlaying = true;
+      document.getElementById('btn-twister-play').innerHTML =
+        `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg><span>Dừng thử thách</span>`;
+
+      const step = () => {
+        if (!state.twisterPlaying) return;
+        state.twisterIndex++;
+        if (state.twisterIndex >= state.twisterWords.length) {
+          if (state.twisterRound < 3) {
+            state.twisterRound++;
+            state.twisterIndex = -1;
+            updateTwisterRoundBadge();
+            updateTwisterHighlight();
+            state.twisterTimer = setTimeout(step, 650);
+            return;
+          } else {
+            stopTwisterChallenge();
+            showToast('Xuất sắc! Bạn đã hoàn thành cả 3 vòng thử thách líu lưỡi!', 'success');
+            return;
+          }
+        }
+
+        updateTwisterHighlight();
+        const currentSpeed = getTwisterRoundSpeed();
+        const baseMs = (60 / currentSpeed) * 1000;
+        const word = state.twisterWords[state.twisterIndex] || '';
+        let extraPause = 0;
+        if (/[.!?…]$/.test(word)) extraPause = 450;
+        else if (/[,;:]$/.test(word)) extraPause = 240;
+
+        state.twisterTimer = setTimeout(step, baseMs + extraPause);
+      };
+
+      step();
+    }
+
+    function stopTwisterChallenge() {
+      state.twisterPlaying = false;
+      clearTimeout(state.twisterTimer);
+      const btn = document.getElementById('btn-twister-play');
+      if (btn) {
+        btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span>Chạy thử thách 3 vòng</span>`;
+      }
+    }
+
+    function initTwisterControls() {
+      selectTwister(1);
+
+      document.getElementById('twister-speed-slider').addEventListener('input', (e) => {
+        state.twisterBaseSpeed = Number(e.target.value);
+        document.getElementById('twister-speed-label').textContent = `${state.twisterBaseSpeed} tiếng/phút`;
+        updateTwisterRoundBadge();
+      });
+
+      document.getElementById('btn-twister-play').addEventListener('click', () => {
+        if (state.twisterPlaying) {
+          stopTwisterChallenge();
+        } else {
+          if (state.twisterRound === 3 && state.twisterIndex >= state.twisterWords.length - 1) {
+            state.twisterRound = 1;
+            state.twisterIndex = -1;
+            updateTwisterRoundBadge();
+          }
+          startTwisterChallenge();
+        }
+      });
+
+      document.getElementById('btn-twister-reset').addEventListener('click', () => {
+        stopTwisterChallenge();
+        state.twisterRound = 1;
+        state.twisterIndex = -1;
+        updateTwisterRoundBadge();
+        updateTwisterHighlight();
+      });
+
+      document.getElementById('btn-twister-random').addEventListener('click', () => {
+        const pool = TONGUE_TWISTERS.filter(t => t.id !== state.activeTwisterId);
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        selectTwister(pick.id);
+      });
+
+      document.querySelectorAll('.twister-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.twisterFilter = btn.dataset.diff;
+          document.querySelectorAll('.twister-filter-btn').forEach(b => {
+            const active = b.dataset.diff === state.twisterFilter;
+            b.classList.toggle('bg-brand-600', active);
+            b.classList.toggle('text-white', active);
+            b.classList.toggle('bg-slate-100', !active);
+            b.classList.toggle('dark:bg-slate-800', !active);
+            b.classList.toggle('text-slate-600', !active);
+            b.classList.toggle('dark:text-slate-300', !active);
+          });
+          renderTwisterList();
+        });
+      });
+    }
+
+    /*************************************************************************
+     * 7. GHI ÂM, VẼ SÓNG ÂM TRỰC QUAN & NGHE LẠI
+     *************************************************************************/
+    function formatTime(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function drawIdleWaveform() {
+      const canvas = document.getElementById('waveform-canvas');
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0) return;
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+    }
+
+    function startWaveformLoop() {
+      const canvas = document.getElementById('waveform-canvas');
+      const ctx = canvas.getContext('2d');
+      const bufferLength = state.analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const draw = () => {
+        if (!state.isRecording) return;
+        state.waveformRaf = requestAnimationFrame(draw);
+
+        const rect = canvas.getBoundingClientRect();
+        if (canvas.width !== Math.floor(rect.width)) {
+          canvas.width = rect.width;
+          canvas.height = rect.height;
+        }
+
+        state.analyser.getByteFrequencyData(dataArray);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const barCount = Math.min(48, Math.floor(canvas.width / 6));
+        const step = Math.max(1, Math.floor(bufferLength / barCount));
+        const barWidth = (canvas.width / barCount) - 2;
+
+        for (let i = 0; i < barCount; i++) {
+          const v = state.isRecordPaused ? 6 : dataArray[i * step] / 255;
+          const barHeight = Math.max(3, v * canvas.height);
+          const x = i * (barWidth + 2);
+          const y = (canvas.height - barHeight) / 2;
+          ctx.fillStyle = state.isRecordPaused ? '#94a3b8' : '#e11d48';
+          ctx.fillRect(x, y, barWidth, barHeight);
+        }
+      };
+
+      draw();
+    }
+
+    async function startRecording() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Trình duyệt không hỗ trợ ghi âm.', 'error');
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        state.audioStream = stream;
+        state.audioChunks = [];
+
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+        state.mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+
+        state.mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) state.audioChunks.push(e.data);
+        };
+
+        state.mediaRecorder.onstop = () => {
+          const blob = new Blob(state.audioChunks, { type: state.mediaRecorder.mimeType || 'audio/webm' });
+          const url = URL.createObjectURL(blob);
+          const now = new Date();
+          const timeLabel = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          state.recordings.unshift({
+            id: Date.now(),
+            name: `Bản ghi #${state.recordings.length + 1} (${timeLabel})`,
+            duration: formatTime(state.recordElapsedSec),
+            url
+          });
+          renderRecordingsList();
+          showToast('Đã lưu bản ghi âm mới! Nhấn nút "Bản ghi" để nghe lại.', 'success');
+        };
+
+        // Khởi tạo AudioContext để vẽ sóng âm
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        state.audioContext = new AudioCtx();
+        const source = state.audioContext.createMediaStreamSource(stream);
+        state.analyser = state.audioContext.createAnalyser();
+        state.analyser.fftSize = 128;
+        source.connect(state.analyser);
+
+        state.mediaRecorder.start();
+        state.isRecording = true;
+        state.isRecordPaused = false;
+        state.recordElapsedSec = 0;
+        document.getElementById('record-timer').textContent = '00:00';
+
+        state.recordTimerInterval = setInterval(() => {
+          if (!state.isRecordPaused) {
+            state.recordElapsedSec++;
+            document.getElementById('record-timer').textContent = formatTime(state.recordElapsedSec);
+          }
+        }, 1000);
+
+        // Cập nhật UI nút ghi âm
+        document.getElementById('record-btn-label').textContent = 'Dừng & Lưu';
+        document.getElementById('record-dot').classList.add('animate-ping');
+        const pauseBtn = document.getElementById('btn-record-pause');
+        pauseBtn.classList.remove('hidden');
+        pauseBtn.disabled = false;
+        pauseBtn.textContent = 'Tạm dừng';
+
+        startWaveformLoop();
+      } catch (err) {
+        showToast('Không thể truy cập micro. Hãy cấp quyền micro cho trình duyệt.', 'error');
+      }
+    }
+
+    function stopRecording() {
+      if (!state.isRecording) return;
+      state.isRecording = false;
+      state.isRecordPaused = false;
+
+      clearInterval(state.recordTimerInterval);
+      cancelAnimationFrame(state.waveformRaf);
+
+      if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+        state.mediaRecorder.stop();
+      }
+      if (state.audioStream) {
+        state.audioStream.getTracks().forEach(t => t.stop());
+        state.audioStream = null;
+      }
+      if (state.audioContext) {
+        state.audioContext.close().catch(() => {});
+        state.audioContext = null;
+      }
+
+      document.getElementById('record-btn-label').textContent = 'Ghi âm';
+      document.getElementById('record-dot').classList.remove('animate-ping');
+      const pauseBtn = document.getElementById('btn-record-pause');
+      pauseBtn.classList.add('hidden');
+      pauseBtn.disabled = true;
+
+      drawIdleWaveform();
+    }
+
+    function renderRecordingsList() {
+      document.getElementById('recordings-count-badge').textContent = state.recordings.length;
+      const listEl = document.getElementById('recordings-list');
+
+      if (state.recordings.length === 0) {
+        listEl.innerHTML = `<div class="text-center py-10 text-sm text-slate-500 dark:text-slate-400">Chưa có bản ghi âm nào. Hãy nhấn nút <strong>Ghi âm</strong> ở thanh dưới cùng khi luyện đọc nhé!</div>`;
+        return;
+      }
+
+      listEl.innerHTML = state.recordings.map(rec => `
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 dark:text-white">${escapeHtml(rec.name)}</h4>
+              <span class="text-xs text-slate-500 dark:text-slate-400">Thời lượng: ${rec.duration}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button data-rate="0.75" data-audio-id="${rec.id}" type="button" class="rate-btn px-2 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">0.75x</button>
+              <button data-rate="1" data-audio-id="${rec.id}" type="button" class="rate-btn px-2 py-1 rounded-lg text-[11px] font-bold bg-brand-600 text-white">1x</button>
+              <button data-rate="1.25" data-audio-id="${rec.id}" type="button" class="rate-btn px-2 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">1.25x</button>
+              <a href="${rec.url}" download="${escapeHtml(rec.name)}.webm"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Tải về</a>
+              <button data-delete-id="${rec.id}" type="button"
+                class="delete-rec-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-50 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800">Xóa</button>
+            </div>
+          </div>
+          <audio id="audio-${rec.id}" controls src="${rec.url}" class="w-full h-10"></audio>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.rate-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.audioId;
+          const rate = Number(btn.dataset.rate);
+          const audio = document.getElementById(`audio-${id}`);
+          if (audio) audio.playbackRate = rate;
+
+          listEl.querySelectorAll(`.rate-btn[data-audio-id="${id}"]`).forEach(b => {
+            const active = Number(b.dataset.rate) === rate;
+            b.classList.toggle('bg-brand-600', active);
+            b.classList.toggle('text-white', active);
+            b.classList.toggle('bg-white', !active);
+            b.classList.toggle('dark:bg-slate-900', !active);
+          });
+        });
+      });
+
+      listEl.querySelectorAll('.delete-rec-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = Number(btn.dataset.deleteId);
+          const target = state.recordings.find(r => r.id === id);
+          if (target) URL.revokeObjectURL(target.url);
+          state.recordings = state.recordings.filter(r => r.id !== id);
+          renderRecordingsList();
+        });
+      });
+    }
+
+    function initRecorderControls() {
+      drawIdleWaveform();
+      window.addEventListener('resize', () => {
+        if (!state.isRecording) drawIdleWaveform();
+      });
+
+      document.getElementById('btn-record-toggle').addEventListener('click', () => {
+        if (state.isRecording) stopRecording();
+        else startRecording();
+      });
+
+      document.getElementById('btn-record-pause').addEventListener('click', () => {
+        if (!state.mediaRecorder || !state.isRecording) return;
+        const btn = document.getElementById('btn-record-pause');
+        if (state.isRecordPaused) {
+          state.mediaRecorder.resume();
+          state.isRecordPaused = false;
+          btn.textContent = 'Tạm dừng';
+        } else {
+          state.mediaRecorder.pause();
+          state.isRecordPaused = true;
+          btn.textContent = 'Tiếp tục';
+        }
+      });
+
+      const modal = document.getElementById('recordings-modal');
+      document.getElementById('btn-open-recordings').addEventListener('click', () => {
+        renderRecordingsList();
+        modal.classList.remove('hidden');
+      });
+      document.getElementById('btn-close-recordings-modal').addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+    }
+
+    /*************************************************************************
+     * 8. KHỞI CHẠY ỨNG DỤNG
+     *************************************************************************/
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      initTabs();
+      initKaraokeControls();
+      initMouthControls();
+      initTwisterControls();
+      initRecorderControls();
+    });
+  </script>
+</body>
+</html>
